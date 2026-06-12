@@ -1,0 +1,265 @@
+---
+import Gototop from '../components/Gototop.vue';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  shareImage?: string;
+}
+
+const {
+  title,
+  description = "2026縣市長選舉 即時報導、參選人資訊、選舉民調與選情統計，一次看懂最關鍵的選戰局勢！",
+  canonical = "https://www.businesstoday.com.tw/bt_topic/2026/election/",
+shareImage = "https://www.businesstoday.com.tw/bt_topic/2026/election/share.jpg"
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/x-icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
+  <link rel="icon" type="image/png" href={`${import.meta.env.BASE_URL}favicon.png`} />
+  <meta name="generator" content={Astro.generator} />
+  <slot name="head-extra" />
+
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta name="keywords" content="2026選舉, 九合一選舉, 縣市長選舉, 選舉民調, 即時戰報, 今周刊" />
+  <link rel="canonical" href={canonical} />
+
+  <meta name="robots" content="index, follow" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={shareImage} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="zh_TW" />
+  <meta property="og:site_name" content="今周刊" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={shareImage} />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <slot />
+
+    <footer class="site-footer">
+      <div class="container footer-container">
+        <div class="footer-badge">內容監製：今周刊</div>
+        <p class="copyright">
+          Copyright © 2026 今周刊 All rights reserved. 版權所有，禁止擅自轉貼節錄
+        </p>
+      </div>
+    </footer>
+
+    <Gototop client:load />
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --color-primary: #C7161D;          /* 今周刊標準色 */
+    --color-primary-rgb: 199, 22, 29;
+    
+    --color-coffee-50: #F3EEEA;       
+    --color-coffee-100: #CBC1B5;     
+    --color-coffee-300: #917F6B;       
+    --color-coffee-600: #6B5C4B;     
+    --color-coffee-600-rgb: 107, 92, 75;
+    --color-coffee-accent: #8E5F28;    
+
+    --color-green: #7CFFB0;        
+    --color-blue: #227EFF;           
+    
+    --color-white: #ffffff;       
+    --color-black: #000000;          
+    
+    --color-coffee-lightest: var(--color-coffee-50);
+    --color-coffee-light: var(--color-coffee-100);
+    --color-coffee-medium: var(--color-coffee-300);
+    --color-coffee-dark: var(--color-coffee-600);
+
+    /* 基礎背景與文字色彩系統 */
+    --color-bg-warm: var(--color-coffee-50);
+    --color-bg-pure: #ffffff;
+    --color-text-main: #332A21;
+    --color-text-muted: #6B5C4B;
+    --color-text-light: #917F6B;
+    --color-border: #E6DFD7;
+    --color-border-light: #F1EAE3;
+    --color-primary-light: rgba(199, 22, 29, 0.08);
+    --color-secondary: #8E5F28;
+    
+    /* 字體 */
+    --font-heading: 'Outfit', 'Noto Sans TC', sans-serif;
+    --font-body: 'Inter', 'Noto Sans TC', sans-serif;
+    
+    /* 動畫過渡 */
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+    --shadow-premium: 0 20px 25px -5px rgb(0 0 0 / 0.04), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--color-text-main);
+    background-color: var(--color-bg-warm);
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition-fast);
+  }
+
+  button {
+    font-family: inherit;
+    border: none;
+    background: none;
+    cursor: pointer;
+    outline: none;
+  }
+
+  ul, ol {
+    list-style: none;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .container {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 1.25rem;
+    padding-left: 1.25rem;
+  }
+
+  @media (min-width: 576px) {
+    .container {
+      max-width: 540px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      max-width: 720px;
+      padding-right: 1.5rem;
+      padding-left: 1.5rem;
+    }
+  }
+
+  @media (min-width: 992px) {
+    .container {
+      max-width: 960px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .container {
+      max-width: 1000px;
+    }
+  }
+
+  section {
+    scroll-margin-top: 104px; /* Header 高度 76px + top offset 20px + 8px 餘裕 */
+  }
+
+  .glass {
+    background: rgba(252, 251, 249, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-warm);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+.site-footer {
+  border-radius: 80px 80px 0 0;
+  background: linear-gradient(135deg, var(--color-green) 0%, var(--color-blue) 100%);
+  color: #ffffff;
+  padding: 2rem 0;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  opacity: 0.9;
+}
+
+.copyright {
+  font-size: 0.88rem;
+  font-weight: 400;
+  opacity: 0.85;
+  letter-spacing: 0.02em;
+  line-height: 1.6;
+  max-width: 600px;
+}
+@media (max-width: 768px) {
+  .site-footer {
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .copyright {
+    font-size: 0.8rem;
+  }
+}
+</style>

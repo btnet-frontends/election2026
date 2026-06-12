@@ -1,0 +1,157 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.vue';
+
+// 此分頁為開發中骨架，尚未正式上線
+const pageTitle = "頁面三 - 今周刊 2026 大選";
+const pageDescription = "開發中頁面";
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <meta name="robots" content="noindex, nofollow" slot="head-extra" />
+
+  <Header client:load />
+
+  <main class="page-skeleton">
+    <div class="skeleton-inner">
+      <div class="skeleton-hero">
+        <div class="skeleton-badge">開發中</div>
+        <h1 class="skeleton-title">Page 3</h1>
+        <p class="skeleton-desc">此分頁正在規劃中，內容即將上線。</p>
+      </div>
+
+      <section class="skeleton-section" id="section-a">
+        <div class="skeleton-block skeleton-block--wide"></div>
+        <div class="skeleton-block skeleton-block--mid"></div>
+        <div class="skeleton-block skeleton-block--narrow"></div>
+      </section>
+
+      <section class="skeleton-section" id="section-b">
+        <div class="skeleton-grid">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </section>
+
+      <section class="skeleton-section" id="section-c">
+        <div class="skeleton-block skeleton-block--wide"></div>
+        <div class="skeleton-block skeleton-block--mid"></div>
+      </section>
+    </div>
+  </main>
+
+
+</Layout>
+
+<style>
+  .page-skeleton {
+    min-height: 100vh;
+    background: var(--color-bg-warm);
+    padding-top: 120px;
+  }
+
+  .skeleton-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  .skeleton-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 1rem 4rem;
+    text-align: center;
+  }
+
+  .skeleton-badge {
+    display: inline-block;
+    background: rgba(230, 0, 18, 0.08);
+    color: var(--color-primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(230, 0, 18, 0.2);
+    margin-bottom: 1.5rem;
+  }
+
+  .skeleton-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 800;
+    color: var(--color-text-main);
+    margin-bottom: 1rem;
+    opacity: 0.15;
+  }
+
+  .skeleton-desc {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    opacity: 0.6;
+  }
+
+  .skeleton-section {
+    margin-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .skeleton-block {
+    height: 24px;
+    border-radius: 8px;
+    background: linear-gradient(
+      90deg,
+      rgba(0,0,0,0.04) 25%,
+      rgba(0,0,0,0.08) 50%,
+      rgba(0,0,0,0.04) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite;
+  }
+
+  .skeleton-block--wide   { width: 100%; }
+  .skeleton-block--mid    { width: 80%; }
+  .skeleton-block--narrow { width: 55%; }
+
+  .skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .skeleton-card {
+    height: 240px;
+    border-radius: 16px;
+    background: linear-gradient(
+      90deg,
+      rgba(0,0,0,0.04) 25%,
+      rgba(0,0,0,0.08) 50%,
+      rgba(0,0,0,0.04) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite;
+  }
+
+  .skeleton-card:nth-child(2) { animation-delay: 0.25s; }
+
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+
+
+
+  @media (max-width: 768px) {
+    .skeleton-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .skeleton-block--mid    { width: 90%; }
+    .skeleton-block--narrow { width: 75%; }
+  }
+</style>

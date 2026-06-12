@@ -1,11 +1,15 @@
 <template>
-  <div class="carousel-wrapper" :class="{ 'carousel--mounted': isMounted }">
-    <div class="carousel-track">
-      <div
-        v-for="(item, index) in items"
+  <div class="carousel-wrapper">
+    <Swiper
+      :modules="modules"
+      :pagination="{ clickable: true }"
+      :autoplay="{ delay: 5000, disableOnInteraction: false }"
+      :loop="true"
+      class="carousel-track"
+    >
+      <SwiperSlide
+        v-for="item in items"
         :key="item.article_id"
-        class="carousel-slide"
-        :class="{ active: activeSlide === index }"
       >
         <div class="slide-media">
           <img :src="item.image_url_a || item.image_url" :alt="item.title" class="slide-image" />
@@ -24,75 +28,38 @@
             </a>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="carousel-dots">
-      <button
-        v-for="(_, index) in items"
-        :key="index"
-        :class="['dot', { active: activeSlide === index }]"
-        @click="setSlide(index)"
-        :aria-label="`Go to slide ${index + 1}`"
-      ></button>
-    </div>
+      </SwiperSlide>
+    </Swiper>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useCarousel } from '../composables/useCarousel.js';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
 
-const props = defineProps({
+defineProps({
   items: {
     type: Array,
     required: true,
   },
 });
 
-const emit = defineEmits(['slide-change']);
+defineEmits(['slide-change']);
 
-const itemsRef = computed(() => props.items);
-
-const { activeSlide, isMounted, setSlide: _setSlide } = useCarousel(itemsRef);
-
-const setSlide = (index) => {
-  _setSlide(index);
-  emit('slide-change', index);
-};
+const modules = [Pagination, Autoplay];
 </script>
 
 <style scoped>
 .carousel-wrapper {
-  margin-bottom: 4rem;
+  margin-bottom: 3rem;
 }
 
 .carousel-track {
-  position: relative;
-  width: 100%;
   border-radius: 24px;
-  overflow: hidden;
   box-shadow: var(--shadow-lg);
-  background: var(--color-bg-pure);
-  min-height: 560px;
-}
-
-.carousel-slide {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.6s ease, visibility 0.6s ease;
-  display: flex;
-  flex-direction: column;
-}
-
-.carousel-slide.active {
-  position: relative;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
+  overflow: hidden;
 }
 
 .slide-media {
@@ -100,7 +67,6 @@ const setSlide = (index) => {
   width: 100%;
   height: 560px;
   overflow: hidden;
-  flex-shrink: 0;
 }
 
 .slide-image {
@@ -109,15 +75,6 @@ const setSlide = (index) => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: none;
-}
-
-.carousel--mounted .slide-image {
-  transition: transform 6s ease;
-}
-
-.carousel-slide.active .slide-image {
-  transform: scale(1.03);
 }
 
 .slide-overlay-color {
@@ -202,37 +159,32 @@ const setSlide = (index) => {
 }
 
 .slide-btn:hover {
-background: var(--color-primary);
+  background: var(--color-primary);
 }
 
-.carousel-dots {
-  display: flex;
-  justify-content: center;
-  gap: 0.6rem;
-  padding-top: 1.25rem;
-}
-
-.dot {
+:deep(.swiper-pagination-bullet) {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  background: var(--color-border);
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  transition: all var(--transition-normal);
+  background: rgba(255, 255, 255, 0.6);
+  opacity: 1;
 }
 
-.dot.active {
+:deep(.swiper-pagination-bullet-active) {
   width: 24px;
   border-radius: 4px;
-  background: #D3A671;
+  background: #ffffff;
+}
+
+:deep(.swiper-pagination) {
+  bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
 }
 
 @media (max-width: 768px) {
   .carousel-track {
     border-radius: 16px;
-    min-height: 320px;
   }
 
   .slide-media {
@@ -240,27 +192,19 @@ background: var(--color-primary);
   }
 
   .slide-content-desktop {
-    display: flex;
     padding: 1.5rem;
     gap: 1rem;
   }
 
   .slide-title {
     font-size: 1.25rem;
-    white-space: normal;
-    display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
   }
 
   .slide-excerpt {
-    display: -webkit-box;
     -webkit-line-clamp: 1;
     line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
     font-size: 0.85rem;
   }
 

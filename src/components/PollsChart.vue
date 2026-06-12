@@ -4,13 +4,13 @@
       <div class="section-header">
         <span class="polls-title">
           <img :src="searchIcon" alt="search" class="search-icon" />
-          歷年選舉民調
+          選舉民調
         </span>
         <div class="polls-divider"></div>
       </div>
 
       <div class="polls-card">
-        <div class="polls-tabs-wrapper">
+<div class="polls-tabs-wrapper" v-show="false">
           <div class="polls-tabs">
             <button 
               v-for="tab in chartTabs" 
@@ -141,6 +141,7 @@ const onIframeLoad = (event) => {
 }
 
 .polls-tabs-wrapper {
+  
   display: flex;
   justify-content: center;
   margin-bottom: 2.5rem;

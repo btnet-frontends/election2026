@@ -4,7 +4,6 @@
       <div class="flash-container">
         <div class="flash-badge">快訊</div>
         
-        <!-- Desktop Mode: Vertical Ticker Transition -->
         <div class="flash-content-wrapper desktop-only">
           <transition :name="direction === 'down' ? 'ticker-down' : 'ticker-up'" mode="out-in">
             <div :key="currentIndex" class="ticker-item">
@@ -14,7 +13,6 @@
           </transition>
         </div>
 
-        <!-- Mobile Mode: Smooth Infinite CSS Marquee -->
         <div class="flash-content-mobile mobile-only">
           <div class="marquee-track">
             <div class="marquee-content">
@@ -229,7 +227,6 @@ onUnmounted(() => { if (autoPlayTimer) clearInterval(autoPlayTimer); });
   opacity: 0;
 }
 
-/* Mobile Marquee Styling */
 .flash-content-mobile {
   flex-grow: 1;
   overflow: hidden;

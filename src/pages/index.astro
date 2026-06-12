@@ -7,8 +7,6 @@ import NewsReport from '../components/NewsReport.vue';
 import PollsChart from '../components/PollsChart.vue';
 import type { NewsData } from '../types/news';
 
-
-
 import config from '../json/data.json';
 
 const hotTags: string[] = config.newsReport.hotTags;
@@ -36,6 +34,12 @@ if (!initialNews.article_lists || initialNews.article_lists.length === 0) {
     page_model: { currentPage: 1, lastPage: 1 }
   };
 }
+
+const flashNewsList = initialNews.article_lists.slice(0, 4).map((item: any) => ({
+  text: item.title,
+  date: item.pubtime ? item.pubtime.slice(0, 10).replace(/-/g, '.') : '',
+  link: item.output_link_path
+}));
 ---
 
 <Layout title="2026九合一大選《今周戰情室》" canonical="https://www.businesstoday.com.tw/bt_topic/2026/election/">
@@ -44,7 +48,7 @@ if (!initialNews.article_lists || initialNews.article_lists.length === 0) {
   <main>
     <KV client:load />
 
-    <FlashNews client:load />
+    <FlashNews flashNewsList={flashNewsList} client:load />
 
     <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />
 

@@ -10,7 +10,7 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 3) {
   const page_model = ref(initialNews.page_model || { currentPage: 1, lastPage: 1 });
   const currentPage = ref(1);
 
-  const activeTag = ref(hotTags[0] ?? '全部戰報');
+const activeTag = ref(hotTags[0]);
   const isNewsLoading = ref(false);
   const isMoreLoading = ref(false);
 
@@ -34,7 +34,6 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 3) {
     if (activeTag.value === tag) return;
     activeTag.value = tag;
     isNewsLoading.value = true;
-    // tag 篩選為 client-side 過濾，setTimeout 僅用於 UX 過渡效果
     setTimeout(() => { isNewsLoading.value = false; }, 600);
   };
 

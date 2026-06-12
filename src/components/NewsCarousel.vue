@@ -108,7 +108,7 @@ const modules = [Pagination, Autoplay];
 }
 
 .slide-text {
-  flex: 0 0 60%;
+  flex: 0 0 61%;
   min-width: 0;
 }
 

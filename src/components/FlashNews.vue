@@ -3,25 +3,24 @@
     <div class="flash-outer">
       <div class="flash-container">
         <div class="flash-badge">快訊</div>
-        
-        <div class="flash-content-wrapper desktop-only">
-          <transition :name="direction === 'down' ? 'ticker-down' : 'ticker-up'" mode="out-in">
-            <div :key="currentIndex" class="ticker-item">
-              <span class="ticker-text">{{ currentNews.text }}</span>
-              <span class="ticker-date">{{ currentNews.date }}</span>
-            </div>
-          </transition>
-        </div>
+
+<div class="flash-content-wrapper desktop-only">
+  <div :class="['ticker-item', animClass]">
+    <a class="ticker-text" :href="currentNews.link" target="_blank" rel="noopener noreferrer">
+      {{ currentNews.text }}
+    </a>
+    <span class="ticker-date">{{ currentNews.date }}</span>
+  </div>
+</div>
 
         <div class="flash-content-mobile mobile-only">
           <div class="marquee-track">
             <div class="marquee-content">
-              <span v-for="(item, idx) in flashNewsList" :key="idx" class="marquee-item">
+              <span v-for="(item, idx) in flashNewsList" :key="idx" class="marquee-item" @click="openLink(item.link)">
                 <span class="marquee-text">{{ item.text }}</span>
                 <span class="marquee-divider">/</span>
               </span>
-              <!-- Duplicate list once to allow seamless loop -->
-              <span v-for="(item, idx) in flashNewsList" :key="'dup-' + idx" class="marquee-item">
+              <span v-for="(item, idx) in flashNewsList" :key="'dup-' + idx" class="marquee-item" @click="openLink(item.link)">
                 <span class="marquee-text">{{ item.text }}</span>
                 <span class="marquee-divider">/</span>
               </span>
@@ -29,7 +28,6 @@
           </div>
         </div>
 
-        <!-- Desktop Mode Controls -->
         <div class="flash-controls desktop-only">
           <button class="control-btn prev" @click="prevNews" aria-label="Previous News">
             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -49,32 +47,56 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import config from '../json/data.json';
 
-const flashNewsList = config.flashNews.list;
+const props = defineProps({
+  flashNewsList: {
+    type: Array,
+    required: true
+  }
+});
+
+const { flashNewsList } = props;
 
 const currentIndex = ref(0);
 const direction = ref('down');
+const animClass = ref('');
 let autoPlayTimer = null;
 
-const currentNews = computed(() => flashNewsList[currentIndex.value]);
+const currentNews = computed(() => flashNewsList[currentIndex.value] ?? {});
+
+const openLink = (url) => {
+  if (url) window.open(url, '_blank', 'noopener,noreferrer');
+};
+
+const changeNews = (newIndex) => {
+  const outClass = direction.value === 'down' ? 'slide-out-up' : 'slide-out-down';
+  const inClass = direction.value === 'down' ? 'slide-in-down' : 'slide-in-up';
+  animClass.value = outClass;
+  setTimeout(() => {
+    currentIndex.value = newIndex;
+    animClass.value = inClass;
+    setTimeout(() => {
+      animClass.value = '';
+    }, 350);
+  }, 350);
+};
 
 const nextNews = () => {
   direction.value = 'down';
-  currentIndex.value = (currentIndex.value + 1) % flashNewsList.length;
+  changeNews((currentIndex.value + 1) % flashNewsList.length);
   resetTimer();
 };
 
 const prevNews = () => {
   direction.value = 'up';
-  currentIndex.value = (currentIndex.value - 1 + flashNewsList.length) % flashNewsList.length;
+  changeNews((currentIndex.value - 1 + flashNewsList.length) % flashNewsList.length);
   resetTimer();
 };
 
 const startTimer = () => {
   autoPlayTimer = setInterval(() => {
     direction.value = 'down';
-    currentIndex.value = (currentIndex.value + 1) % flashNewsList.length;
+    changeNews((currentIndex.value + 1) % flashNewsList.length);
   }, 4500);
 };
 
@@ -130,7 +152,8 @@ onUnmounted(() => { if (autoPlayTimer) clearInterval(autoPlayTimer); });
 }
 
 .flash-content-wrapper {
-  flex-grow: 1;
+flex: 1;
+  min-width: 0;
   padding: 0 1.5rem;
   overflow: hidden;
   height: 100%;
@@ -139,11 +162,12 @@ onUnmounted(() => { if (autoPlayTimer) clearInterval(autoPlayTimer); });
 }
 
 .ticker-item {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  width: 100%;
   gap: 1rem;
+  cursor: pointer;
+  width: 100%;
 }
 
 .ticker-text {
@@ -153,6 +177,14 @@ onUnmounted(() => { if (autoPlayTimer) clearInterval(autoPlayTimer); });
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color var(--transition-fast);
+  text-decoration: none;
+  display: block;
+  min-width: 0;
+}
+
+.ticker-text:hover {
+  color: var(--color-coffee-600);
 }
 
 .ticker-date {
@@ -160,7 +192,7 @@ onUnmounted(() => { if (autoPlayTimer) clearInterval(autoPlayTimer); });
   font-size: 0.95rem;
   color: #917F6B;
   font-weight: 600;
-  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .flash-controls {
@@ -196,31 +228,36 @@ onUnmounted(() => { if (autoPlayTimer) clearInterval(autoPlayTimer); });
   color: #a09890;
 }
 
-.ticker-down-enter-active,
-.ticker-down-leave-active,
-.ticker-up-enter-active,
-.ticker-up-leave-active {
-  transition: all 0.35s cubic-bezier(0.55, 0, 0.1, 1);
+.slide-out-up {
+  animation: slideOutUp 0.35s cubic-bezier(0.55, 0, 0.1, 1) forwards;
 }
 
-.ticker-down-enter-from {
-  transform: translateY(20px);
-  opacity: 0;
+.slide-out-down {
+  animation: slideOutDown 0.35s cubic-bezier(0.55, 0, 0.1, 1) forwards;
 }
 
-.ticker-down-leave-to {
-  transform: translateY(-20px);
-  opacity: 0;
+.slide-in-down {
+  animation: slideInDown 0.35s cubic-bezier(0.55, 0, 0.1, 1) forwards;
 }
 
-.ticker-up-enter-from {
-  transform: translateY(-20px);
-  opacity: 0;
+.slide-in-up {
+  animation: slideInUp 0.35s cubic-bezier(0.55, 0, 0.1, 1) forwards;
 }
 
-.ticker-up-leave-to {
-  transform: translateY(20px);
-  opacity: 0;
+@keyframes slideOutUp {
+  to { transform: translateY(-20px); opacity: 0; }
+}
+
+@keyframes slideOutDown {
+  to { transform: translateY(20px); opacity: 0; }
+}
+
+@keyframes slideInDown {
+  from { transform: translateY(20px); opacity: 0; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(-20px); opacity: 0; }
 }
 
 .flash-content-mobile {
@@ -249,12 +286,18 @@ onUnmounted(() => { if (autoPlayTimer) clearInterval(autoPlayTimer); });
   display: inline-flex;
   align-items: center;
   padding-right: 1.5rem;
+  cursor: pointer;
+}
+
+.marquee-item:hover .marquee-text {
+  color: var(--color-coffee-600);
 }
 
 .marquee-text {
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--color-text-main);
+  transition: color var(--transition-fast);
 }
 
 .marquee-divider {
@@ -265,15 +308,10 @@ onUnmounted(() => { if (autoPlayTimer) clearInterval(autoPlayTimer); });
 }
 
 @keyframes marquee-anim {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(-50%, 0, 0);
-  }
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 
-/* Responsive display switches */
 .desktop-only {
   display: flex;
 }

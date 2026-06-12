@@ -1,0 +1,79 @@
+{
+  "api": {
+    "tagName": "006208",
+    "limit": 10
+  },
+  "header": {
+    "navItems": [
+      { "id": "news", "href": "#news", "label": "即時戰報" },
+      { "id": "polls", "href": "#polls", "label": "選舉民調" }
+    ]
+  },
+  "flashNews": {
+    "list": [
+      { "text": "2026九合一選舉各縣市候選人登記正式出爐！", "date": "2026.09.04" },
+      { "text": "最新民調公布：關鍵縣市支持率出現重大拉鋸，藍綠選情陷入膠著！", "date": "2026.09.05" },
+      { "text": "首波縣市長參選人政策發表會日程敲定，本週末展開線上直播！", "date": "2026.09.06" },
+      { "text": "【選戰分析】連任名單交棒縣市分析、第三勢力崛起板圖完整評估！", "date": "2026.09.07" }
+    ]
+  },
+  "newsReport": {
+    "hotTags": [
+      "2026縣市長選舉報導"
+    ],
+    "carouselItems": [
+    {
+      "article_id": "carousel_1",
+      "title": "2026縣市長選舉懶人包／連任名單交棒縣市、藍綠選情版圖分析！盧秀燕、陳其邁、侯友宜…哪13縣市換人",
+      "part_text": "九合一距離2026年九合一地方選舉，全台政壇的板塊擠壓與暗潮洶湧早已悄悄蔓延。今年九合一之所以被視為台灣政治史上最關鍵的分水嶺，核心原因在於全台22個縣市中，高達13個縣市首長兩屆任滿必須交棒。",
+      "image_url": "https://doqvf81n9htmm.cloudfront.net/data/crop_article/186989/2_20260420163328.32_1140x855.jpg",
+      "output_link_path": "https://www.businesstoday.com.tw/article/category/183027/post/202604200002/?utm_source=businesstoday&utm_medium=search&utm_campaign=article"
+    }
+  ],
+    "fallbackNews": [
+      
+      {
+        "article_id": "mock_1",
+        "title": "【2026選戰分析】縣市長選舉懶人包 - 連任名單交棒縣市、藍綠選情版圖剖析",
+        "part_text": "隨著2026九合一大選時間逐漸逼近，各政黨候選人登記作業陸續完成。本篇為您整理北中南關鍵縣市長選情、最新提名名單，以及歷年藍綠基本盤與政策攻防焦點。",
+        "writers": "今周刊編輯團隊",
+        "pubtime": "2026-09-04 12:00:00",
+        "release_date": "2026-09-04",
+        "output_link_path": "https://www.businesstoday.com.tw/",
+        "image_url": "https://doqvf81n9htmm.cloudfront.net/data/crop_article/187562/shutterstock_2680131591_20260504175318.jpg_280x210.jpg",
+        "image_url_a": "https://doqvf81n9htmm.cloudfront.net/data/crop_article/187562/shutterstock_2680131591_20260504175318.jpg_480x360.jpg",
+        "category_info": { "name": "2026縣市長選舉" }
+      },
+      {
+        "article_id": "mock_2",
+        "title": "2026大選開跑！主要縣市支持度大調查，民調專家分析關鍵游離票去向",
+        "part_text": "最新民調揭露：在年輕族群中，政策牛肉相較於傳統政黨色彩更能發揮吸引力。在台北市與新北市兩大直轄市中，游離選民占比達25%，將成為最終勝負關鍵。",
+        "writers": "政治組記者",
+        "pubtime": "2026-09-05 09:30:00",
+        "release_date": "2026-09-05",
+        "output_link_path": "https://www.businesstoday.com.tw/",
+        "image_url": "https://doqvf81n9htmm.cloudfront.net/data/crop_article/186991/29_20260420102024.jpg_280x210.jpg",
+        "image_url_a": "https://doqvf81n9htmm.cloudfront.net/data/crop_article/186991/29_20260420102024.jpg_480x360.jpg",
+        "category_info": { "name": "選情大調查" }
+      },
+      {
+        "article_id": "mock_3",
+        "title": "第三勢力佈局挑戰！九合一選舉多方角力，小黨參選人如何突圍？",
+        "part_text": "本次九合一大選除了傳統藍綠對決，中生代參選人與小黨勢力紛紛推出實力派新人。本文深入走訪基層，評估地方選民對於多元政治力量的接納度與民調走向。",
+        "writers": "林韋伶",
+        "pubtime": "2026-09-06 14:00:00",
+        "release_date": "2026-09-06",
+        "output_link_path": "https://www.businesstoday.com.tw/",
+        "image_url": "https://doqvf81n9htmm.cloudfront.net/data/crop_article/186800/116_20260415104759.jpg_280x210.jpg",
+        "image_url_a": "https://doqvf81n9htmm.cloudfront.net/data/crop_article/186800/116_20260415104759.jpg_480x360.jpg",
+        "category_info": { "name": "九合一大選" }
+      }
+    ]
+  },
+  "pollsChart": {
+    "tabs": [
+      { "id": "history", "label": "歷年選情走向", "flourishId": "10741369" },
+      { "id": "percentage", "label": "政黨支持百分比", "flourishId": "10741372" }
+    ]
+  }
+}

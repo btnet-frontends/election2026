@@ -49,13 +49,9 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import config from '../json/data.json';
 
-const flashNewsList = [
-  { text: '2026九合一選舉各縣市候選人登記正式出爐！', date: '2026.09.04' },
-  { text: '最新民調公布：關鍵縣市支持率出現重大拉鋸，藍綠選情陷入膠著！', date: '2026.09.05' },
-  { text: '首波縣市長參選人政策發表會日程敲定，本週末展開線上直播！', date: '2026.09.06' },
-  { text: '【選戰分析】連任名單交棒縣市分析、第三勢力崛起板圖完整評估！', date: '2026.09.07' }
-];
+const flashNewsList = config.flashNews.list;
 
 const currentIndex = ref(0);
 const direction = ref('down');

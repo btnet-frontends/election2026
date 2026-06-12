@@ -1,8 +1,9 @@
 import { ref, computed } from 'vue';
+import config from '../json/data.json';
 
 /**
  * @param {Object} initialNews  
- * @param {string[]} hotTags    - 熱門標籤陣列（由 API / props 傳入，含「全部戰報」在第一位）
+ * @param {string[]} hotTags   
  */
 export function useNewsFeed(initialNews, hotTags, carouselCount = 3) {
   const newsList = ref(initialNews.article_lists || []);
@@ -43,7 +44,7 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 3) {
     const nextPage = currentPage.value + 1;
     try {
       const response = await fetch(
-        `https://www.businesstoday.com.tw/tag/toJson/?name=006208&limit=10&page=${nextPage}`
+        `https://www.businesstoday.com.tw/tag/toJson/?name=${config.api.tagName}&limit=${config.api.limit}&page=${nextPage}`
       );
       if (!response.ok) throw new Error('無法載入新聞');
       const data = await response.json();

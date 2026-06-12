@@ -58,11 +58,9 @@
 import { ref, computed } from 'vue';
 import pollsBg from '../assets/images/polls_bg.png?url';
 import searchIcon from '../assets/images/search_icon.svg?url';
+import config from '../json/data.json';
 
-const chartTabs = [
-  { id: 'history', label: '歷年選情走向', flourishId: '10741369' }, 
-  { id: 'percentage', label: '政黨支持百分比', flourishId: '10741372' },
-];
+const chartTabs = config.pollsChart.tabs;
 
 const activeTab = ref('history');
 const isLoading = ref(true);

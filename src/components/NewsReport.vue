@@ -67,11 +67,12 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import NewsCarousel from './NewsCarousel.vue';
 import HotTags from './HotTags.vue';
 import { useNewsFeed } from '../composables/useNewsFeed.js';
 import { formatDate, getItemTags } from '../utils/newsUtils.js';
+import siteData from '../json/data.json';
 
 const props = defineProps({
   initialNews: {
@@ -98,7 +99,7 @@ const {
   loadMore,
 } = useNewsFeed(props.initialNews, props.hotTags, CAROUSEL_COUNT);
 
-const carouselItems = computed(() => newsList.value.slice(0, CAROUSEL_COUNT));
+const carouselItems = ref(siteData.newsReport.carouselItems);
 </script>
 
 <style scoped>

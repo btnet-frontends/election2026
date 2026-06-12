@@ -105,11 +105,9 @@ import electionLogo from '../assets/images/2026_logo.svg?url';
 import logoFb from '../assets/images/logo-fb.svg?url';
 import logoIg from '../assets/images/logo-ig.svg?url';
 import logoLine from '../assets/images/logo-line.svg?url';
+import config from '../json/data.json';
 
-const navItems = [
-  { id: 'news', href: '#news', label: '即時戰報' },
-  { id: 'polls', href: '#polls', label: '選舉民調' }
-];
+const navItems = config.header.navItems;
 
 const isScrolled = ref(false);
 const isMobileMenuOpen = ref(false);

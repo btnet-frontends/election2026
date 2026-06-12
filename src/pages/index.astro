@@ -9,14 +9,14 @@ import type { NewsData } from '../types/news';
 
 
 
-const hotTags: string[] = [
-  '全部戰報'
-];
+import config from '../json/data.json';
+
+const hotTags: string[] = config.newsReport.hotTags;
 
 let initialNews: NewsData = { article_lists: [], page_model: { currentPage: 1, lastPage: 1 } };
 
 try {
-  const response = await fetch('https://www.businesstoday.com.tw/tag/toJson/?name=006208&limit=10', {
+  const response = await fetch(`https://www.businesstoday.com.tw/tag/toJson/?name=${config.api.tagName}&limit=${config.api.limit}`, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     }
@@ -32,44 +32,7 @@ try {
 
 if (!initialNews.article_lists || initialNews.article_lists.length === 0) {
   initialNews = {
-    article_lists: [
-      {
-        article_id: 'mock_1',
-        title: '【2026選戰分析】縣市長選舉懶人包 - 連任名單交棒縣市、藍綠選情版圖剖析',
-        part_text: '隨著2026九合一大選時間逐漸逼近，各政黨候選人登記作業陸續完成。本篇為您整理北中南關鍵縣市長選情、最新提名名單，以及歷年藍綠基本盤與政策攻防焦點。',
-        writers: '今周刊編輯團隊',
-        pubtime: '2026-09-04 12:00:00',
-        release_date: '2026-09-04',
-        output_link_path: 'https://www.businesstoday.com.tw/',
-        image_url: 'https://doqvf81n9htmm.cloudfront.net/data/crop_article/187562/shutterstock_2680131591_20260504175318.jpg_280x210.jpg',
-        image_url_a: 'https://doqvf81n9htmm.cloudfront.net/data/crop_article/187562/shutterstock_2680131591_20260504175318.jpg_480x360.jpg',
-        category_info: { name: '2026縣市長選舉' }
-      },
-      {
-        article_id: 'mock_2',
-        title: '2026大選開跑！主要縣市支持度大調查，民調專家分析關鍵游離票去向',
-        part_text: '最新民調揭露：在年輕族群中，政策牛肉相較於傳統政黨色彩更能發揮吸引力。在台北市與新北市兩大直轄市中，游離選民占比達25%，將成為最終勝負關鍵。',
-        writers: '政治組記者',
-        pubtime: '2026-09-05 09:30:00',
-        release_date: '2026-09-05',
-        output_link_path: 'https://www.businesstoday.com.tw/',
-        image_url: 'https://doqvf81n9htmm.cloudfront.net/data/crop_article/186991/29_20260420102024.jpg_280x210.jpg',
-        image_url_a: 'https://doqvf81n9htmm.cloudfront.net/data/crop_article/186991/29_20260420102024.jpg_480x360.jpg',
-        category_info: { name: '選情大調查' }
-      },
-      {
-        article_id: 'mock_3',
-        title: '第三勢力佈局挑戰！九合一選舉多方角力，小黨參選人如何突圍？',
-        part_text: '本次九合一大選除了傳統藍綠對決，中生代參選人與小黨勢力紛紛推出實力派新人。本文深入走訪基層，評估地方選民對於多元政治力量的接納度與民調走向。',
-        writers: '林韋伶',
-        pubtime: '2026-09-06 14:00:00',
-        release_date: '2026-09-06',
-        output_link_path: 'https://www.businesstoday.com.tw/',
-        image_url: 'https://doqvf81n9htmm.cloudfront.net/data/crop_article/186800/116_20260415104759.jpg_280x210.jpg',
-        image_url_a: 'https://doqvf81n9htmm.cloudfront.net/data/crop_article/186800/116_20260415104759.jpg_480x360.jpg',
-        category_info: { name: '九合一大選' }
-      }
-    ],
+    article_lists: config.newsReport.fallbackNews,
     page_model: { currentPage: 1, lastPage: 1 }
   };
 }

@@ -85,7 +85,7 @@ const props = defineProps({
   },
 });
 
-const CAROUSEL_COUNT = 3;
+const CAROUSEL_COUNT = 0;
 
 const {
   newsList,

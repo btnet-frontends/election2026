@@ -10,11 +10,11 @@
     <div class="tags-inner-container">
       <button
         v-for="tag in tags"
-        :key="tag"
+        :key="getTagKey(tag)"
         :class="['tag-btn', { active: isActive(tag) }]"
         @click="selectTag(tag)"
       >
-        {{ tag }}
+        {{ getTagLabel(tag) }}
         <span v-if="isActive(tag)" class="tag-remove">×</span>
       </button>
     </div>
@@ -22,6 +22,8 @@
 </template>
 
 <script setup>
+import { getTagApi, getTagLabel } from '../utils/newsApi.js';
+
 const props = defineProps({
   modelValue: {
     type: String,
@@ -36,11 +38,17 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const isActive = (tag) => {
-  return props.modelValue === tag;
+  return props.modelValue === getTagLabel(tag);
+};
+
+const getTagKey = (tag) => {
+  return getTagApi(tag)?.tagName || getTagLabel(tag);
 };
 
 const selectTag = (tag) => {
-  emit('update:modelValue', props.modelValue === tag ? props.tags[0] : tag);
+  const tagLabel = getTagLabel(tag);
+  const defaultLabel = getTagLabel(props.tags[0]);
+  emit('update:modelValue', props.modelValue === tagLabel ? defaultLabel : tagLabel);
 };
 </script>
 

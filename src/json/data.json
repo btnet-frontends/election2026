@@ -1,18 +1,26 @@
 {
-  "api": {
-    "tagName": "006208",
-    "limit": 10
-  },
   "header": {
     "navItems": [
       { "id": "news", "href": "#news", "label": "即時戰報" },
       { "id": "polls", "href": "#polls", "label": "選舉民調" }
     ]
   },
-
   "newsReport": {
     "hotTags": [
-      "2026縣市長選舉報導"
+      {
+        "label": "2026縣市長選舉報導",
+        "api": {
+          "tagName": "2026縣市長選舉報導",
+          "limit": 10
+        }
+      },
+      {
+        "label": "賴清德",
+        "api": {
+          "tagName": "賴清德",
+          "limit": 10
+        }
+      }
     ],
     "carouselItems": [
     {

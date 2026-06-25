@@ -15,12 +15,12 @@
 
         <div class="flash-content-mobile mobile-only">
           <div class="marquee-track">
-            <div class="marquee-content">
-              <span v-for="(item, idx) in flashNewsList" :key="idx" class="marquee-item" @click="openLink(item.link)">
+            <div class="marquee-content" @animationiteration="refreshFlashNews">
+              <span v-for="(item, idx) in flashItems" :key="idx" class="marquee-item" @click="openLink(item.link)">
                 <span class="marquee-text">{{ item.text }}</span>
                 <span class="marquee-divider">/</span>
               </span>
-              <span v-for="(item, idx) in flashNewsList" :key="'dup-' + idx" class="marquee-item" @click="openLink(item.link)">
+              <span v-for="(item, idx) in flashItems" :key="'dup-' + idx" class="marquee-item" @click="openLink(item.link)">
                 <span class="marquee-text">{{ item.text }}</span>
                 <span class="marquee-divider">/</span>
               </span>
@@ -47,62 +47,121 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { buildNewsApiUrl } from '../utils/newsApi.js';
+import { buildFlashNewsList } from '../utils/newsUtils.js';
 
 const props = defineProps({
   flashNewsList: {
     type: Array,
     required: true
+  },
+  flashNewsApi: {
+    type: Object,
+    default: null
   }
 });
 
-const { flashNewsList } = props;
-
+const flashItems = ref(props.flashNewsList);
 const currentIndex = ref(0);
 const direction = ref('down');
 const animClass = ref('');
+const isRefreshing = ref(false);
 let autoPlayTimer = null;
 
-const currentNews = computed(() => flashNewsList[currentIndex.value] ?? {});
+const currentNews = computed(() => flashItems.value[currentIndex.value] ?? {});
 
 const openLink = (url) => {
   if (url) window.open(url, '_blank', 'noopener,noreferrer');
 };
 
-const changeNews = (newIndex) => {
+const refreshFlashNews = async () => {
+  const api = props.flashNewsApi;
+  if (!api?.tagName || isRefreshing.value) return;
+
+  isRefreshing.value = true;
+
+  try {
+    const response = await fetch(buildNewsApiUrl(api), { cache: 'no-store' });
+    if (!response.ok) throw new Error(`快訊 API 回應失敗: ${response.status}`);
+
+    const data = await response.json();
+    const nextItems = buildFlashNewsList(data.article_lists, api.limit || 4);
+
+    if (nextItems.length > 0) {
+      flashItems.value = nextItems;
+      currentIndex.value = Math.min(currentIndex.value, nextItems.length - 1);
+    }
+  } catch (error) {
+    console.error('更新快訊失敗:', error);
+  } finally {
+    isRefreshing.value = false;
+  }
+};
+
+const changeNews = (newIndex, shouldRefresh = true) => {
+  const itemCount = flashItems.value.length;
+  if (itemCount === 0) return;
+
+  const safeIndex = (newIndex + itemCount) % itemCount;
   const outClass = direction.value === 'down' ? 'slide-out-up' : 'slide-out-down';
   const inClass = direction.value === 'down' ? 'slide-in-down' : 'slide-in-up';
   animClass.value = outClass;
   setTimeout(() => {
-    currentIndex.value = newIndex;
+    currentIndex.value = safeIndex;
     animClass.value = inClass;
     setTimeout(() => {
       animClass.value = '';
     }, 350);
+    if (shouldRefresh) {
+      refreshFlashNews();
+    }
   }, 350);
 };
 
-const nextNews = () => {
+const rotateNews = () => {
+  if (flashItems.value.length <= 1) {
+    refreshFlashNews();
+    return;
+  }
+
   direction.value = 'down';
-  changeNews((currentIndex.value + 1) % flashNewsList.length);
+  changeNews(currentIndex.value + 1);
+};
+
+const nextNews = () => {
+  if (flashItems.value.length <= 1) {
+    refreshFlashNews();
+    resetTimer();
+    return;
+  }
+
+  direction.value = 'down';
+  changeNews(currentIndex.value + 1);
   resetTimer();
 };
 
 const prevNews = () => {
+  if (flashItems.value.length <= 1) {
+    refreshFlashNews();
+    resetTimer();
+    return;
+  }
+
   direction.value = 'up';
-  changeNews((currentIndex.value - 1 + flashNewsList.length) % flashNewsList.length);
+  changeNews(currentIndex.value - 1);
   resetTimer();
 };
 
 const startTimer = () => {
   autoPlayTimer = setInterval(() => {
-    direction.value = 'down';
-    changeNews((currentIndex.value + 1) % flashNewsList.length);
+    rotateNews();
   }, 4500);
 };
 
 const resetTimer = () => {
   if (autoPlayTimer) {
     clearInterval(autoPlayTimer);
+    autoPlayTimer = null;
     startTimer();
   }
 };

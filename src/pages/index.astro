@@ -9,28 +9,42 @@ import type { NewsData } from '../types/news';
 
 import config from '../json/data.json';
 import { buildNewsApiUrl, getTagApi } from '../utils/newsApi.js';
+import { buildFlashNewsList } from '../utils/newsUtils.js';
 
 const hotTags = config.newsReport.hotTags;
 const defaultTagApi = getTagApi(hotTags[0]);
+const flashNewsTag = config.flashNews?.tag || hotTags[0];
+const flashNewsApi = getTagApi(flashNewsTag);
 
-let initialNews: NewsData = { article_lists: [], page_model: { currentPage: 1, lastPage: 1 } };
+const getEmptyNewsData = (): NewsData => ({
+  article_lists: [],
+  page_model: { currentPage: 1, lastPage: 1 }
+});
 
-try {
-  if (defaultTagApi?.tagName) {
-    const response = await fetch(buildNewsApiUrl(defaultTagApi), {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+const fetchNewsByApi = async (api: any, label: string): Promise<NewsData> => {
+  let newsData = getEmptyNewsData();
+
+  try {
+    if (api?.tagName) {
+      const response = await fetch(buildNewsApiUrl(api), {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      });
+      if (response.ok) {
+        newsData = await response.json();
+      } else {
+        console.error(`Astro 靜態抓取${label}今周刊 API 失敗: ${response.status}`);
       }
-    });
-    if (response.ok) {
-      initialNews = await response.json();
-    } else {
-      console.error(`Astro 靜態抓取今周刊 API 失敗: ${response.status}`);
     }
+  } catch (error) {
+    console.error(`Astro 靜態抓取${label}今周刊 API 發生異常:`, error);
   }
-} catch (error) {
-  console.error('Astro 靜態抓取今周刊 API 發生異常:', error);
-}
+
+  return newsData;
+};
+
+let initialNews = await fetchNewsByApi(defaultTagApi, '新聞列表');
 
 if (!initialNews.article_lists || initialNews.article_lists.length === 0) {
   initialNews = {
@@ -39,11 +53,20 @@ if (!initialNews.article_lists || initialNews.article_lists.length === 0) {
   };
 }
 
-const flashNewsList = initialNews.article_lists.slice(0, 4).map((item: any) => ({
-  text: item.title,
-  date: item.pubtime ? item.pubtime.slice(0, 10).replace(/-/g, '.') : '',
-  link: item.output_link_path
-}));
+const flashNewsLimit = flashNewsApi?.limit || 4;
+let initialFlashNews = initialNews;
+const canReuseInitialNewsForFlash =
+  defaultTagApi?.tagName === flashNewsApi?.tagName &&
+  initialNews.article_lists.length >= flashNewsLimit;
+
+if (!canReuseInitialNewsForFlash) {
+  initialFlashNews = await fetchNewsByApi(flashNewsApi, '快訊');
+}
+
+const flashNewsList = buildFlashNewsList(
+  initialFlashNews.article_lists?.length ? initialFlashNews.article_lists : initialNews.article_lists,
+  flashNewsLimit
+);
 ---
 
 <Layout title="2026九合一大選《今周戰情室》" canonical="https://www.businesstoday.com.tw/bt_topic/2026/election/">
@@ -52,7 +75,7 @@ const flashNewsList = initialNews.article_lists.slice(0, 4).map((item: any) => (
   <main>
     <KV client:load />
 
-    <FlashNews flashNewsList={flashNewsList} client:load />
+    <FlashNews flashNewsList={flashNewsList} flashNewsApi={flashNewsApi} client:load />
 
     <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />
 

@@ -5,6 +5,15 @@
       { "id": "polls", "href": "#polls", "label": "選舉民調" }
     ]
   },
+  "flashNews": {
+    "tag": {
+      "label": "0050",
+      "api": {
+        "tagName": "0050",
+        "limit": 4
+      }
+    }
+  },
   "newsReport": {
     "hotTags": [
       {

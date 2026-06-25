@@ -9,6 +9,22 @@ export const formatDate = (dateStr) => {
 };
 
 /**
+ * 將文章列表整理成快訊輪播資料
+ * @param {Object[]} items
+ * @param {number} limit
+ * @returns {{ text: string, date: string, link: string }[]}
+ */
+export const buildFlashNewsList = (items = [], limit = 4) => {
+  if (!Array.isArray(items)) return [];
+
+  return items.slice(0, limit).map((item) => ({
+    text: item.title || '',
+    date: formatDate(item.pubtime),
+    link: item.output_link_path || '',
+  })).filter(item => item.text);
+};
+
+/**
  * 從文章資料萃取標籤（最多 3 個）
  * @param {Object} item - 文章物件
  * @param {string[]} hotTags - 熱門標籤陣列（不含「全部戰報」）

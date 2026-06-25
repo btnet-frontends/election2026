@@ -10,7 +10,7 @@
       </div>
 
       <div class="polls-card">
-<div class="polls-tabs-wrapper" v-show="false">
+        <div class="polls-tabs-wrapper">
           <div class="polls-tabs">
             <button 
               v-for="tab in chartTabs" 
@@ -23,7 +23,7 @@
           </div>
         </div>
 
-        <div class="chart-content">
+        <div class="chart-content" :style="{ minHeight: iframeHeight }">
           <transition name="fade">
             <div v-if="isLoading" class="chart-skeleton">
               <div class="skeleton-header">
@@ -35,12 +35,13 @@
 
           <div class="flourish-container" :class="{ 'hidden': isLoading }">
             <iframe 
+              ref="iframeRef"
               :key="activeTab"
               :src="currentChartUrl" 
               class="flourish-iframe"
               frameborder="0" 
               scrolling="no" 
-              style="width: 100%; height: 500px;"
+              :style="{ height: iframeHeight }"
               @load="onIframeLoad"
             ></iframe>
           </div>
@@ -55,32 +56,109 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount, onMounted } from 'vue';
 import pollsBg from '../assets/images/polls_bg.png?url';
 import searchIcon from '../assets/images/search_icon.svg?url';
 import config from '../json/data.json';
 
 const chartTabs = config.pollsChart.tabs;
+const defaultIframeHeight = '500px';
 
-const activeTab = ref('history');
+const activeTab = ref(chartTabs[0]?.id || '');
 const isLoading = ref(true);
+const iframeRef = ref(null);
+const iframeHeight = ref(defaultIframeHeight);
 
 const currentChartUrl = computed(() => {
-  const activeItem = chartTabs.find(tab => tab.id === activeTab.value);
+  const activeItem = chartTabs.find(tab => tab.id === activeTab.value) || chartTabs[0];
+  if (!activeItem) return '';
+
   return `https://public.flourish.studio/visualisation/${activeItem.flourishId}/embed?auto=1`;
 });
 
 const switchTab = (tabId) => {
   if (activeTab.value === tabId) return;
   isLoading.value = true; 
+  iframeHeight.value = defaultIframeHeight;
   activeTab.value = tabId;
 };
 
-const onIframeLoad = (event) => {
-  if (event.target.src === currentChartUrl.value) {
-    isLoading.value = false;
+const onIframeLoad = () => {
+  isLoading.value = false;
+};
+
+const parseMessageData = (messageData) => {
+  if (typeof messageData === 'object' && messageData !== null) return messageData;
+
+  try {
+    return JSON.parse(messageData);
+  } catch {
+    return null;
   }
 };
+
+const normalizeIframeHeight = (height) => {
+  if (typeof height === 'number' && Number.isFinite(height)) {
+    return `${Math.ceil(height)}px`;
+  }
+
+  if (typeof height !== 'string') return null;
+
+  const trimmedHeight = height.trim();
+
+  if (/^\d+(\.\d+)?$/.test(trimmedHeight)) {
+    return `${Math.ceil(Number(trimmedHeight))}px`;
+  }
+
+  if (/^\d+(\.\d+)?(cm|mm|Q|in|pc|pt|px|em|ex|ch|rem|lh|vw|vh|vmin|vmax|%)$/i.test(trimmedHeight)) {
+    return trimmedHeight;
+  }
+
+  return null;
+};
+
+const isFlourishOrigin = (origin) => {
+  try {
+    const hostname = new URL(origin).hostname;
+    return hostname === 'flourish.studio' ||
+      hostname.endsWith('.flourish.studio') ||
+      hostname === 'uri.sh' ||
+      hostname.endsWith('.uri.sh');
+  } catch {
+    return false;
+  }
+};
+
+const isCurrentIframeMessage = (source, iframe) => {
+  if (source === iframe.contentWindow) return true;
+
+  try {
+    return source?.parent === iframe.contentWindow;
+  } catch {
+    return false;
+  }
+};
+
+const onFlourishMessage = (event) => {
+  const iframe = iframeRef.value;
+  if (!iframe || !isCurrentIframeMessage(event.source, iframe) || !isFlourishOrigin(event.origin)) return;
+
+  const data = parseMessageData(event.data);
+  if (data?.sender !== 'Flourish' || data.method !== 'resize') return;
+
+  const nextHeight = normalizeIframeHeight(data.height);
+  if (nextHeight) {
+    iframeHeight.value = nextHeight;
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('message', onFlourishMessage);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('message', onFlourishMessage);
+});
 </script>
 
 <style scoped>
@@ -175,7 +253,6 @@ const onIframeLoad = (event) => {
 
 .chart-content {
   position: relative;
-  min-height: 480px;
   width: 100%;
 }
 
@@ -194,7 +271,7 @@ const onIframeLoad = (event) => {
 
 .flourish-iframe {
   width: 100%;
-  height: 500px;
+  min-height: 320px;
   border: none;
   background: transparent;
 }

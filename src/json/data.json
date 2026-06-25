@@ -82,8 +82,7 @@
   },
   "pollsChart": {
     "tabs": [
-      { "id": "history", "label": "歷年選情走向", "flourishId": "10741369" },
-      { "id": "percentage", "label": "政黨支持百分比", "flourishId": "10741372" }
+      { "id": "percentage", "label": "政黨支持百分比", "flourishId": "29495450" }
     ]
   }
 }

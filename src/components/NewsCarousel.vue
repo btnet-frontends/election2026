@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="carousel-wrapper">
     <Swiper
       :modules="modules"
@@ -58,7 +58,7 @@ const modules = [Pagination, Autoplay];
 
 .carousel-track {
   border-radius: 24px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
   overflow: hidden;
 }
 
@@ -155,7 +155,7 @@ const modules = [Pagination, Autoplay];
   align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
-  transition: all var(--transition-fast);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .slide-btn:hover {

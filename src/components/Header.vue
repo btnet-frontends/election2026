@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <header :class="['site-header', { 'scrolled': isScrolled, 'menu-open': isMobileMenuOpen }]">
     <div class="header-container">
       <div class="header-left">
@@ -173,7 +173,7 @@ onUnmounted(() => {
   width: 100%;
   z-index: 1000;
   pointer-events: none;
-  transition: all var(--transition-normal);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .site-header.scrolled {
@@ -196,7 +196,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: background var(--transition-normal), box-shadow var(--transition-normal);
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .site-header.scrolled .header-container {
@@ -253,7 +253,7 @@ onUnmounted(() => {
   color: #6B5C4B;
   padding: 0.5rem 0.3rem;
   letter-spacing: 0.05em;
-  transition: color var(--transition-fast);
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-link:hover {
@@ -268,7 +268,7 @@ onUnmounted(() => {
 
 .social-icon {
   display: block;
-  transition: transform var(--transition-fast);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .social-icon:hover {
@@ -283,7 +283,7 @@ onUnmounted(() => {
   height: 38px;
   border-radius: 50%;
   background-color: #F1EAE3;
-  transition: background-color var(--transition-fast);
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .icon-circle img {
@@ -311,7 +311,7 @@ onUnmounted(() => {
   height: 2px;
   background-color: #6B5C4B;
   border-radius: 2px;
-  transition: all var(--transition-normal);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .menu-open .burger-line.line-1 {
@@ -332,7 +332,7 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   height: 100vh;
-  background: var(--color-coffee-lightest);
+  background: var(--color-coffee-50);
   z-index: 1050;
   padding: 0 2rem 3rem 2rem;
   display: flex;
@@ -357,7 +357,7 @@ onUnmounted(() => {
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: opacity var(--transition-fast);
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   padding: 0;
 }
@@ -389,7 +389,7 @@ onUnmounted(() => {
   padding: 1.5rem 0;
   letter-spacing: 0.08em;
   text-align: center;
-  transition: opacity var(--transition-fast);
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mobile-link + .mobile-link {
@@ -420,7 +420,7 @@ onUnmounted(() => {
   height: 48px;
   border-radius: 50%;
   background-color: #E6DFD7;
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mobile-icon-circle img {

@@ -155,7 +155,7 @@ onUnmounted(() => {
   min-height: 600px;
   overflow: hidden;
   box-sizing: border-box;
-  background-color: var(--color-coffee-lightest);
+  background-color: var(--color-coffee-50);
 }
 
 .parallax-bg {
@@ -255,7 +255,7 @@ onUnmounted(() => {
 .kv-subtitle2 {
   font-size: clamp(1rem, 1.6vw, 1.4rem);
   font-weight: 500;
-  color: var(--color-coffee-dark);
+  color: var(--color-coffee-600);
   letter-spacing: 0.06em;
   line-height: 1.6;
   margin-bottom: 1.8rem;
@@ -272,7 +272,7 @@ onUnmounted(() => {
 .cd-num {
   font-size: clamp(2rem, 3vw, 3rem);
   font-weight: 900;
-  color: var(--color-text-muted);
+  color: var(--color-coffee-600);
   line-height: 1;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -281,12 +281,12 @@ onUnmounted(() => {
 .cd-unit {
   font-size: clamp(0.9rem, 1.2vw, 1.1rem);
   font-weight: 500;
-  color: var(--color-text-muted);
+  color: var(--color-coffee-600);
 }
 
 .cd-sep {
   font-size: clamp(1rem, 1.5vw, 1.3rem);
-  color: var(--color-text-light);
+  color: var(--color-coffee-300);
   font-weight: 300;
 }
 

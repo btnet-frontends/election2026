@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section id="polls" class="polls-section" :style="{ backgroundImage: `url(${pollsBg})` }">
     <div class="container">
       <div class="section-header">
@@ -86,7 +86,7 @@ const onIframeLoad = (event) => {
 <style scoped>
 .polls-section {
   padding: 6rem 0;
-  background-color: var(--color-bg-warm); 
+  background-color: var(--color-coffee-50); 
   background-attachment: fixed;
   background-position: bottom center;
   background-repeat: no-repeat;
@@ -115,7 +115,7 @@ const onIframeLoad = (event) => {
 .polls-title {
   font-size: 2rem;
   font-weight: 600;
-  color: var(--color-text-main);
+  color: var(--color-coffee-900);
   white-space: nowrap;
   flex-shrink: 0;
   display: flex;
@@ -130,10 +130,10 @@ const onIframeLoad = (event) => {
 }
 
 .polls-card {
-  background: var(--color-bg-pure);
+  background: var(--color-coffee-0);
   border-radius: 24px;
   border: 1px solid rgba(226, 232, 240, 0.7);
-  box-shadow: var(--shadow-premium);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.04), 0 8px 10px -6px rgb(0 0 0 / 0.04);
   overflow: hidden;
   padding: 2.5rem;
 }
@@ -147,19 +147,19 @@ const onIframeLoad = (event) => {
 
 .polls-tabs {
   display: inline-flex;
-  background: var(--color-bg-warm);
+  background: var(--color-coffee-50);
   padding: 0.4rem;
   border-radius: 14px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-coffee-200);
 }
 
 .tab-btn {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--color-text-muted);
+  color: var(--color-coffee-600);
   padding: 0.6rem 1.8rem;
   border-radius: 10px;
-  transition: all var(--transition-fast);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tab-btn:hover {
@@ -167,10 +167,10 @@ const onIframeLoad = (event) => {
 }
 
 .tab-btn.active {
-  background: var(--color-bg-pure);
+  background: var(--color-coffee-0);
   color: var(--color-primary);
   font-weight: 700;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
 .chart-content {
@@ -207,7 +207,7 @@ const onIframeLoad = (event) => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg-pure);
+  background: var(--color-coffee-0);
   z-index: 5;
 }
 
@@ -231,12 +231,12 @@ const onIframeLoad = (event) => {
 .chart-footer {
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--color-border-light);
+  border-top: 1px solid var(--color-coffee-150);
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.82rem;
-  color: var(--color-text-muted);
+  color: var(--color-coffee-600);
 }
 
 .footer-source {

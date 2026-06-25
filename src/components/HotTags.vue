@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="tags-section">
     <div class="tags-header">
       <span class="tags-title">
@@ -70,7 +70,7 @@ const selectTag = (tag) => {
 .tags-title {
   font-size: 2rem;
   font-weight: 600;
-  color: var(--color-text-main);
+  color: var(--color-coffee-900);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -109,7 +109,7 @@ const selectTag = (tag) => {
   align-items: center;
   gap: 0.5rem;
   position: relative;
-  transition: color var(--transition-fast), background var(--transition-fast);
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tag-btn::before {
@@ -124,7 +124,7 @@ const selectTag = (tag) => {
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tag-btn:hover::before,

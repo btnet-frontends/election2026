@@ -43,8 +43,8 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #7CFFB0, #227EFF);
   border-radius: 9999px;
 box-shadow: 
-  0 10px 15px -3px color-mix(in srgb, var(--color-text-muted) 10%, transparent),
-  0 4px 6px -2px color-mix(in srgb, var(--color-text-muted) 5%, transparent);  font-size: 1.25rem;
+  0 10px 15px -3px color-mix(in srgb, var(--color-coffee-600) 10%, transparent),
+  0 4px 6px -2px color-mix(in srgb, var(--color-coffee-600) 5%, transparent);  font-size: 1.25rem;
   font-weight: 700;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
@@ -57,8 +57,8 @@ box-shadow:
 .gototop-btn:hover {
   transform: scale(1.1);
 box-shadow: 
-  0 20px 25px -5px color-mix(in srgb, var(--color-text-muted) 15%, transparent),
-  0 8px 10px -6px color-mix(in srgb, var(--color-text-muted) 10%, transparent);
+  0 20px 25px -5px color-mix(in srgb, var(--color-coffee-600) 15%, transparent),
+  0 8px 10px -6px color-mix(in srgb, var(--color-coffee-600) 10%, transparent);
 }
 
 .arrow_up {

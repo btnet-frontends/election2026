@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="flash-news-bar container">
     <div class="flash-outer">
       <div class="flash-container">
@@ -232,11 +232,11 @@ flex: 1;
 .ticker-text {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--color-text-main);
+  color: var(--color-coffee-900);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color var(--transition-fast);
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   display: block;
   min-width: 0;
@@ -247,7 +247,7 @@ flex: 1;
 }
 
 .ticker-date {
-  font-family: var(--font-heading);
+  font-family: 'Outfit', 'Noto Sans TC', sans-serif;
   font-size: 0.95rem;
   color: #917F6B;
   font-weight: 600;
@@ -258,7 +258,7 @@ flex: 1;
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  border-left: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-coffee-200);
   padding: 0 0.75rem;
   flex-shrink: 0;
   align-self: center;
@@ -274,7 +274,7 @@ flex: 1;
   border-radius: 50%;
   color: #CBC1B5;
   background-color: #F1EAE3;
-  transition: all var(--transition-fast);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .control-btn svg {
@@ -355,8 +355,8 @@ flex: 1;
 .marquee-text {
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--color-text-main);
-  transition: color var(--transition-fast);
+  color: var(--color-coffee-900);
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .marquee-divider {

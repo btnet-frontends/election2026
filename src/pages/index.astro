@@ -11,6 +11,13 @@ import config from '../json/data.json';
 import { buildNewsApiUrl, getTagApi } from '../utils/newsApi.js';
 import { buildFlashNewsList } from '../utils/newsUtils.js';
 
+const componentVisibility = {
+  KV: config.components?.KV !== false,
+  FlashNews: config.components?.FlashNews !== false,
+  NewsReport: config.components?.NewsReport !== false,
+  PollsChart: config.components?.PollsChart !== false
+};
+
 const hotTags = config.newsReport.hotTags;
 const defaultTagApi = getTagApi(hotTags[0]);
 const flashNewsTag = config.flashNews?.tag || hotTags[0];
@@ -44,41 +51,58 @@ const fetchNewsByApi = async (api: any, label: string): Promise<NewsData> => {
   return newsData;
 };
 
-let initialNews = await fetchNewsByApi(defaultTagApi, '新聞列表');
+const fallbackNewsData = {
+  article_lists: config.newsReport.fallbackNews,
+  page_model: { currentPage: 1, lastPage: 1 }
+};
 
-if (!initialNews.article_lists || initialNews.article_lists.length === 0) {
-  initialNews = {
-    article_lists: config.newsReport.fallbackNews,
-    page_model: { currentPage: 1, lastPage: 1 }
-  };
+let initialNews = getEmptyNewsData();
+
+if (componentVisibility.NewsReport) {
+  initialNews = await fetchNewsByApi(defaultTagApi, '新聞列表');
+
+  if (!initialNews.article_lists || initialNews.article_lists.length === 0) {
+    initialNews = fallbackNewsData;
+  }
 }
 
-const flashNewsLimit = flashNewsApi?.limit || 4;
-let initialFlashNews = initialNews;
-const canReuseInitialNewsForFlash =
-  defaultTagApi?.tagName === flashNewsApi?.tagName &&
-  initialNews.article_lists.length >= flashNewsLimit;
+let flashNewsList = [];
 
-if (!canReuseInitialNewsForFlash) {
-  initialFlashNews = await fetchNewsByApi(flashNewsApi, '快訊');
+if (componentVisibility.FlashNews) {
+  const flashNewsLimit = flashNewsApi?.limit || 4;
+  let initialFlashNews = getEmptyNewsData();
+  const canReuseInitialNewsForFlash =
+    componentVisibility.NewsReport &&
+    defaultTagApi?.tagName === flashNewsApi?.tagName &&
+    initialNews.article_lists.length >= flashNewsLimit;
+
+  if (canReuseInitialNewsForFlash) {
+    initialFlashNews = initialNews;
+  } else {
+    initialFlashNews = await fetchNewsByApi(flashNewsApi, '快訊');
+  }
+
+  const fallbackFlashNewsList = initialNews.article_lists?.length
+    ? initialNews.article_lists
+    : fallbackNewsData.article_lists;
+
+  flashNewsList = buildFlashNewsList(
+    initialFlashNews.article_lists?.length ? initialFlashNews.article_lists : fallbackFlashNewsList,
+    flashNewsLimit
+  );
 }
-
-const flashNewsList = buildFlashNewsList(
-  initialFlashNews.article_lists?.length ? initialFlashNews.article_lists : initialNews.article_lists,
-  flashNewsLimit
-);
 ---
 
 <Layout title="2026九合一大選《今周戰情室》" canonical="https://www.businesstoday.com.tw/bt_topic/2026/election/">
   <Header client:load />
 
   <main>
-    <KV client:load />
+    {componentVisibility.KV && <KV client:load />}
 
-    <FlashNews flashNewsList={flashNewsList} flashNewsApi={flashNewsApi} client:load />
+    {componentVisibility.FlashNews && <FlashNews flashNewsList={flashNewsList} flashNewsApi={flashNewsApi} client:load />}
 
-    <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />
+    {componentVisibility.NewsReport && <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />}
 
-    <PollsChart client:visible />
+    {componentVisibility.PollsChart && <PollsChart client:visible />}
   </main>
 </Layout>

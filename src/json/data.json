@@ -1,9 +1,14 @@
 {
   "header": {
     "navItems": [
-      { "id": "news", "href": "#news", "label": "即時戰報" },
-      { "id": "polls", "href": "#polls", "label": "選舉民調" }
+      { "id": "news", "href": "#news", "label": "即時戰報" }
     ]
+  },
+  "components": {
+    "KV": true,
+    "FlashNews": true,
+    "NewsReport": true,
+    "PollsChart": false
   },
   "flashNews": {
     "tag": {

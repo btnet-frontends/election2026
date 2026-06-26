@@ -26,7 +26,7 @@
 
         <div class="chart-content" :style="{ minHeight: iframeHeight }">
           <transition name="fade">
-            <div v-if="isLoading" class="chart-skeleton">
+            <div v-if="!isClientReady || isLoading" class="chart-skeleton">
               <div class="skeleton-header">
                 <div class="pulse-line sm"></div>
                 <div class="pulse-line md"></div>
@@ -34,7 +34,11 @@
             </div>
           </transition>
 
-          <div class="flourish-container" :class="{ 'hidden': isLoading }">
+          <div
+            v-if="isClientReady && currentChartUrl"
+            class="flourish-container"
+            :class="{ 'hidden': isLoading }"
+          >
             <iframe 
               ref="iframeRef"
               :key="activeTab"
@@ -66,6 +70,7 @@ const chartTabs = config.pollsChart.tabs;
 const defaultIframeHeight = '500px';
 
 const activeTab = ref(chartTabs[0]?.id || '');
+const isClientReady = ref(false);
 const isLoading = ref(true);
 const iframeRef = ref(null);
 const iframeHeight = ref(defaultIframeHeight);
@@ -154,6 +159,7 @@ const onFlourishMessage = (event) => {
 };
 
 onMounted(() => {
+  isClientReady.value = true;
   window.addEventListener('message', onFlourishMessage);
 });
 

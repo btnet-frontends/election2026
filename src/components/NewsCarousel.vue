@@ -12,7 +12,7 @@
         :key="item.article_id"
       >
         <div class="slide-media">
-          <img :src="item.image_url":alt="item.title" class="slide-image" />
+          <img :src="item.image_url" :alt="item.title" class="slide-image" />
           <div class="slide-overlay-color"></div>
           <div class="slide-overlay-dark"></div>
           <div class="slide-content-desktop">

@@ -10,7 +10,8 @@
       </div>
 
       <div class="polls-card">
-        <div class="polls-tabs-wrapper">
+        <!--隱藏頁籤-->
+        <!-- <div class="polls-tabs-wrapper">
           <div class="polls-tabs">
             <button 
               v-for="tab in chartTabs" 
@@ -21,7 +22,7 @@
               {{ tab.label }}
             </button>
           </div>
-        </div>
+        </div> -->
 
         <div class="chart-content" :style="{ minHeight: iframeHeight }">
           <transition name="fade">

@@ -9,7 +9,11 @@
       </div>
     </Teleport>
 
-    <img :src="kvBgGroup" alt="" class="kv-bggroup" aria-hidden="true" />
+    <!-- kv_bggroup（暫時隱藏） -->
+    <img v-show="false" :src="kvBgGroup" alt="" class="kv-bggroup" aria-hidden="true" />
+
+    <!-- kv_bggroup_n 新圖片 -->
+    <img :src="kvBgGroupN" alt="" class="kv-bggroup-n" aria-hidden="true" />
 
     <div class="kv-left-wrapper">
       <div class="kv-left">
@@ -40,6 +44,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 
 import kvBgGroup   from '../assets/images/kv_bggroup.png?url';
+import kvBgGroupN  from '../assets/images/kv_bggroup_n.png?url';
 import kvCloud     from '../assets/images/kv_cloud.svg?url';
 import kvTitle     from '../assets/images/kv_title.svg?url';
 import kvPeople    from '../assets/images/kv_people.svg?url';
@@ -209,6 +214,20 @@ onUnmounted(() => {
   pointer-events: none;
   user-select: none;
   z-index: 0;
+  animation: fadeIn 1.5s ease both;
+}
+
+.kv-bggroup-n {
+  position: absolute;
+  top: 30%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 100%;
+  min-width: 800px;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
   animation: fadeIn 1.5s ease both;
 }
 
@@ -396,6 +415,15 @@ onUnmounted(() => {
     object-position: bottom center;
   }
 
+  .kv-bggroup-n {
+    top: 63%;
+    bottom: auto;
+    left: 0;
+    transform: translateY(-50%);
+    width: 100%;
+    min-width: unset;
+  }
+
   .parallax-left {
     left: -290px;
     top: 50%;
@@ -486,6 +514,15 @@ onUnmounted(() => {
     width: 100%;
     height: auto;
     object-position: bottom center;
+  }
+
+  .kv-bggroup-n {
+    top: 63%;
+    bottom: auto;
+    left: 0;
+    transform: translateY(-50%);
+    width: 100%;
+    min-width: unset;
   }
 }
 

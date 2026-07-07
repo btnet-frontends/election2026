@@ -91,9 +91,11 @@ if (componentVisibility.FlashNews) {
     flashNewsLimit
   );
 }
+
+const footerBgColor = componentVisibility.PollsChart ? 'var(--color-coffee-50)' : 'var(--color-coffee-0)';
 ---
 
-<Layout title="2026九合一大選《今周戰情室》" canonical="https://www.businesstoday.com.tw/bt_topic/2026/election/">
+<Layout title="2026九合一大選《今周戰情室》" canonical="https://www.businesstoday.com.tw/bt_topic/2026/election/" footerBgColor={footerBgColor}>
   <Header client:load />
 
   <main>

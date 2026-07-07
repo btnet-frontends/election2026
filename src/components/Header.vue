@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <header :class="['site-header', { 'scrolled': isScrolled, 'menu-open': isMobileMenuOpen }]">
     <div class="header-container">
       <div class="header-left">
@@ -113,17 +113,32 @@ const isScrolled = ref(false);
 const isMobileMenuOpen = ref(false);
 const activeSection = ref('kv');
 
+const getElementTop = (id) => {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  let top = 0;
+  let currentEl = el;
+  while (currentEl) {
+    top += currentEl.offsetTop;
+    currentEl = currentEl.offsetParent;
+  }
+  return top;
+};
+
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 30;
 
   const scrollPosition = window.scrollY + 120;
-  const newsSection = document.getElementById('news');
-  const pollsSection = document.getElementById('polls');
+  const pollsTop = getElementTop('polls');
+  const tagsTop = getElementTop('tags');
+  const flashTop = getElementTop('flash-news');
 
-  if (pollsSection && scrollPosition >= pollsSection.offsetTop) {
+  if (pollsTop && scrollPosition >= pollsTop) {
     activeSection.value = 'polls';
-  } else if (newsSection && scrollPosition >= newsSection.offsetTop) {
-    activeSection.value = 'news';
+  } else if (tagsTop && scrollPosition >= tagsTop) {
+    activeSection.value = 'tags';
+  } else if (flashTop && scrollPosition >= flashTop) {
+    activeSection.value = 'flash-news';
   } else {
     activeSection.value = 'kv';
   }

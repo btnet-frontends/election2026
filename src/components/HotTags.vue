@@ -1,5 +1,5 @@
-﻿<template>
-  <div class="tags-section">
+<template>
+  <div id="tags" class="tags-section">
     <div class="tags-header">
       <span class="tags-title">
         <span class="tags-hash">#</span> 熱門標籤

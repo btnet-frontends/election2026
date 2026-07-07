@@ -1,5 +1,5 @@
-﻿<template>
-  <div class="flash-news-bar container">
+<template>
+  <div id="flash-news" class="flash-news-bar container">
     <div class="flash-outer">
       <div class="flash-container">
         <div class="flash-badge">快訊</div>

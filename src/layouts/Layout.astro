@@ -1,4 +1,4 @@
-﻿---
+---
 import Gototop from '../components/Gototop.vue';
 
 interface Props {
@@ -6,13 +6,15 @@ interface Props {
   description?: string;
   canonical?: string;
   shareImage?: string;
+  footerBgColor?: string;
 }
 
 const {
   title,
   description = "2026縣市長選舉 即時報導、參選人資訊、選舉民調與選情統計，一次看懂最關鍵的選戰局勢！",
   canonical = "https://www.businesstoday.com.tw/bt_topic/2026/election/",
-shareImage = "https://www.businesstoday.com.tw/bt_topic/2026/election/share.jpg"
+  shareImage = "https://www.businesstoday.com.tw/bt_topic/2026/election/share.jpg",
+  footerBgColor = "var(--color-coffee-50)"
 } = Astro.props;
 ---
 
@@ -55,14 +57,16 @@ shareImage = "https://www.businesstoday.com.tw/bt_topic/2026/election/share.jpg"
 <body>
     <slot />
 
-    <footer class="site-footer">
-      <div class="container footer-container">
-        <div class="footer-badge">今周刊數位內容部</div>
-        <p class="copyright">
-          Copyright © 2026 今周刊 All rights reserved. 版權所有，禁止擅自轉貼節錄
-        </p>
-      </div>
-    </footer>
+    <div class="site-footer-wrapper" style={`background-color: ${footerBgColor};`}>
+      <footer class="site-footer">
+        <div class="container footer-container">
+          <div class="footer-badge">今周刊數位內容部</div>
+          <p class="copyright">
+            Copyright © 2026 今周刊 All rights reserved. 版權所有，禁止擅自轉貼節錄
+          </p>
+        </div>
+      </footer>
+    </div>
 
     <Gototop client:load />
   </body>
@@ -167,7 +171,7 @@ shareImage = "https://www.businesstoday.com.tw/bt_topic/2026/election/share.jpg"
     }
   }
 
-  section {
+  section, #flash-news, #tags {
     scroll-margin-top: 104px; /* Header 高度 76px + top offset 20px + 8px 餘裕 */
   }
 
@@ -192,6 +196,12 @@ shareImage = "https://www.businesstoday.com.tw/bt_topic/2026/election/share.jpg"
   ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
   }
+
+.site-footer-wrapper {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+}
 
 .site-footer {
   border-radius: 80px 80px 0 0;

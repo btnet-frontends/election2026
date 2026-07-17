@@ -7,7 +7,7 @@
   },
   "components": {
     "KV": true,
-    "FlashNews": true,
+    "FlashNews": false,
     "NewsReport": true,
     "PollsChart": false
   },

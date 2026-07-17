@@ -2,7 +2,7 @@
   <div id="tags" class="tags-section">
     <div class="tags-header">
       <span class="tags-title">
-        <span class="tags-hash">#</span> 即時戰報
+        <span class="tags-hash">#</span> 熱門標籤
       </span>
       <div class="tags-divider"></div>
       <span class="tags-hint">▼ 點擊篩選文章</span>

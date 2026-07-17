@@ -101,7 +101,7 @@ const footerBgColor = componentVisibility.PollsChart ? 'var(--color-coffee-50)' 
   <main>
     {componentVisibility.KV && <KV client:load />}
 
-    {/*componentVisibility.FlashNews && <FlashNews flashNewsList={flashNewsList} flashNewsApi={flashNewsApi} client:load />*/} {/* 易舒姐說先隱藏 7/17 */}
+    {componentVisibility.FlashNews && <FlashNews flashNewsList={flashNewsList} flashNewsApi={flashNewsApi} client:load />}
 
     {componentVisibility.NewsReport && <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />}
 

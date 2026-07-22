@@ -9,9 +9,6 @@
       </div>
     </Teleport>
 
-    <!-- kv_bggroup（暫時隱藏） -->
-    <img v-show="false" :src="kvBgGroup" alt="" class="kv-bggroup" aria-hidden="true" />
-
     <!-- kv_bggroup_n 新圖片 -->
     <img :src="kvBgGroupN" alt="" class="kv-bggroup-n" aria-hidden="true" />
 
@@ -204,21 +201,6 @@ onUnmounted(() => {
   user-select: none;
 }
 
-.kv-bggroup {
-  position: absolute;
-  top: 0;
-  left: auto;
-  right: 0;
-  transform: none;
-  width: 100%;
-  min-width: 800px;
-  height: auto;
-  pointer-events: none;
-  user-select: none;
-  z-index: 0;
-  animation: fadeIn 1.5s ease both;
-}
-
 .kv-bggroup-n {
   position: absolute;
   top: 30%;
@@ -364,10 +346,6 @@ onUnmounted(() => {
     padding-bottom: 3rem;
   }
 
-  .kv-bggroup {
-    min-width: 100%;
-  }
-
   .kv-left-wrapper {
     position: static;
     top: auto;
@@ -453,10 +431,6 @@ onUnmounted(() => {
     align-items: center;
     padding-top: 80px;
     padding-bottom: 3rem;
-  }
-
-  .kv-bggroup {
-    min-width: 100%;
   }
 
   .kv-left-wrapper {

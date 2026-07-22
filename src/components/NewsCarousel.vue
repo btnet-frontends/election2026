@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="carousel-wrapper">
+  <div id="flash-news" class="carousel-wrapper">
     <Swiper
       :modules="modules"
       :pagination="{ clickable: true }"

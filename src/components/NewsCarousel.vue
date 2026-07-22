@@ -118,7 +118,7 @@ const canLoop = computed(() => props.items.length > 1);
 }
 
 .slide-text {
-  flex: 0 0 61%;
+  flex: 0 0 66%;
   min-width: 0;
 }
 
@@ -208,19 +208,20 @@ const canLoop = computed(() => props.items.length > 1);
   }
 
   .slide-content-desktop {
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
     gap: 1rem;
   }
 
   .slide-title {
-    font-size: 1.25rem;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+    font-size: 1rem;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    white-space: nowrap;
   }
 
   .slide-excerpt {
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     font-size: 0.85rem;
   }
 
@@ -230,6 +231,12 @@ const canLoop = computed(() => props.items.length > 1);
 
   .slide-text {
     flex: 1;
+  }
+}
+
+@media (max-width: 360px) {
+  .slide-title {
+    font-size: 0.85rem;
   }
 }
 </style>

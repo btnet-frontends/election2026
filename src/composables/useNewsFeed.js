@@ -16,6 +16,7 @@ const isFrom2026 = (item) => {
   return dateStr.startsWith('2026');
 };
 
+
 const isLastPage = (requestedPage, lastPageFromApi, rawArticlesLength, limit) => {
   if (typeof lastPageFromApi === 'number' && requestedPage >= lastPageFromApi) return true;
   if (typeof limit === 'number' && rawArticlesLength < limit) return true;
@@ -36,17 +37,10 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
 
   const apiExhaustedTags = reactive(new Set());
 
+
   const nextPageCache = reactive({});
 
-  const getTagByLabel = (label) => {
-    const found = hotTags.find(tag => getTagLabel(tag) === label);
-    if (!found) {
-      console.warn(`[useNewsFeed] 找不到標籤 "${label}"，已回退至預設標籤`);
-      return hotTags[0];
-    }
-    return found;
-  };
-
+  const getTagByLabel = (label) => hotTags.find(tag => getTagLabel(tag) === label) || hotTags[0];
   const shouldFilterYear = (tagLabel) => !NO_YEAR_FILTER_TAGS.has(tagLabel);
 
   const fetchRawPage = async (tag, page = 1) => {
@@ -94,7 +88,6 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
     return Boolean(getTagApi(activeTagConfig.value)?.tagName);
   });
 
- 
   const probeForward = async ({ tag, tagLabel, limit, existingIds, startPage, maxPages }) => {
     const shouldFilter = shouldFilterYear(tagLabel);
     let page = startPage;
@@ -123,12 +116,13 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
         return { exhausted: true };
       }
 
+
       if (shouldFilter && rawArticles.length > 0 && filtered.length === 0) {
         return { exhausted: true };
       }
     }
 
-    return { exhausted: true, items: null, reachedMaxPages: true };
+    return { exhausted: false, items: null };
   };
 
   const applyProbeResult = (tagLabel, peek) => {
@@ -163,11 +157,9 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
     try {
       const limit = getTagApi(tag)?.limit;
       const rawData = await fetchRawPage(getTagByLabel(nextTagLabel), 1);
-
-      if (requestId !== latestRequestId) return;
-
       const state = processApiData(rawData, nextTagLabel, limit, 1);
       newsByTag[nextTagLabel] = state;
+
 
       if (!apiExhaustedTags.has(nextTagLabel)) {
         const existingIds = new Set(state.article_lists.map(item => item.article_id));
@@ -186,10 +178,8 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
       }
     } catch (error) {
       console.error('切換新聞標籤出錯:', error);
-      if (requestId === latestRequestId) {
-        newsByTag[nextTagLabel] = processApiData({}, nextTagLabel, undefined, 1);
-        apiExhaustedTags.add(nextTagLabel);
-      }
+      newsByTag[nextTagLabel] = processApiData({}, nextTagLabel, undefined, 1);
+      apiExhaustedTags.add(nextTagLabel);
     } finally {
       if (requestId === latestRequestId) {
         isNewsLoading.value = false;
@@ -228,6 +218,7 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
       }
 
       if (!result.items) {
+
         return;
       }
 
@@ -239,6 +230,7 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
         apiExhaustedTags.add(tagLabel);
         return;
       }
+
 
       const existingIdsAfter = new Set(state.article_lists.map(item => item.article_id));
       const peek = await probeForward({

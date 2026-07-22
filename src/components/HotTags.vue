@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div id="tags" class="tags-section">
     <div class="tags-header">
       <span class="tags-title">
@@ -46,9 +46,7 @@ const getTagKey = (tag) => {
 };
 
 const selectTag = (tag) => {
-  const tagLabel = getTagLabel(tag);
-  const defaultLabel = getTagLabel(props.tags[0]);
-  emit('update:modelValue', props.modelValue === tagLabel ? defaultLabel : tagLabel);
+  emit('update:modelValue', getTagLabel(tag));
 };
 </script>
 
@@ -155,6 +153,10 @@ const selectTag = (tag) => {
   line-height: 1;
   color: var(--color-coffee-600);
   flex-shrink: 0;
+}
+
+.tag-btn .tag-remove {
+  display: none;
 }
 
 @media (max-width: 576px) {

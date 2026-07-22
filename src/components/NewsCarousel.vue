@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div id="flash-news" class="carousel-wrapper">
     <Swiper
       :modules="modules"
@@ -84,6 +84,7 @@ const canLoop = computed(() => props.items.length > 1);
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
 }
 
 .slide-overlay-color {

@@ -9,8 +9,33 @@
       </div>
     </Teleport>
 
-    <!-- kv_bggroup_n 新圖片 -->
-    <img :src="kvBgGroupN" alt="" class="kv-bggroup-n" aria-hidden="true" />
+    <svg
+      class="kv-bggroup-n"
+      viewBox="0 0 1920 347"
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden="true"
+    >
+      <defs>
+        <mask id="kv-curve-draw-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="347">
+          <rect width="1920" height="347" fill="black" />
+          <path
+            class="kv-curve-reveal"
+            d="M -100 158 C 190 5 390 32 650 132 C 900 228 1115 310 1405 275 C 1645 247 1830 137 2020 -28"
+            fill="none"
+            stroke="white"
+            stroke-width="180"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </mask>
+      </defs>
+      <image
+        :href="kvBgGroupN"
+        width="1920"
+        height="347"
+        mask="url(#kv-curve-draw-mask)"
+      />
+    </svg>
 
     <div class="kv-left-wrapper">
       <div class="kv-left">
@@ -147,9 +172,9 @@ onUnmounted(() => {
   to   { opacity: 1; transform: translateX(0); }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+@keyframes drawKvCurve {
+  from { stroke-dashoffset: 2400; }
+  to   { stroke-dashoffset: 0; }
 }
 
 .kv-section {
@@ -212,7 +237,12 @@ onUnmounted(() => {
   pointer-events: none;
   user-select: none;
   z-index: 1;
-  animation: fadeIn 1.5s ease both;
+}
+
+.kv-curve-reveal {
+  stroke-dasharray: 2400;
+  stroke-dashoffset: 2400;
+  animation: drawKvCurve 2.4s cubic-bezier(0.65, 0, 0.35, 1) 0.15s both;
 }
 
 .kv-left-wrapper {
@@ -513,6 +543,13 @@ onUnmounted(() => {
 @media (max-width: 376px) {
   .kv-bggroup {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kv-curve-reveal {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 }
 </style>

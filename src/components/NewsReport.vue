@@ -42,7 +42,10 @@
               <div class="news-card-footer">
                 <span class="news-card-more">
                   詳全文
-                  <svg class="more-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <svg class="more-arrow more-arrow-static" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                  <svg class="more-arrow more-arrow-hover" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M9 6l6 6-6 6" />
                   </svg>
                 </span>
@@ -264,22 +267,36 @@ const carouselItems = ref(siteData.newsReport.carouselItems);
   transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
-  gap: 0.15rem;
+  gap: 2px;
+  position: relative;
+  padding-right: 14px;
 }
 
-.more-arrow {
+/* 預設一直顯示的箭頭 */
+.more-arrow-static {
+  flex-shrink: 0;
+  margin-right: -4px;
+}
+
+/* hover 時額外出現的第二支箭頭,用絕對定位疊加,不佔文字流的寬度,避免文字被推動 */
+.more-arrow-hover {
+  position: absolute;
+  right: -2px;
+  top: 50%;
   opacity: 0;
-  transform: translateX(-4px);
+  transform: translateY(-50%) translateX(-4px);
   transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (hover: hover) {
+  .news-card:hover .more-arrow-hover {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
 }
 
 .news-card:hover .news-card-more {
   color: var(--color-primary);
-}
-
-.news-card:hover .more-arrow {
-  opacity: 1;
-  transform: translateX(0);
 }
 
 .skeleton-grid {

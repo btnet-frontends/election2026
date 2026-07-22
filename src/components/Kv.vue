@@ -1,6 +1,6 @@
 <template>
   <section ref="kvSection" id="kv" class="kv-section">
-    <Teleport to="body">
+    <Teleport to="body" v-if="isMounted">
       <div ref="parallaxRight" class="parallax-bg parallax-right">
         <img :src="bgCircle" alt="" class="bg-circle" aria-hidden="true" />
       </div>
@@ -56,6 +56,8 @@ const electionDate = new Date(ELECTION_DATE).getTime();
 const t = ref({ days: '--', hours: '--', minutes: '--', seconds: '--' });
 let timer = null;
 
+const isMounted = ref(false);
+
 const kvSection = ref(null);
 const parallaxLeft = ref(null);
 const parallaxRight = ref(null);
@@ -88,11 +90,11 @@ const handleScroll = () => {
 
   if (scrollY >= carouselStartPos) {
     currentOpacity = 1;
-    
+
     if (pollsSection) {
       const triggerPoint = pollsSection.offsetTop - window.innerHeight;
       const fadeStart = triggerPoint - 200;
-      
+
       if (scrollY >= triggerPoint) {
         currentOpacity = 0;
       } else if (scrollY >= fadeStart) {
@@ -125,6 +127,7 @@ const handleScroll = () => {
 };
 
 onMounted(() => {
+  isMounted.value = true;
   tick();
   timer = setInterval(tick, 1000);
   window.addEventListener('scroll', handleScroll);

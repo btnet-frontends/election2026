@@ -30,12 +30,85 @@
         }
       },
       {
-        "label": "賴清德",
+        "label": "柯文哲選舉新聞",
         "api": {
-          "tagName": "賴清德",
+          "tagName": "柯文哲選舉新聞",
+          "limit": 10
+        }
+      },
+            {
+        "label": "賴清德選舉新聞",
+        "api": {
+          "tagName": "賴清德選舉新聞",
+          "limit": 10
+        }
+      },
+                 {
+        "label": "最新民調",
+        "api": {
+          "tagName": "最新民調",
+          "limit": 10
+        }
+      },
+                       {
+        "label": "蔣萬安",
+        "api": {
+          "tagName": "蔣萬安",
+          "limit": 10
+        }
+      },
+                             {
+        "label": "黃國昌",
+        "api": {
+          "tagName": "黃國昌",
+          "limit": 10
+        }
+      },
+                             {
+        "label": "李四川",
+        "api": {
+          "tagName": "李四川",
+          "limit": 10
+        }
+      },
+                                   {
+        "label": "蘇巧慧",
+        "api": {
+          "tagName": "蘇巧慧",
+          "limit": 10
+        }
+      },
+                                         {
+        "label": "賴瑞隆",
+        "api": {
+          "tagName": "賴瑞隆",
+          "limit": 10
+        }
+      },
+                                               {
+        "label": "柯志恩",
+        "api": {
+          "tagName": "柯志恩",
+          "limit": 10
+        }
+      },
+                                                     {
+        "label": "高虹安",
+        "api": {
+          "tagName": "高虹安",
+          "limit": 10
+        }
+      },
+                                                     {
+        "label": "沈伯洋",
+        "api": {
+          "tagName": "沈伯洋",
           "limit": 10
         }
       }
+      
+      
+      
     ],
     "carouselItems": [
     {

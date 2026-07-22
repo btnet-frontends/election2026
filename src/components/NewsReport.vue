@@ -40,7 +40,12 @@
               </div>
               <p class="news-card-excerpt">{{ item.part_text }}</p>
               <div class="news-card-footer">
-                <span class="news-card-more">詳全文 ›</span>
+                <span class="news-card-more">
+                  詳全文
+                  <svg class="more-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                </span>
               </div>
             </div>
           </a>
@@ -169,6 +174,7 @@ const carouselItems = ref(siteData.newsReport.carouselItems);
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
   display: block;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -258,11 +264,10 @@ const carouselItems = ref(siteData.newsReport.carouselItems);
   transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
+  gap: 0.15rem;
 }
 
-.news-card-more::after {
-  content: '›';
-  display: inline-block;
+.more-arrow {
   opacity: 0;
   transform: translateX(-4px);
   transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -272,7 +277,7 @@ const carouselItems = ref(siteData.newsReport.carouselItems);
   color: var(--color-primary);
 }
 
-.news-card:hover .news-card-more::after {
+.news-card:hover .more-arrow {
   opacity: 1;
   transform: translateX(0);
 }
@@ -427,7 +432,8 @@ const carouselItems = ref(siteData.newsReport.carouselItems);
 @media (max-width: 768px) {
   .news-card-img-wrap {
     width: 200px;
-    height: 160px;
+    aspect-ratio: 5 / 4;
+    height: auto;
   }
 
   .news-card-title {
@@ -444,7 +450,8 @@ const carouselItems = ref(siteData.newsReport.carouselItems);
 
   .news-card-img-wrap {
     width: 100%;
-    height: 180px;
+    aspect-ratio: 16 / 10;
+    height: auto;
     border-radius: 8px;
   }
 
@@ -474,7 +481,8 @@ const carouselItems = ref(siteData.newsReport.carouselItems);
 
   .skeleton-img {
     width: 100%;
-    height: 160px;
+    aspect-ratio: 16 / 10;
+    height: auto;
     border-radius: 8px;
   }
 }

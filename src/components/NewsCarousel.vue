@@ -4,15 +4,19 @@
       :modules="modules"
       :pagination="{ clickable: true }"
       :autoplay="{ delay: 5000, disableOnInteraction: false }"
-      :loop="true"
+      :loop="canLoop"
       class="carousel-track"
     >
       <SwiperSlide
         v-for="item in items"
         :key="item.article_id"
       >
-        <div class="slide-media">
-          <img :src="item.image_url":alt="item.title" class="slide-image" />
+        <a
+          :href="item.href || item.output_link_path"
+          target="_blank"
+          class="slide-media"
+        >
+          <img :src="item.image_url" :alt="item.title" class="slide-image" />
           <div class="slide-overlay-color"></div>
           <div class="slide-overlay-dark"></div>
           <div class="slide-content-desktop">
@@ -20,26 +24,27 @@
               <h3 class="slide-title">{{ item.title }}</h3>
               <p class="slide-excerpt">{{ item.part_text }}</p>
             </div>
-            <a :href="item.href || item.output_link_path" target="_blank" class="slide-btn">
+            <span class="slide-btn">
               閱讀文章
               <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                 <path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21 12l-8.15-8.15-1.42 1.42 5.43 5.43H5v2z"/>
               </svg>
-            </a>
+            </span>
           </div>
-        </div>
+        </a>
       </SwiperSlide>
     </Swiper>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
-defineProps({
+const props = defineProps({
   items: {
     type: Array,
     required: true,
@@ -49,6 +54,8 @@ defineProps({
 defineEmits(['slide-change']);
 
 const modules = [Pagination, Autoplay];
+
+const canLoop = computed(() => props.items.length > 1);
 </script>
 
 <style scoped>
@@ -64,9 +71,11 @@ const modules = [Pagination, Autoplay];
 
 .slide-media {
   position: relative;
+  display: block;
   width: 100%;
   height: 560px;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .slide-image {
@@ -158,7 +167,7 @@ const modules = [Pagination, Autoplay];
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.slide-btn:hover {
+.slide-media:hover .slide-btn {
   background: var(--color-primary);
 }
 

@@ -27,7 +27,7 @@ export const buildFlashNewsList = (items = [], limit = 4) => {
 /**
  * 從文章資料萃取標籤（最多 3 個）
  * @param {Object} item - 文章物件
- * @param {string[]} hotTags - 熱門標籤陣列（不含「全部戰報」）
+ * @param {string[]} hotTags - 熱門話題陣列（不含「全部戰報」）
  * @returns {string[]}
  */
 export const getItemTags = (item, hotTags) => {

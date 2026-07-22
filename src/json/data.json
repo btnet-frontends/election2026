@@ -2,7 +2,7 @@
   "header": {
     "navItems": [
       { "id": "flash-news", "href": "#flash-news", "label": "即時戰報" },
-      { "id": "tags", "href": "#tags", "label": "熱門標籤" }
+      { "id": "tags", "href": "#tags", "label": "熱門話題" }
     ]
   },
   "components": {

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <section id="news" class="news-section">
     <div class="container">
 
@@ -32,13 +32,13 @@
             </div>
             <div class="news-card-body">
               <div class="news-card-top">
-                <h4 class="news-card-title">{{ item.title }}</h4>
+                <h4 class="news-card-title" v-html="item.title"></h4>
                 <span class="news-card-date">{{ formatDate(item.pubtime) }}</span>
               </div>
               <div class="news-card-tags" v-if="getItemTags(item, filterTags).length">
                 <span v-for="tag in getItemTags(item, filterTags)" :key="tag" class="news-card-tag"># {{ tag }}</span>
               </div>
-              <p class="news-card-excerpt">{{ item.part_text }}</p>
+              <p class="news-card-excerpt" v-html="item.part_text"></p>
               <div class="news-card-footer">
                 <span class="news-card-more">
                   詳全文

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div id="flash-news" class="carousel-wrapper">
     <Swiper
       :modules="modules"
@@ -21,8 +21,8 @@
           <div class="slide-overlay-dark"></div>
           <div class="slide-content-desktop">
             <div class="slide-text">
-              <h3 class="slide-title">{{ item.title }}</h3>
-              <p class="slide-excerpt">{{ item.part_text }}</p>
+              <h3 class="slide-title" v-html="item.title"></h3>
+              <p class="slide-excerpt" v-html="item.part_text"></p>
             </div>
             <span class="slide-btn">
               閱讀文章
@@ -133,6 +133,9 @@ const canLoop = computed(() => props.items.length > 1);
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-line;
 }
 
 .slide-excerpt {
@@ -140,11 +143,14 @@ const canLoop = computed(() => props.items.length > 1);
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.6;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-line;
 }
 
 .slide-btn {
@@ -212,8 +218,8 @@ const canLoop = computed(() => props.items.length > 1);
   }
 
   .slide-excerpt {
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     font-size: 0.85rem;
   }
 

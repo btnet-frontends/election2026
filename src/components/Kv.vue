@@ -43,7 +43,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 
-import kvBgGroup   from '../assets/images/kv_bggroup.png?url';
 import kvBgGroupN  from '../assets/images/kv_bggroup_n.png?url';
 import kvCloud     from '../assets/images/kv_cloud.svg?url';
 import kvTitle     from '../assets/images/kv_title.svg?url';

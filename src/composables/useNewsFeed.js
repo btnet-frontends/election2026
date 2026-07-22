@@ -155,8 +155,9 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
     isNewsLoading.value = true;
 
     try {
-      const limit = getTagApi(tag)?.limit;
-      const rawData = await fetchRawPage(getTagByLabel(nextTagLabel), 1);
+      const resolvedTag = getTagByLabel(nextTagLabel);
+      const limit = getTagApi(resolvedTag)?.limit;
+      const rawData = await fetchRawPage(resolvedTag, 1);
       const state = processApiData(rawData, nextTagLabel, limit, 1);
       newsByTag[nextTagLabel] = state;
 
@@ -164,7 +165,7 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
       if (!apiExhaustedTags.has(nextTagLabel)) {
         const existingIds = new Set(state.article_lists.map(item => item.article_id));
         const peek = await probeForward({
-          tag: getTagByLabel(nextTagLabel),
+          tag: resolvedTag,
           tagLabel: nextTagLabel,
           limit,
           existingIds,

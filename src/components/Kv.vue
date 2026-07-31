@@ -72,7 +72,7 @@ import kvPeople    from '../assets/images/kv_people.svg?url';
 import kvSubtitle1 from '../assets/images/kv_subtitle1.png?url';
 import bgCircle    from '../assets/images/bg_circle.svg?url';
 
-const ELECTION_DATE = '2026-11-28T08:00:00+08:00';
+const ELECTION_DATE = '2026-11-28T16:00:00+08:00';
 const electionDate = new Date(ELECTION_DATE).getTime();
 const t = ref({ days: '--', hours: '--', minutes: '--', seconds: '--' });
 let timer = null;

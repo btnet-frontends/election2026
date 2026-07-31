@@ -6,16 +6,27 @@ interface Props {
   description?: string;
   canonical?: string;
   shareImage?: string;
+  shareImageAlt?: string;
+  robots?: string;
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
   footerBgColor?: string;
 }
 
 const {
   title,
-  description,
-  canonical = "https://www.businesstoday.com.tw/bt_topic/2026/election/",
+  description = "2026縣市長選舉《今周刊》戰情室一次掌握！2026年九合一選舉11/28舉行，「藍綠白」爭奪22個縣市版圖、派出黨內菁英一決高下。關於最新選舉開票、即時新聞、選情分析，以及縣市長候選人深入報導，《今周刊》戰情室一次掌握。",
+  canonical: canonicalProp,
   shareImage = "https://www.businesstoday.com.tw/bt_topic/2026/election/share.jpg",
+  shareImageAlt = "2026九合一大選《今周戰情室》",
+  robots = "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+  structuredData,
   footerBgColor = "var(--color-coffee-50)"
 } = Astro.props;
+
+const canonical = canonicalProp ?? new URL(Astro.url.pathname, Astro.site).href;
+const structuredDataJson = structuredData
+  ? JSON.stringify(structuredData).replace(/</g, '\\u003c')
+  : null;
 ---
 
 <!DOCTYPE html>
@@ -30,18 +41,24 @@ const {
 
   <title>{title}</title>
   <meta name="description" content={description} />
-  <meta name="keywords" content="九合一選舉, 縣市長選舉, 六都, 開票, 投票, 國民黨, 民進黨, 無黨籍, 民眾黨" />
+  <meta name="author" content="今周刊" />
   <link rel="canonical" href={canonical} />
+  <link rel="alternate" hreflang="zh-Hant-TW" href={canonical} />
+  <link rel="sitemap" type="application/xml" href="https://www.businesstoday.com.tw/bt_topic/2026/election/sitemap.xml" />
 
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content={robots} />
+  <meta name="googlebot" content={robots} />
 
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonical} />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:image" content={shareImage} />
-  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:secure_url" content={shareImage} />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1199" />
   <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content={shareImageAlt} />
   <meta property="og:locale" content="zh_TW" />
   <meta property="og:site_name" content="今周刊" />
 
@@ -49,6 +66,11 @@ const {
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={shareImage} />
+  <meta name="twitter:image:alt" content={shareImageAlt} />
+
+  {structuredDataJson && (
+    <script type="application/ld+json" is:inline set:html={structuredDataJson}></script>
+  )}
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

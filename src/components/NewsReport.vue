@@ -32,7 +32,7 @@
             </div>
             <div class="news-card-body">
               <div class="news-card-top">
-                <h4 class="news-card-title" v-html="item.title"></h4>
+                <h2 class="news-card-title" v-html="item.title"></h2>
                 <span class="news-card-date">{{ formatDate(item.pubtime) }}</span>
               </div>
               <div class="news-card-tags" v-if="getItemTags(item, filterTags).length">

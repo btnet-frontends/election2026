@@ -94,9 +94,104 @@ if (componentVisibility.FlashNews) {
 }
 
 const footerBgColor = componentVisibility.PollsChart ? 'var(--color-coffee-50)' : 'var(--color-coffee-0)';
+
+const seoTitle = '2026縣市長選舉《今周戰情室》- 今周刊';
+const seoDescription = '2026縣市長選舉《今周刊》戰情室一次掌握！2026年九合一選舉11/28舉行，「藍綠白」爭奪22個縣市版圖、派出黨內菁英一決高下。關於最新選舉開票、即時新聞、選情分析，以及縣市長候選人深入報導，《今周刊》戰情室一次掌握。';
+const canonicalUrl = 'https://www.businesstoday.com.tw/bt_topic/2026/election/';
+const shareImageUrl = `${canonicalUrl}share.jpg`;
+const organizationId = 'https://www.businesstoday.com.tw/#organization';
+const websiteId = 'https://www.businesstoday.com.tw/#website';
+const webpageId = `${canonicalUrl}#webpage`;
+
+const stripHtml = (value = '') => value.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+const isArticleUrl = (value = '') => {
+  try {
+    const url = new URL(value);
+    return url.hostname === 'www.businesstoday.com.tw' && url.pathname.includes('/article/');
+  } catch {
+    return false;
+  }
+};
+
+const structuredNewsItems = initialNews.article_lists
+  .filter((item) => item?.title && isArticleUrl(item?.output_link_path))
+  .slice(0, 10)
+  .map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    url: item.output_link_path,
+    name: stripHtml(item.title),
+    ...(item.image_url ? { image: item.image_url } : {})
+  }));
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': organizationId,
+      name: '今周刊',
+      alternateName: 'Business Today',
+      url: 'https://www.businesstoday.com.tw/',
+      sameAs: [
+        'https://www.facebook.com/BToday/',
+        'https://www.instagram.com/btoday_ig/'
+      ]
+    },
+    {
+      '@type': 'WebSite',
+      '@id': websiteId,
+      url: 'https://www.businesstoday.com.tw/',
+      name: '今周刊',
+      inLanguage: 'zh-Hant-TW',
+      publisher: { '@id': organizationId }
+    },
+    {
+      '@type': 'CollectionPage',
+      '@id': webpageId,
+      url: canonicalUrl,
+      name: seoTitle,
+      description: seoDescription,
+      inLanguage: 'zh-Hant-TW',
+      isPartOf: { '@id': websiteId },
+      publisher: { '@id': organizationId },
+      primaryImageOfPage: {
+        '@type': 'ImageObject',
+        url: shareImageUrl,
+        width: 1199,
+        height: 630
+      },
+      about: [
+        { '@type': 'Thing', name: '2026九合一選舉' },
+        { '@type': 'Thing', name: '2026縣市長選舉' }
+      ],
+      ...(structuredNewsItems.length
+        ? { mainEntity: { '@id': `${canonicalUrl}#news-list` } }
+        : {})
+    },
+    ...(structuredNewsItems.length
+      ? [{
+          '@type': 'ItemList',
+          '@id': `${canonicalUrl}#news-list`,
+          name: '2026縣市長選舉最新報導',
+          numberOfItems: structuredNewsItems.length,
+          itemListOrder: 'https://schema.org/ItemListOrderDescending',
+          itemListElement: structuredNewsItems
+        }]
+      : [])
+  ]
+};
 ---
 
-<Layout title="2026縣市長選舉《今周戰情室》- 今周刊" description="2026縣市長選舉《今周刊》戰情室一次掌握！2026年九合一選舉11/28舉行，「藍綠白」爭奪22個縣市版圖、派出黨內菁英一決高下。關於最新選舉開票、即時新聞、選情分析，以及縣市長候選人深入報導，《今周刊》戰情室一次掌握。" canonical="https://www.businesstoday.com.tw/bt_topic/2026/election/" footerBgColor={footerBgColor}>
+<Layout
+  title={seoTitle}
+  description={seoDescription}
+  canonical={canonicalUrl}
+  shareImage={shareImageUrl}
+  shareImageAlt="2026九合一選舉今周戰情室"
+  structuredData={structuredData}
+  footerBgColor={footerBgColor}
+>
   <Header client:load />
 
   <main>
@@ -104,7 +199,7 @@ const footerBgColor = componentVisibility.PollsChart ? 'var(--color-coffee-50)' 
 
     {componentVisibility.FlashNews && <FlashNews flashNewsList={flashNewsList} flashNewsApi={flashNewsApi} client:load />}
 
-    {componentVisibility.NewsReport && <NewsReport initialNews={initialNews} hotTags={hotTags} client:only="vue" />}
+    {componentVisibility.NewsReport && <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />}
 
     {componentVisibility.PollsChart && <PollsChart client:visible />}
   </main>

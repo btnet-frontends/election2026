@@ -1,5 +1,6 @@
 <template>
   <section ref="kvSection" id="kv" class="kv-section">
+    <h1 class="visually-hidden">2022縣市長選舉《今周戰情室》- 今周刊</h1>
     <Teleport to="body" v-if="isMounted">
       <div ref="parallaxRight" class="parallax-bg parallax-right">
         <img :src="bgCircle" alt="" class="bg-circle" aria-hidden="true" />
@@ -175,6 +176,18 @@ onUnmounted(() => {
 @keyframes drawKvCurve {
   from { stroke-dashoffset: 2400; }
   to   { stroke-dashoffset: 0; }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .kv-section {

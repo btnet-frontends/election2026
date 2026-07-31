@@ -21,7 +21,7 @@
           <div class="slide-overlay-dark"></div>
           <div class="slide-content-desktop">
             <div class="slide-text">
-              <h3 class="slide-title" v-html="item.title"></h3>
+              <h2 class="slide-title" v-html="item.title"></h2>
               <p class="slide-excerpt" v-html="item.part_text"></p>
             </div>
             <span class="slide-btn">

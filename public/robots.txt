@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.businesstoday.com.tw/bt_topic/2026/election/sitemap.xml

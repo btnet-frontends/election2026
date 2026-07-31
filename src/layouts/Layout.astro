@@ -11,7 +11,7 @@ interface Props {
 
 const {
   title,
-  description = "2026縣市長選舉 即時報導、參選人資訊、選舉民調與選情統計，一次看懂最關鍵的選戰局勢！",
+  description,
   canonical = "https://www.businesstoday.com.tw/bt_topic/2026/election/",
   shareImage = "https://www.businesstoday.com.tw/bt_topic/2026/election/share.jpg",
   footerBgColor = "var(--color-coffee-50)"
@@ -30,7 +30,7 @@ const {
 
   <title>{title}</title>
   <meta name="description" content={description} />
-  <meta name="keywords" content="九合一選舉, 縣市長, 六都, 開票, 投票, 國民黨, 民進黨, 無黨籍, 民眾黨" />
+  <meta name="keywords" content="九合一選舉, 縣市長選舉, 六都, 開票, 投票, 國民黨, 民進黨, 無黨籍, 民眾黨" />
   <link rel="canonical" href={canonical} />
 
   <meta name="robots" content="index, follow" />

@@ -11,11 +11,15 @@
         v-for="item in items"
         :key="item.article_id"
       >
+<<<<<<< HEAD
         <a
           :href="item.href || item.output_link_path"
           target="_blank"
           class="slide-media"
         >
+=======
+        <div class="slide-media">
+>>>>>>> 1c2cd888a39c907e848d08cff75d8f54d3589b58
           <img :src="item.image_url" :alt="item.title" class="slide-image" />
           <div class="slide-overlay-color"></div>
           <div class="slide-overlay-dark"></div>

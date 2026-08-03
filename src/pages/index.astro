@@ -5,6 +5,7 @@ import KV from '../components/Kv.vue';
 import FlashNews from '../components/FlashNews.vue';
 import NewsReport from '../components/NewsReport.vue';
 import PollsChart from '../components/PollsChart.vue';
+import LiveStreaming from '../components/LiveStreaming.vue';
 import type { NewsData } from '../types/news';
 
 import config from '../json/data.json';
@@ -15,7 +16,8 @@ const componentVisibility = {
   KV: config.components?.KV !== false,
   FlashNews: config.components?.FlashNews !== false,
   NewsReport: config.components?.NewsReport !== false,
-  PollsChart: config.components?.PollsChart !== false
+  PollsChart: config.components?.PollsChart !== false,
+  LiveStreaming: config.components?.LiveStreaming !== false
 };
 
 const hotTags = config.newsReport.hotTags;
@@ -201,6 +203,8 @@ const structuredData = {
 
     {componentVisibility.NewsReport && <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />}
 
-    {componentVisibility.PollsChart && <PollsChart client:visible />}
+    {componentVisibility.LiveStreaming && <LiveStreaming client:load />}
+
+    {componentVisibility.PollsChart && <PollsChart client:load />}
   </main>
 </Layout>

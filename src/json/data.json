@@ -9,7 +9,8 @@
     "KV": true,
     "FlashNews": false,
     "NewsReport": true,
-    "PollsChart": false
+    "PollsChart": true,
+    "LiveStreaming": true
   },
   "flashNews": {
     "tag": {

@@ -9,7 +9,13 @@
         <div class="live-streaming-divider"></div>
       </div>
 
-      
+      <div class="live-streaming-frame">
+        <iframe
+          :src="config.LiveStreaming.liveStreamingUrl"
+          frameborder="0"
+          allowfullscreen
+        ></iframe>
+      </div>
       
     </div>
   </section>
@@ -26,11 +32,7 @@ import config from '../json/data.json';
 <style scoped>
 .live-streaming-section {
   padding: 6rem 0;
-  background-color: var(--color-coffee-50); 
-  background-attachment: fixed;
-  background-position: bottom center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  background: var(--color-coffee-0) 100%;
 }
 
 .container {
@@ -69,5 +71,16 @@ import config from '../json/data.json';
   width: 13rem;
   height: 2px;
   background-color: var(--color-coffee-300);
+}
+
+.live-streaming-frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.live-streaming-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 </style>

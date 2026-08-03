@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section id="news" class="news-section">
     <div class="container">
 

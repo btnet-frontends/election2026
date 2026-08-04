@@ -95,12 +95,12 @@ import votePanel from './votePanel.vue';
 }
 
 .vote_panel_box{
-  position: absolute;
+  position: relative;
   display: block;
   width: 450px;
   min-width: 400px;
   right: 20%;
-  top: 15%;
+  margin-top: 5%;
 }
 
 @media (max-width: 1470px) {
@@ -115,6 +115,7 @@ import votePanel from './votePanel.vue';
     left: 0;
   }
   .vote_panel_box{
+    right: 5%;
     width: 30%;
   }
 }

@@ -674,11 +674,12 @@
 
 <style scoped>
     #taiwan_location{
-        transform: translateX(-5%);
+        width: 130%;
     }
 
     @media (max-width: 1366px) {
         #taiwan_location{
+            width: 180%;
             transform: translateX(-15%);
         }
     }

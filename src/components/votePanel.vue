@@ -159,6 +159,10 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
   width: min(17rem, 55%);
 }
 
+#vote-location{
+    font-size: 1.5rem;
+}
+
 .select-wrap select {
   width: 100%;
   min-height: 3.25rem;
@@ -341,7 +345,6 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
     font-size: clamp(0.75rem, 1vw, 0.85rem);
   }
 }
-
 
 @media (max-width: 680px) {
   .location-selector {

@@ -131,7 +131,8 @@ import votePanel from './votePanel.vue';
     right: 0;
     left: 0;
     margin: 0 auto;
-    min-width: none;
+    width: 100%;
+    min-width: 0;
   }
 }
 

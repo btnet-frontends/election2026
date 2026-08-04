@@ -91,6 +91,8 @@ import votePanel from './votePanel.vue';
   display: block;
   width: 100%;
   left: -10%;
+  max-width: 1500px;
+  margin: 0 auto;
 }
 
 .vote_panel_box{

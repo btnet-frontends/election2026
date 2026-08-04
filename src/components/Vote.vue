@@ -22,19 +22,17 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
 import voteIcon from '../assets/images/election_vote_icon.svg?url';
 import pollsBg from '../assets/images/polls_bg.png?url';
 import taiwanLocation from './taiwanLocation.vue';
 import votePanel from './votePanel.vue';
-import config from '../json/data.json';
-
-
 </script>
 
 <style scoped>
 .vote-section {
-  padding: 6rem 0;
+  padding: 6rem 0 6rem 0;
+  overflow: hidden;
+
 }
 
 .container {
@@ -81,21 +79,70 @@ import config from '../json/data.json';
 
 .vote_area{
   display: flex;
+  align-items: flex-start;
   width: 100%;
-  gap: 2rem;
+  gap: clamp(2rem, 5vw, 5rem);
   flex-direction: row;
+  min-height: 30vw;
 }
 
 .taiwan_location_box{
   position: relative;
   display: block;
-  width: 80%;
+  width: 100%;
+  left: -10%;
+  margin: auto 0;
 }
 
 .vote_panel_box{
-  position: relative;
+  position: absolute;
   display: block;
-  width: 20%;
+  width: 450px;
+  min-width: 400px;
+  right: 20%;
+  top: 15%;
+}
+
+@media (max-width: 1470px) {
+  .vote_panel_box{
+    width: 30%;
+    right: 15%;
+  }
+}
+
+@media (max-width: 1366px) {
+  .taiwan_location_box{
+    left: 0;
+  }
+  .vote_panel_box{
+    width: 30%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .vote-section {
+    padding: 4rem 0;
+  }
+  .vote_area{
+    flex-direction: column;
+  }
+  .vote_panel_box{
+    position: relative;
+    right: 0;
+    left: 0;
+    margin: 0 auto;
+    min-width: none;
+  }
+}
+
+@media (max-width: 575px) {
+  .vote-section {
+    padding: 3rem 0;
+  }
+
+  .section-header {
+    margin-bottom: 2.5rem;
+  }
 }
 
 </style>

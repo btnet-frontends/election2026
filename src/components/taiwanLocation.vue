@@ -673,6 +673,20 @@
 </script>
 
 <style scoped>
+    #taiwan_location{
+        transform: translateX(-5%);
+    }
 
+    @media (max-width: 1366px) {
+        #taiwan_location{
+            transform: translateX(-15%);
+        }
+    }
 
+    @media (max-width: 1024px) {
+        #taiwan_location{
+            width: 210%;
+            transform: translateX(-20%);
+        }
+    }
 </style>

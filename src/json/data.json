@@ -2,7 +2,9 @@
   "header": {
     "navItems": [
       { "id": "flash-news", "href": "#flash-news", "label": "即時戰報" },
-      { "id": "tags", "href": "#tags", "label": "熱門話題" }
+      { "id": "tags", "href": "#tags", "label": "熱門話題" },
+      { "id": "page2", "href": "page2", "label": "選情統計" },
+      { "id": "page3", "href": "page3", "label": "選舉民調" }
     ]
   },
   "components": {

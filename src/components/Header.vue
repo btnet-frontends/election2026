@@ -16,7 +16,7 @@
           <a
             v-for="item in navItems"
             :key="item.id"
-            :href="item.href"
+            :href="getLocalHref(item.href)"
             :class="['nav-link', { 'active': activeSection === item.id }]"
             @click="scrollToSection($event, item.id)"
           >
@@ -69,7 +69,7 @@
           <a
             v-for="item in navItems"
             :key="item.id"
-            :href="item.href"
+            :href="getLocalHref(item.href)"
             :class="['mobile-link', { 'active': activeSection === item.id }]"
             @click="scrollToSection($event, item.id)"
           >
@@ -112,6 +112,15 @@ const navItems = config.header.navItems;
 const isScrolled = ref(false);
 const isMobileMenuOpen = ref(false);
 const activeSection = ref('kv');
+const localBaseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const getLocalHref = (href) => {
+  const path = href.startsWith('#')
+    ? `/${href}`
+    : `/${href.replace(/^\/+/, '')}`;
+
+  return `${localBaseUrl}${path}`;
+};
 
 const getElementTop = (id) => {
   const el = document.getElementById(id);
@@ -157,12 +166,12 @@ const toggleMobileMenu = () => {
 };
 
 const scrollToSection = (event, id) => {
-  event.preventDefault();
   isMobileMenuOpen.value = false;
   document.body.style.overflow = '';
 
   const target = document.getElementById(id);
   if (target) {
+    event.preventDefault();
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     activeSection.value = id;
   }
@@ -258,7 +267,7 @@ onUnmounted(() => {
 .desktop-nav {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 .nav-link {

@@ -682,6 +682,7 @@ const selectedLocation = defineModel('selectedLocation', {
     type: String,
     default: '台北市'
 });
+const emit = defineEmits(['location-selected']);
 
 const mapElement = ref(null);
 
@@ -693,6 +694,7 @@ const selectLocation = (event) => {
 
     if (location) {
         selectedLocation.value = location;
+        emit('location-selected', location);
     }
 };
 
@@ -705,6 +707,7 @@ const selectLocationByKeyboard = (event) => {
     if (location) {
         event.preventDefault();
         selectedLocation.value = location;
+        emit('location-selected', location);
     }
 };
 

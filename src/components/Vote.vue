@@ -11,9 +11,12 @@
 
       <div class="vote_area">
         <div class="taiwan_location_box">
-          <taiwanLocation v-model:selected-location="selectedLocation" />
+          <taiwanLocation
+            v-model:selected-location="selectedLocation"
+            @location-selected="scrollToVotePanel"
+          />
         </div>
-        <div class="vote_panel_box">
+        <div ref="votePanelElement" class="vote_panel_box">
           <votePanel v-model:selected-location="selectedLocation" />
         </div>
       </div>
@@ -22,13 +25,24 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import voteIcon from '../assets/images/election_vote_icon.svg?url';
 import pollsBg from '../assets/images/polls_bg.png?url';
 import taiwanLocation from './taiwanLocation.vue';
 import votePanel from './votePanel.vue';
 
 const selectedLocation = ref('台北市');
+const votePanelElement = ref(null);
+
+const scrollToVotePanel = async () => {
+  if (!window.matchMedia('(max-width: 1024px)').matches) return;
+
+  await nextTick();
+  votePanelElement.value?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+};
 </script>
 
 <style scoped>
@@ -142,6 +156,7 @@ const selectedLocation = ref('台北市');
     margin: 0 auto;
     width: 100%;
     min-width: 0;
+    scroll-margin-top: 110px;
   }
 }
 

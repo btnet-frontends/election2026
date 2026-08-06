@@ -35,7 +35,11 @@ const selectedLocation = ref('台北市');
 .vote-section {
   padding: 6rem 0 6rem 0;
   overflow: hidden;
-
+  background-color: var(--color-coffee-50); 
+  background-attachment: fixed;
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .container {

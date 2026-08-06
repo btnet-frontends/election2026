@@ -66,8 +66,13 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import elected_icon from '../assets/images/elected.png?url';
+
+const selectedLocation = defineModel('selectedLocation', {
+  type: String,
+  default: '台北市'
+});
 
 const locations = [
   '台北市',
@@ -124,7 +129,6 @@ const electionData = Object.fromEntries(
   locations.map((location) => [location, defaultElections])
 );
 
-const selectedLocation = ref('台北市');
 const updateTime = '2022/11/26 23:53';
 const selectedElections = computed(() => electionData[selectedLocation.value] ?? defaultElections);
 

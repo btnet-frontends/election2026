@@ -11,10 +11,10 @@
 
       <div class="vote_area">
         <div class="taiwan_location_box">
-          <taiwanLocation />
+          <taiwanLocation v-model:selected-location="selectedLocation" />
         </div>
         <div class="vote_panel_box">
-          <votePanel />
+          <votePanel v-model:selected-location="selectedLocation" />
         </div>
       </div>
     </div>
@@ -22,10 +22,13 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import voteIcon from '../assets/images/election_vote_icon.svg?url';
 import pollsBg from '../assets/images/polls_bg.png?url';
 import taiwanLocation from './taiwanLocation.vue';
 import votePanel from './votePanel.vue';
+
+const selectedLocation = ref('台北市');
 </script>
 
 <style scoped>

@@ -486,7 +486,7 @@ watch(selectedYear, () => {
 .seat-total {
   fill: var(--seat-total);
   font-family: inherit;
-  font-size: 180px;
+  font-size: 150px;
   font-weight: 300;
   line-height: 1;
 }

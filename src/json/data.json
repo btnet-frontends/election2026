@@ -13,7 +13,8 @@
     "NewsReport": true,
     "PollsChart": true,
     "LiveStreaming": true,
-    "Vote": true
+    "Vote": true,
+    "Seats": true
   },
   "flashNews": {
     "tag": {

@@ -37,15 +37,25 @@
         :aria-labelledby="`vote-analysis-tab-${activeTab.id}`"
         tabindex="0"
       >
-        <div v-if="activeTab.type === 'line'" class="chart-scroll" tabindex="0">
-          <VChart
-            class="echart line-chart"
-            :option="lineOption"
-            :init-options="chartInitOptions"
-            autoresize
-            role="img"
-            :aria-label="activeTab.label"
-          />
+        <div v-if="activeTab.type === 'line'" class="line-chart-wrap">
+          <p id="party-trend-swipe-hint" class="chart-swipe-hint">
+            <span class="swipe-hint-icon" aria-hidden="true">↔</span>
+            左右滑動查看完整圖表
+          </p>
+          <div
+            class="chart-scroll"
+            tabindex="0"
+            aria-describedby="party-trend-swipe-hint"
+          >
+            <VChart
+              class="echart line-chart"
+              :option="lineOption"
+              :init-options="chartInitOptions"
+              autoresize
+              role="img"
+              :aria-label="activeTab.label"
+            />
+          </div>
         </div>
 
         <VChart
@@ -548,6 +558,11 @@ function getPieAriaLabel(city) {
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scrollbar-color: rgba(142,95,40, 0.38) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chart-swipe-hint {
+  display: none;
 }
 
 .echart {
@@ -623,6 +638,26 @@ function getPieAriaLabel(city) {
     min-height: 31rem;
   }
 
+  .chart-swipe-hint {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 auto 0.25rem;
+    border-radius: 999px;
+    padding: 0.35rem 0.8rem;
+    background: rgba(142, 95, 40, 0.1);
+    color: var(--color-coffee-accent);
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  .swipe-hint-icon {
+    display: inline-block;
+    font-size: 1rem;
+    animation: swipe-hint 1.4s ease-in-out infinite;
+  }
+
   .line-chart {
     height: 31rem;
   }
@@ -641,8 +676,15 @@ function getPieAriaLabel(city) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chart-tab {
+  .chart-tab,
+  .swipe-hint-icon {
     transition: none;
+    animation: none;
   }
+}
+
+@keyframes swipe-hint {
+  0%, 100% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
 }
 </style>

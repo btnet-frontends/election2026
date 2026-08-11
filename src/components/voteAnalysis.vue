@@ -350,53 +350,67 @@ const compactPieLabel = ({ data: item }) => (
   item.key === 'other' ? '其他候選人(%)' : item.name
 );
 
-const buildPieTitles = (cities, positions, fontSize = 16) => (
-  cities.map((city, index) => ({
-    text: city.city,
-    left: positions[index][0],
-    top: positions[index][1],
-    textAlign: 'center',
-    textVerticalAlign: 'middle',
-    textStyle: {
-      color: colors.text,
-      fontFamily,
-      fontSize,
-      fontWeight: 700
-    }
-  }))
-);
-
 const buildPieSeries = (cities, positions, radius, compact = false) => (
-  cities.map((city, index) => ({
-    id: city.city,
-    name: `${activeTab.value.year}年${city.city}`,
-    type: 'pie',
-    radius,
-    center: positions[index],
-    minAngle: 0,
-    avoidLabelOverlap: true,
-    itemStyle: { borderWidth: 0 },
-    label: {
-      show: true,
-      color: '#454545',
-      fontFamily,
-      fontSize: compact ? 11 : 12,
-      formatter: compact ? compactPieLabel : '{b}',
-      bleedMargin: 0
+  cities.flatMap((city, index) => [
+    {
+      id: city.city,
+      name: `${activeTab.value.year}年${city.city}`,
+      type: 'pie',
+      radius,
+      center: positions[index],
+      minAngle: 0,
+      avoidLabelOverlap: true,
+      itemStyle: { borderWidth: 0 },
+      label: {
+        show: true,
+        color: '#454545',
+        fontFamily,
+        fontSize: compact ? 11 : 12,
+        formatter: compact ? compactPieLabel : '{b}',
+        bleedMargin: 0
+      },
+      labelLine: {
+        show: true,
+        length: compact ? 8 : 12,
+        length2: compact ? 6 : 10,
+        lineStyle: { width: 1 }
+      },
+      emphasis: {
+        scale: true,
+        scaleSize: 7,
+        label: { fontWeight: 700 }
+      },
+      data: getPieData(city)
     },
-    labelLine: {
-      show: true,
-      length: compact ? 8 : 12,
-      length2: compact ? 6 : 10,
-      lineStyle: { width: 1 }
-    },
-    emphasis: {
-      scale: true,
-      scaleSize: 7,
-      label: { fontWeight: 700 }
-    },
-    data: getPieData(city)
-  }))
+    {
+      id: `${city.city}-center-label`,
+      name: `${city.city}地名`,
+      type: 'pie',
+      radius: [0, 1],
+      center: positions[index],
+      silent: true,
+      animation: false,
+      z: 20,
+      tooltip: { show: false },
+      labelLine: { show: false },
+      label: {
+        show: true,
+        position: 'center',
+        formatter: city.city,
+        color: colors.text,
+        fontFamily,
+        fontSize: compact ? 15 : 16,
+        fontWeight: 700
+      },
+      data: [
+        {
+          value: 1,
+          itemStyle: { color: 'transparent' },
+          emphasis: { disabled: true }
+        }
+      ]
+    }
+  ])
 );
 
 const municipalityOption = computed(() => {
@@ -422,7 +436,6 @@ const municipalityOption = computed(() => {
         enabled: true,
         description: cities.map(getPieAriaLabel).join(' ')
       },
-      title: buildPieTitles(cities, desktopPositions),
       tooltip: {
         ...tooltipBase,
         trigger: 'item',
@@ -437,14 +450,12 @@ const municipalityOption = computed(() => {
       {
         query: { maxWidth: 991 },
         option: {
-          title: buildPieTitles(cities, tabletPositions, 15),
           series: buildPieSeries(cities, tabletPositions, [52, 86], true)
         }
       },
       {
         query: { maxWidth: 700 },
         option: {
-          title: buildPieTitles(cities, mobilePositions, 15),
           series: buildPieSeries(cities, mobilePositions, [48, 80], true)
         }
       }

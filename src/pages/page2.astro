@@ -8,6 +8,7 @@ import PollsChart from '../components/PollsChart.vue';
 import LiveStreaming from '../components/LiveStreaming.vue';
 import Vote from '../components/Vote.vue';
 import Seats from '../components/Seats.vue';
+import VoteAnalysis from '../components/voteAnalysis.vue';
 import type { NewsData } from '../types/news';
 
 import config from '../json/data.json';
@@ -21,7 +22,8 @@ const componentVisibility = {
   PollsChart: config.components?.PollsChart !== false,
   LiveStreaming: config.components?.LiveStreaming !== false,
   Vote: config.components?.Vote !== false,
-  Seats: config.components?.Seats !== false
+  Seats: config.components?.Seats !== false,
+  VoteAnalysis: config.components?.VoteAnalysis !== false
 };
 
 const hotTags = config.newsReport.hotTags;
@@ -208,6 +210,8 @@ const structuredData = {
     {componentVisibility.NewsReport && <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />}
 
     {componentVisibility.Seats && <Seats client:load />}
+
+    {componentVisibility.VoteAnalysis && <VoteAnalysis client:load />}
 
   </main>
 </Layout>

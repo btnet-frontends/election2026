@@ -21,7 +21,8 @@
     "PollsChart": true,
     "LiveStreaming": true,
     "Vote": true,
-    "Seats": true
+    "Seats": true,
+    "VoteAnalysis": true
   },
   "flashNews": {
     "tag": {
@@ -170,6 +171,118 @@
         "category_info": { "name": "九合一大選" }
       }
     ]
+  },
+  "voteAnalysis": {
+    "title": "投票分析",
+    "source": {
+      "label": "資料來源：中央選舉委員會（依今周刊 2022 選舉專題圖表整理）",
+      "url": "https://www.cec.gov.tw/"
+    },
+    "colors": {
+      "accent": "#643851",
+      "kmt": "#3a51ba",
+      "dpp": "#3c9b63",
+      "other": "#cccccc",
+      "turnout": "#9c7189",
+      "text": "#5d626d",
+      "grid": "#e7ebf2"
+    },
+    "tabs": [
+      {
+        "id": "party-trend",
+        "label": "國、民兩黨20年來重要選舉得票率",
+        "type": "line"
+      },
+      {
+        "id": "turnout",
+        "label": "2008年以來台灣重要選舉投票率",
+        "type": "bar"
+      },
+      {
+        "id": "municipality-2018",
+        "label": "2018年直轄市長選舉各政黨候選人得票率",
+        "type": "pie",
+        "year": 2018
+      },
+      {
+        "id": "municipality-2022",
+        "label": "2022年直轄市長選舉各政黨候選人得票率",
+        "type": "pie",
+        "year": 2022
+      }
+    ],
+    "partyTrend": {
+      "axisTitle": "選舉得票率(%)",
+      "categories": [
+        { "year": "2002年", "election": "直轄市長" },
+        { "year": "2004年", "election": "總統" },
+        { "year": "2005年", "election": "縣市長" },
+        { "year": "2006年", "election": "直轄市長" },
+        { "year": "2008年", "election": "總統" },
+        { "year": "2009年", "election": "縣市長" },
+        { "year": "2010年", "election": "直轄市長" },
+        { "year": "2012年", "election": "總統" },
+        { "year": "2014年", "election": "直轄市長、\n縣市長" },
+        { "year": "2016年", "election": "總統" },
+        { "year": "2018年", "election": "直轄市長、\n縣市長" },
+        { "year": "2020年", "election": "總統" },
+        { "year": "2022年", "election": "直轄市長、\n縣市長" }
+      ],
+      "series": [
+        {
+          "id": "kmt",
+          "name": "國民黨",
+          "values": [57.9, 49.9, 51.0, 52.1, 58.4, 47.9, 44.5, 51.6, 40.7, 31.0, 48.8, 38.6, 50.03]
+        },
+        {
+          "id": "dpp",
+          "name": "民進黨",
+          "values": [41.0, 51.0, 42.0, 44.1, 41.6, 45.3, 49.9, 45.6, 47.3, 56.1, 39.2, 57.1, 41.62]
+        }
+      ]
+    },
+    "turnout": {
+      "unit": "%",
+      "items": [
+        { "label": "2008年總統", "value": 76.33 },
+        { "label": "2009年縣市長", "value": 63.34 },
+        { "label": "2010年直轄市長", "value": 71.71 },
+        { "label": "2012年總統", "value": 74.38 },
+        { "label": "2014年直轄市長", "value": 66.31 },
+        { "label": "2014年縣市長", "value": 70.4 },
+        { "label": "2016年總統", "value": 66.27 },
+        { "label": "2018年直轄市長", "value": 66.11 },
+        { "label": "2018年縣市長", "value": 68.87 },
+        { "label": "2020年總統", "value": 74.9 },
+        { "label": "2022年直轄市長", "value": 59.86 },
+        { "label": "2022年縣市長", "value": 64.2 }
+      ]
+    },
+    "municipality": {
+      "partyLabels": {
+        "kmt": "國民黨",
+        "dpp": "民進黨",
+        "other": "無黨籍及未經政黨推薦"
+      },
+      "years": {
+        "2018": [
+          { "city": "台北市", "kmt": 40.82, "dpp": 17.28, "other": 41.9 },
+          { "city": "新北市", "kmt": 57.15, "dpp": 42.85, "other": 0 },
+          { "city": "桃園市", "kmt": 39.42, "dpp": 53.46, "other": 7.12 },
+          { "city": "台中市", "kmt": 56.57, "dpp": 42.35, "other": 1.08 },
+          { "city": "台南市", "kmt": 32.37, "dpp": 38.02, "other": 29.61 },
+          { "city": "高雄市", "kmt": 53.87, "dpp": 44.8, "other": 1.33 }
+        ],
+        "2022": [
+          { "city": "台北市", "kmt": 42.29, "dpp": 31.93, "other": 25.77 },
+          { "city": "新北市", "kmt": 62.42, "dpp": 37.58, "other": 0 },
+          { "city": "桃園市", "kmt": 52.02, "dpp": 40.03, "other": 7.95 },
+          { "city": "台中市", "kmt": 59.35, "dpp": 38.93, "other": 1.72 },
+          { "city": "台南市", "kmt": 43.63, "dpp": 48.8, "other": 7.57 },
+          { "city": "高雄市", "kmt": 40.16, "dpp": 58.1, "other": 1.74 }
+        ]
+      }
+    }
   },
   "pollsChart": {
     "tabs": [

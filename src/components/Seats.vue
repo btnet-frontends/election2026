@@ -420,7 +420,7 @@ watch(selectedYear, () => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(1rem, 7vw, 4.5rem);
-  width: min(100%, 30rem);
+  width: min(100%, 27rem);
   margin: 0 auto;
 }
 
@@ -435,13 +435,13 @@ watch(selectedYear, () => {
   height: clamp(3.25rem, 6vw, 3.65rem);
   appearance: none;
   -webkit-appearance: none;
-  border: 2px solid #171717;
+  border: 2px solid var(--seat-coffee);
   border-radius: 1.6rem;
   background: rgba(255, 255, 255, 0.12);
   color: var(--seat-coffee);
   padding: 0.35rem 3.75rem 0.35rem 1.25rem;
   font: inherit;
-  font-size: clamp(1.25rem, 2.6vw, 1.8rem);
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
   font-weight: 700;
   line-height: 1;
   text-align: center;

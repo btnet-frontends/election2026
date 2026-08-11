@@ -510,7 +510,7 @@ function getPieAriaLabel(city) {
   padding: 0.65rem 1.5rem;
   background: #ffffff;
   color: var(--color-coffee-accent);
-  font-size: clamp(1rem, 1.85vw, 1.4rem);
+  font-size: clamp(0.9rem, 1.25vw, 1.1rem);
   font-weight: 500;
   line-height: 1.35;
   text-align: center;
@@ -616,7 +616,7 @@ function getPieAriaLabel(city) {
   .chart-tab {
     min-height: 3rem;
     padding: 0.6rem 1rem;
-    font-size: 0.98rem;
+    font-size: 0.9rem;
   }
 
   .chart-panel {

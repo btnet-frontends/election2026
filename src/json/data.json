@@ -179,11 +179,11 @@
       "url": "https://www.cec.gov.tw/"
     },
     "colors": {
-      "accent": "#643851",
+      "accent": "#8e5f28",
       "kmt": "#3a51ba",
       "dpp": "#3c9b63",
       "other": "#cccccc",
-      "turnout": "#9c7189",
+      "turnout": "#c9a983",
       "text": "#5d626d",
       "grid": "#e7ebf2"
     },

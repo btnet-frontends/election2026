@@ -103,16 +103,16 @@ const partyCatalog = {
   kmt: {
     key: 'kmt',
     label: '國民黨',
-    dotColor: '#3498db',
-    textColor: '#3498db',
+    dotColor: '#3a51ba',
+    textColor: '#3a51ba',
     chartOrder: 10,
     legendOrder: 2
   },
   dpp: {
     key: 'dpp',
     label: '民進黨',
-    dotColor: '#59e84f',
-    textColor: '#59e84f',
+    dotColor: '#3c9b63',
+    textColor: '#3c9b63',
     chartOrder: 100,
     legendOrder: 3
   },

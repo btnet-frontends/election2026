@@ -496,11 +496,11 @@ function getPieAriaLabel(city) {
   min-height: 3.55rem;
   align-items: center;
   justify-content: center;
-  border: 2px solid #643851;
+  border: 2px solid var(--color-coffee-accent);
   border-radius: 999px;
   padding: 0.65rem 1.5rem;
   background: #ffffff;
-  color: #643851;
+  color: var(--color-coffee-accent);
   font-size: clamp(1rem, 1.85vw, 1.4rem);
   font-weight: 500;
   line-height: 1.35;
@@ -517,14 +517,14 @@ function getPieAriaLabel(city) {
 }
 
 .chart-tab.active {
-  background: #643851;
+  background: var(--color-coffee-accent);
   color: #ffffff;
 }
 
 .chart-tab:focus-visible,
 .chart-panel:focus-visible,
 .chart-scroll:focus-visible {
-  outline: 3px solid rgba(100, 56, 81, 0.28);
+  outline: 3px solid rgba(142,95,40, 0.28);
   outline-offset: 4px;
 }
 
@@ -538,7 +538,7 @@ function getPieAriaLabel(city) {
   width: 100%;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
-  scrollbar-color: rgba(100, 56, 81, 0.38) transparent;
+  scrollbar-color: rgba(142,95,40, 0.38) transparent;
 }
 
 .echart {

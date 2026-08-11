@@ -470,9 +470,13 @@ function getPieAriaLabel(city) {
 </script>
 
 <style scoped>
-.vote-analysis-section {
-  padding: 2rem 0 7rem;
-  background: var(--color-coffee-0);
+.vote-analysis-section {  
+    padding: 6rem 0;
+  background-color: var(--color-coffee-50); 
+  background-attachment: fixed;
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .vote-analysis-container {
@@ -485,12 +489,6 @@ function getPieAriaLabel(city) {
   margin-bottom: 2.5rem;
   text-align: center;
   color: var(--color-coffee-300);
-}
-
-.section-heading h2 {
-  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
-  font-weight: 700;
-  letter-spacing: 0.05em;
 }
 
 .chart-tabs {

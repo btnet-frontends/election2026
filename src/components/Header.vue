@@ -2,26 +2,43 @@
   <header :class="['site-header', { 'scrolled': isScrolled, 'menu-open': isMobileMenuOpen }]">
     <div class="header-container">
       <div class="header-left">
-        <a href="#kv" class="logo-link" @click="scrollToSection($event, 'kv')">
+        <a :href="getLocalHref('#kv')" class="logo-link" @click="scrollToSection($event, 'kv')">
           <img :src="btLogo" alt="今周刊" class="logo-bt" />
         </a>
         <div class="logo-divider"></div>
-        <a href="#kv" class="logo-link" @click="scrollToSection($event, 'kv')">
+        <a :href="getLocalHref('#kv')" class="logo-link" @click="scrollToSection($event, 'kv')">
           <img :src="electionLogo" alt="2026九合一大選" class="logo-election" />
         </a>
       </div>
 
       <div class="header-right">
         <nav class="desktop-nav">
-          <a
-            v-for="item in navItems"
-            :key="item.id"
-            :href="getLocalHref(item.href)"
-            :class="['nav-link', { 'active': activeSection === item.id }]"
-            @click="scrollToSection($event, item.id)"
-          >
-            {{ item.label }}
-          </a>
+          <ul class="desktop-nav-list">
+            <li
+              v-for="item in navItems"
+              :key="item.id"
+              class="desktop-nav-item"
+            >
+              <a
+                :href="getLocalHref(item.href)"
+                :class="['nav-link', { 'active': isNavItemActive(item) }]"
+                @click="navigateToItem($event, item)"
+              >
+                {{ item.label }}
+              </a>
+              <ul v-if="item.children?.length" class="desktop-subnav">
+                <li v-for="child in item.children" :key="child.id">
+                  <a
+                    :href="getLocalHref(child.href)"
+                    :class="['subnav-link', { 'active': activeSection === child.id }]"
+                    @click="navigateToItem($event, child)"
+                  >
+                    {{ child.label }}
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </nav>
 
         <div class="social-block">
@@ -66,15 +83,32 @@
           </button>
         </div>
         <nav class="mobile-nav">
-          <a
-            v-for="item in navItems"
-            :key="item.id"
-            :href="getLocalHref(item.href)"
-            :class="['mobile-link', { 'active': activeSection === item.id }]"
-            @click="scrollToSection($event, item.id)"
-          >
-            {{ item.label }}
-          </a>
+          <ul class="mobile-nav-list">
+            <li
+              v-for="item in navItems"
+              :key="item.id"
+              class="mobile-nav-item"
+            >
+              <a
+                :href="getLocalHref(item.href)"
+                :class="['mobile-link', { 'active': isNavItemActive(item) }]"
+                @click="navigateToItem($event, item)"
+              >
+                {{ item.label }}
+              </a>
+              <ul v-if="item.children?.length" class="mobile-subnav">
+                <li v-for="child in item.children" :key="child.id">
+                  <a
+                    :href="getLocalHref(child.href)"
+                    :class="['mobile-subnav-link', { 'active': activeSection === child.id }]"
+                    @click="navigateToItem($event, child)"
+                  >
+                    {{ child.label }}
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </nav>
         <div class="mobile-socials">
           <a href="https://www.facebook.com/BToday/" target="_blank" rel="noopener noreferrer" class="mobile-social-icon">
@@ -115,12 +149,26 @@ const activeSection = ref('kv');
 const localBaseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const getLocalHref = (href) => {
-  const path = href.startsWith('#')
-    ? `/${href}`
-    : `/${href.replace(/^\/+/, '')}`;
+  if (/^(?:https?:|mailto:|tel:)/.test(href)) return href;
 
-  return `${localBaseUrl}${path}`;
+  if (href.startsWith('#')) {
+    return `${localBaseUrl}/${href}`;
+  }
+
+  const path = href.replace(/^\/+/, '');
+  return path === 'index' ? `${localBaseUrl}/` : `${localBaseUrl}/${path}`;
 };
+
+const normalizePath = (path) => path.replace(/\/+$/, '') || '/';
+
+const getHomePath = () => normalizePath(`${localBaseUrl}/`);
+
+const isHomePage = () => normalizePath(window.location.pathname) === getHomePath();
+
+const isNavItemActive = (item) => (
+  activeSection.value === item.id ||
+  item.children?.some((child) => activeSection.value === child.id)
+);
 
 const getElementTop = (id) => {
   const el = document.getElementById(id);
@@ -136,6 +184,8 @@ const getElementTop = (id) => {
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 30;
+
+  if (!isHomePage()) return;
 
   const scrollPosition = window.scrollY + 120;
   const pollsTop = getElementTop('polls');
@@ -153,6 +203,11 @@ const handleScroll = () => {
   }
 };
 
+const setActivePage = () => {
+  const pageId = normalizePath(window.location.pathname).split('/').pop();
+  activeSection.value = isHomePage() ? 'kv' : pageId;
+};
+
 const handleResize = () => {
   if (window.innerWidth > 991) {
     isMobileMenuOpen.value = false;
@@ -165,19 +220,28 @@ const toggleMobileMenu = () => {
   document.body.style.overflow = isMobileMenuOpen.value ? 'hidden' : '';
 };
 
-const scrollToSection = (event, id) => {
+const navigateToItem = (event, item) => {
   isMobileMenuOpen.value = false;
   document.body.style.overflow = '';
 
-  const target = document.getElementById(id);
-  if (target) {
+  const destination = new URL(getLocalHref(item.href), window.location.origin);
+  const isCurrentPage = normalizePath(destination.pathname) === normalizePath(window.location.pathname);
+  const target = isCurrentPage ? document.getElementById(item.id) : null;
+
+  if (target && destination.hash) {
     event.preventDefault();
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    activeSection.value = id;
+    window.history.replaceState(null, '', destination.hash);
+    activeSection.value = item.id;
   }
 };
 
+const scrollToSection = (event, id) => {
+  navigateToItem(event, { id, href: `#${id}` });
+};
+
 onMounted(() => {
+  setActivePage();
   window.addEventListener('scroll', handleScroll);
   window.addEventListener('resize', handleResize);
   handleScroll();
@@ -267,7 +331,16 @@ onUnmounted(() => {
 .desktop-nav {
   display: flex;
   align-items: center;
+}
+
+.desktop-nav-list {
+  display: flex;
+  align-items: center;
   gap: 1rem;
+}
+
+.desktop-nav-item {
+  position: relative;
 }
 
 .nav-link {
@@ -282,6 +355,53 @@ onUnmounted(() => {
 
 .nav-link:hover {
   color: #DD2A2A;
+}
+
+.nav-link.active,
+.subnav-link.active {
+  color: #DD2A2A;
+}
+
+.desktop-subnav {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  min-width: 132px;
+  padding: 0.75rem;
+  background: rgba(252, 248, 244, 0.96);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(107, 92, 75, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.2s;
+}
+
+.desktop-nav-item:hover .desktop-subnav,
+.desktop-nav-item:focus-within .desktop-subnav {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.subnav-link {
+  display: block;
+  white-space: nowrap;
+  color: #6B5C4B;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-align: center;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+}
+
+.subnav-link:hover {
+  color: #DD2A2A;
+  background: #F1EAE3;
 }
 
 .social-block {
@@ -401,10 +521,29 @@ onUnmounted(() => {
   justify-content: flex-start;
   flex: 1;
   padding: 0 1rem;
-  padding-top: 18vh;
+  padding-top: 10vh;
+  overflow-y: auto;
+}
+
+.mobile-nav-item {
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+}
+
+.mobile-nav-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.mobile-nav-item + .mobile-nav-item {
+  border-top: 1px solid rgba(107, 92, 75, 0.15);
 }
 
 .mobile-link {
+  display: block;
   width: 100%;
   max-width: 480px;
   font-size: 1.35rem;
@@ -416,11 +555,39 @@ onUnmounted(() => {
   transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.mobile-link + .mobile-link {
-  border-top: 1px solid rgba(107, 92, 75, 0.15);
+.mobile-link:hover {
+  opacity: 0.8;
 }
 
-.mobile-link:hover {
+.mobile-link.active,
+.mobile-subnav-link.active {
+  color: #DD2A2A;
+}
+
+.mobile-subnav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0 0 1rem;
+}
+
+.mobile-subnav > li {
+  width: 100%;
+}
+
+.mobile-subnav-link {
+  display: block;
+  width: 100%;
+  color: #6B5C4B;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  padding: 0.65rem 0;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-subnav-link:hover {
   opacity: 0.8;
 }
 

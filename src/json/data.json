@@ -22,7 +22,8 @@
     "LiveStreaming": true,
     "Vote": true,
     "Seats": true,
-    "VoteAnalysis": true
+    "VoteAnalysis": true,
+    "PartyHistory": true
   },
   "flashNews": {
     "tag": {

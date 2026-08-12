@@ -9,7 +9,7 @@ import LiveStreaming from '../components/LiveStreaming.vue';
 import Vote from '../components/Vote.vue';
 import Seats from '../components/Seats.vue';
 import VoteAnalysis from '../components/voteAnalysis.vue';
-import type { NewsData } from '../types/news';
+import PartyHistory from '../components/PartyHistory.vue';
 
 import config from '../json/data.json';
 import { buildNewsApiUrl, getTagApi } from '../utils/newsApi.js';
@@ -23,7 +23,8 @@ const componentVisibility = {
   LiveStreaming: config.components?.LiveStreaming !== false,
   Vote: config.components?.Vote !== false,
   Seats: config.components?.Seats !== false,
-  VoteAnalysis: config.components?.VoteAnalysis !== false
+  VoteAnalysis: config.components?.VoteAnalysis !== false,
+  PartyHistory: config.components?.PartyHistory !== false
 };
 
 const hotTags = config.newsReport.hotTags;
@@ -212,6 +213,8 @@ const structuredData = {
     {componentVisibility.Seats && <Seats client:load />}
 
     {componentVisibility.VoteAnalysis && <VoteAnalysis client:load />}
+
+    {componentVisibility.PartyHistory && <PartyHistory client:load />}
 
   </main>
 </Layout>

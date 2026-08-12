@@ -344,7 +344,7 @@ watch(selectedYear, () => {
 
 <style scoped>
 .seats-section {
-  padding: 2rem 0 7rem;
+  padding: 6rem 0 7rem;
   background: linear-gradient(
     to bottom,
     var(--color-coffee-0) 0px,

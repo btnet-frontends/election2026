@@ -177,7 +177,7 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
 
 .referendum-title {
   margin: 0;
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-size: 2rem;
   font-weight: 600;
   color: var(--color-coffee-900);
   display: flex;

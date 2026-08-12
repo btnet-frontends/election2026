@@ -10,8 +10,25 @@
           { "id": "tags", "href": "#tags", "label": "熱門話題" }
         ]
       },
-      { "id": "page2", "href": "page2", "label": "選情統計" },
-      { "id": "page3", "href": "page3", "label": "選舉民調" }
+      {
+        "id": "page2",
+        "href": "page2",
+        "label": "選情統計 ▼",
+        "children": [
+          { "id": "seats", "href": "#seats", "label": "議員席次" },
+          { "id": "vote-analysis", "href": "#vote-analysis", "label": "投票分析" },
+          { "id": "partyHistory", "href": "#partyHistory", "label": "歷史版圖" }
+        ]
+      },
+      {
+        "id": "page3",
+        "href": "#page3",
+        "label": "即時戰報 ▼",
+        "children": [
+          { "id": "flash-news", "href": "#flash-news", "label": "選情分析" },
+          { "id": "tags", "href": "#tags", "label": "熱門話題" }
+        ]
+      }
     ]
   },
   "components": {
@@ -36,8 +53,8 @@
       "kmt": { "label": "國民黨", "color": "#425db5" },
       "dpp": { "label": "民進黨", "color": "#45a168" },
       "tpp": { "label": "民眾黨", "color": "#5fc5cf" },
-      "independent": { "label": "無黨籍", "color": "#b69b7c" },
-      "pending": { "label": "尚未開票", "color": "#f4f4f4" }
+      "independent": { "label": "無黨籍", "color": "#aaa" },
+      "pending": { "label": "尚未開票", "color": "#bbb" }
     },
     "results": {
       "2018": {

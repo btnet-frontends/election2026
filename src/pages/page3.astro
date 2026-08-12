@@ -204,11 +204,5 @@ const structuredData = {
     {componentVisibility.FlashNews && <FlashNews flashNewsList={flashNewsList} flashNewsApi={flashNewsApi} client:load />}
 
     {componentVisibility.NewsReport && <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />}
-
-    {componentVisibility.LiveStreaming && <LiveStreaming client:load />}
-
-    {componentVisibility.PollsChart && <PollsChart client:load />}
-
-    {componentVisibility.Vote && <Vote client:load />}
   </main>
 </Layout>

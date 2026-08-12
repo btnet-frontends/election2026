@@ -206,10 +206,6 @@ const structuredData = {
   <main>
     {componentVisibility.KV && <KV client:load />}
 
-    {componentVisibility.FlashNews && <FlashNews flashNewsList={flashNewsList} flashNewsApi={flashNewsApi} client:load />}
-
-    {componentVisibility.NewsReport && <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />}
-
     {componentVisibility.Seats && <Seats client:load />}
 
     {componentVisibility.VoteAnalysis && <VoteAnalysis client:load />}

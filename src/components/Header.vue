@@ -30,7 +30,7 @@
                 <li v-for="child in item.children" :key="child.id">
                   <a
                     :href="getLocalHref(child.href)"
-                    :class="['subnav-link', { 'active': activeSection === child.id }]"
+                    :class="['subnav-link', { 'active': isSubnavItemActive(item, child) }]"
                     @click="navigateToItem($event, child)"
                   >
                     {{ child.label }}
@@ -100,7 +100,7 @@
                 <li v-for="child in item.children" :key="child.id">
                   <a
                     :href="getLocalHref(child.href)"
-                    :class="['mobile-subnav-link', { 'active': activeSection === child.id }]"
+                    :class="['mobile-subnav-link', { 'active': isSubnavItemActive(item, child) }]"
                     @click="navigateToItem($event, child)"
                   >
                     {{ child.label }}
@@ -145,7 +145,8 @@ const navItems = config.header.navItems;
 
 const isScrolled = ref(false);
 const isMobileMenuOpen = ref(false);
-const activeSection = ref('kv');
+const activePage = ref('');
+const activeSection = ref('');
 const localBaseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const getLocalHref = (href) => {
@@ -161,13 +162,19 @@ const getLocalHref = (href) => {
 
 const normalizePath = (path) => path.replace(/\/+$/, '') || '/';
 
-const getHomePath = () => normalizePath(`${localBaseUrl}/`);
+const getItemPath = (item) => normalizePath(
+  new URL(getLocalHref(item.href), window.location.origin).pathname
+);
 
-const isHomePage = () => normalizePath(window.location.pathname) === getHomePath();
+const getCurrentNavItem = () => {
+  const currentPath = normalizePath(window.location.pathname);
+  return navItems.find((item) => getItemPath(item) === currentPath);
+};
 
-const isNavItemActive = (item) => (
-  activeSection.value === item.id ||
-  item.children?.some((child) => activeSection.value === child.id)
+const isNavItemActive = (item) => activePage.value === item.id;
+
+const isSubnavItemActive = (parent, child) => (
+  activePage.value === parent.id && activeSection.value === child.id
 );
 
 const getElementTop = (id) => {
@@ -185,27 +192,44 @@ const getElementTop = (id) => {
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 30;
 
-  if (!isHomePage()) return;
+  const currentNavItem = getCurrentNavItem();
+  if (!currentNavItem) {
+    activePage.value = '';
+    activeSection.value = '';
+    return;
+  }
+
+  activePage.value = currentNavItem.id;
 
   const scrollPosition = window.scrollY + 120;
-  const pollsTop = getElementTop('polls');
-  const tagsTop = getElementTop('tags');
-  const flashTop = getElementTop('flash-news');
+  const sections = (currentNavItem.children ?? [])
+    .filter((child) => document.getElementById(child.id))
+    .map((child) => ({ id: child.id, top: getElementTop(child.id) }))
+    .sort((a, b) => a.top - b.top);
 
-  if (pollsTop && scrollPosition >= pollsTop) {
-    activeSection.value = 'polls';
-  } else if (tagsTop && scrollPosition >= tagsTop) {
-    activeSection.value = 'tags';
-  } else if (flashTop && scrollPosition >= flashTop) {
-    activeSection.value = 'flash-news';
-  } else {
-    activeSection.value = 'kv';
-  }
+  activeSection.value = sections.reduce(
+    (currentSection, section) => (
+      scrollPosition >= section.top ? section.id : currentSection
+    ),
+    currentNavItem.id
+  );
 };
 
 const setActivePage = () => {
-  const pageId = normalizePath(window.location.pathname).split('/').pop();
-  activeSection.value = isHomePage() ? 'kv' : pageId;
+  const currentNavItem = getCurrentNavItem();
+  activePage.value = currentNavItem?.id ?? '';
+
+  const hashId = decodeURIComponent(window.location.hash.slice(1));
+  const hashChild = currentNavItem?.children?.find(
+    (child) => child.id === hashId && document.getElementById(child.id)
+  );
+
+  activeSection.value = hashChild?.id ?? currentNavItem?.id ?? '';
+};
+
+const handleHashChange = () => {
+  setActivePage();
+  window.requestAnimationFrame(handleScroll);
 };
 
 const handleResize = () => {
@@ -232,6 +256,7 @@ const navigateToItem = (event, item) => {
     event.preventDefault();
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     window.history.replaceState(null, '', destination.hash);
+    activePage.value = getCurrentNavItem()?.id ?? '';
     activeSection.value = item.id;
   }
 };
@@ -244,12 +269,14 @@ onMounted(() => {
   setActivePage();
   window.addEventListener('scroll', handleScroll);
   window.addEventListener('resize', handleResize);
+  window.addEventListener('hashchange', handleHashChange);
   handleScroll();
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
   window.removeEventListener('resize', handleResize);
+  window.removeEventListener('hashchange', handleHashChange);
 });
 </script>
 

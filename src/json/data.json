@@ -43,6 +43,48 @@
     "VoteAnalysis": true,
     "PartyHistory": true
   },
+  "referendum": {
+    "sectionTitle": "憲法修正案公民複決",
+    "items": [
+      {
+        "id": "referendum-1",
+        "number": 1,
+        "title": "鞭刑公投",
+        "question": "您是否同意政府制定法律，針對性侵害犯罪、凌虐幼童罪、以及高額詐欺罪、複合型態加重詐欺罪，增設由法院宣告並依法執行之特別刑法制度（鞭刑），以嚇阻犯罪持續發生？",
+        "status": "pending",
+        "statusOptions": [
+          { "id": "failed", "label": "不通過" },
+          { "id": "passed", "label": "通過" }
+        ],
+        "scale": {
+          "minimum": "0%",
+          "threshold": "1/2過門檻(961萬9697票)",
+          "maximum": "100%"
+        },
+        "results": [
+          { "id": "agree", "label": "同意", "percentage": 46, "votes": 0, "tone": "agree" },
+          { "id": "disagree", "label": "不同意", "percentage": 45, "votes": 0, "tone": "disagree" }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "label": "註 1",
+            "text": "根據憲法增修條文規定，經中華民國自由地區選舉人投票複決，有效同意票過選舉人總額的半數，即通過"
+          },
+          {
+            "id": "note-2",
+            "label": "註 2",
+            "text": "本屆選舉有效選舉人數總額：1923萬9392人。"
+          },
+          {
+            "id": "note-3",
+            "label": "註 3",
+            "text": "最終選舉結果以中選會公告為主。"
+          }
+        ]
+      }
+    ]
+  },
   "partyHistory": {
     "defaultYear": 2018,
     "years": [

@@ -279,7 +279,7 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
 
 .results-block {
   --result-label-column: 4.5rem;
-  --result-votes-column: 3.75rem;
+  --result-votes-column: 4.5rem;
   --result-column-gap: 1rem;
   margin-top: clamp(2.75rem, 5vw, 3.75rem);
 }
@@ -385,7 +385,7 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
   font-size: 1rem;
   line-height: 1.25;
   text-align: right;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 .case-notes {

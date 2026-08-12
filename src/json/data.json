@@ -62,7 +62,7 @@
           "maximum": "100%"
         },
         "results": [
-          { "id": "agree", "label": "同意", "percentage": 46, "votes": 0, "tone": "agree" },
+          { "id": "agree", "label": "同意", "percentage": 46, "votes": 1000000, "tone": "agree" },
           { "id": "disagree", "label": "不同意", "percentage": 45, "votes": 0, "tone": "disagree" }
         ],
         "notes": [

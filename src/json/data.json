@@ -38,6 +38,7 @@
     "PollsChart": true,
     "LiveStreaming": true,
     "Vote": true,
+    "Referendum": true,
     "Seats": true,
     "VoteAnalysis": true,
     "PartyHistory": true

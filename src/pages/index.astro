@@ -6,7 +6,9 @@ import FlashNews from '../components/FlashNews.vue';
 import NewsReport from '../components/NewsReport.vue';
 import PollsChart from '../components/PollsChart.vue';
 import LiveStreaming from '../components/LiveStreaming.vue';
+import Referendum from '../components/Referendum.vue';
 import Vote from '../components/Vote.vue';
+
 import type { NewsData } from '../types/news';
 
 import config from '../json/data.json';
@@ -19,6 +21,7 @@ const componentVisibility = {
   NewsReport: config.components?.NewsReport !== false,
   PollsChart: config.components?.PollsChart !== false,
   LiveStreaming: config.components?.LiveStreaming !== false,
+  Referendum: config.components?.Referendum !== false,
   Vote: config.components?.Vote !== false
 };
 
@@ -210,5 +213,7 @@ const structuredData = {
     {componentVisibility.PollsChart && <PollsChart client:load />}
 
     {componentVisibility.Vote && <Vote client:load />}
+
+    {componentVisibility.Referendum && <Referendum client:load />}
   </main>
 </Layout>

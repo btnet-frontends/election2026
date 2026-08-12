@@ -15,18 +15,18 @@
         "href": "page2",
         "label": "選情統計 ▼",
         "children": [
-          { "id": "seats", "href": "#seats", "label": "議員席次" },
-          { "id": "vote-analysis", "href": "#vote-analysis", "label": "投票分析" },
-          { "id": "partyHistory", "href": "#partyHistory", "label": "歷史版圖" }
+          { "id": "seats", "href": "page2#seats", "label": "議員席次" },
+          { "id": "vote-analysis", "href": "page2#vote-analysis", "label": "投票分析" },
+          { "id": "partyHistory", "href": "page2#partyHistory", "label": "歷史版圖" }
         ]
       },
       {
         "id": "page3",
-        "href": "#page3",
+        "href": "page3",
         "label": "即時戰報 ▼",
         "children": [
-          { "id": "flash-news", "href": "#flash-news", "label": "選情分析" },
-          { "id": "tags", "href": "#tags", "label": "熱門話題" }
+          { "id": "flash-news", "href": "page3#flash-news", "label": "選情分析" },
+          { "id": "tags", "href": "page3#tags", "label": "熱門話題" }
         ]
       }
     ]

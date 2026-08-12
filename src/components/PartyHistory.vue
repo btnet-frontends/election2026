@@ -14,7 +14,6 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue';
-import statisticsIcon from '../assets/images/statistics_icon.svg?url';
 
 </script>
 

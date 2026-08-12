@@ -1,12 +1,14 @@
 <template>
     <svg
-        id="taiwan_location"
+        id="taiwan_party_history_location"
         ref="mapElement"
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 1920 1080"
-        @click="selectLocation"
-        @keydown="selectLocationByKeyboard"
+        viewBox="340 0 940 1080"
+        role="img"
+        :aria-label="mapLabel"
+        :style="mapStyle"
     >
+        <title>{{ mapLabel }}</title>
         <g class="taitung_island">
             <path
                 d="M1121.52,1044.71c-.67,0-1.35-.84-2.2-1.89-1.19-1.48-2.82-3.5-5.59-4.7-1.52-.66-2.62-.75-3.59-.75-.22,0-.43,0-.65,0-.2,0-.4,0-.6,0-.93,0-1.76-.12-2.79-.68-2.29-1.26-4.32-4.01-5.06-6.86-.4-1.53-.6-3.78,.69-5.82,1.68-2.67,5.06-3.62,7.67-3.62,2.19,0,4.07,.66,4.79,1.68,.52,.74,.35,1.53,.12,2.63-.27,1.26-.6,2.83,.03,4.95,.72,2.45,2.32,4.19,3.6,5.59,1.24,1.35,2.31,2.16,3.16,2.81,1.17,.89,1.87,1.42,2.12,2.6,.34,1.66-.41,3.73-1.46,4.03-.09,.02-.17,.04-.25,.04h0Z"
@@ -676,84 +678,68 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
-const selectedLocation = defineModel('selectedLocation', {
-    type: String,
-    default: '台北市'
+const props = defineProps({
+    locationColors: {
+        type: Object,
+        default: () => ({})
+    },
+    locationDescriptions: {
+        type: Object,
+        default: () => ({})
+    },
+    mapLabel: {
+        type: String,
+        default: '台灣縣市政黨版圖'
+    }
 });
-const emit = defineEmits(['location-selected']);
 
 const mapElement = ref(null);
+const mapStyle = computed(() => ({
+    '--taitung-island-fill': props.locationColors.taitung_county ?? '#f4f4f4'
+}));
 
-const getLocationElement = (target) => target?.closest?.('.location_index');
-
-const selectLocation = (event) => {
-    const locationElement = getLocationElement(event.target);
-    const location = locationElement?.dataset.chname;
-
-    if (location) {
-        selectedLocation.value = location;
-        emit('location-selected', location);
-    }
-};
-
-const selectLocationByKeyboard = (event) => {
-    if (event.key !== 'Enter' && event.key !== ' ') return;
-
-    const locationElement = getLocationElement(event.target);
-    const location = locationElement?.dataset.chname;
-
-    if (location) {
-        event.preventDefault();
-        selectedLocation.value = location;
-        emit('location-selected', location);
-    }
-};
-
-const updateSelectedLocation = () => {
+const updateLocationColors = () => {
     mapElement.value?.querySelectorAll('.location_index').forEach((locationElement) => {
-        const isSelected = locationElement.dataset.chname === selectedLocation.value;
+        const locationId = locationElement.dataset.name;
+        const locationName = locationElement.dataset.chname;
+        const color = props.locationColors[locationId] ?? '#f4f4f4';
+        const description = props.locationDescriptions[locationId] ?? '尚無資料';
 
-        locationElement.classList.toggle('is-selected', isSelected);
-        locationElement.setAttribute('role', 'button');
-        locationElement.setAttribute('tabindex', '0');
-        locationElement.setAttribute('aria-label', `選擇${locationElement.dataset.chname}`);
-        locationElement.setAttribute('aria-pressed', String(isSelected));
+        locationElement.style.setProperty('--location-fill', color);
+        locationElement.setAttribute('aria-label', `${locationName}：${description}`);
     });
 };
 
-onMounted(updateSelectedLocation);
-watch(selectedLocation, updateSelectedLocation);
+onMounted(updateLocationColors);
+watch(
+    () => [props.locationColors, props.locationDescriptions],
+    updateLocationColors,
+    { deep: true }
+);
 </script>
 
 <style scoped>
-    #taiwan_location{
+    #taiwan_party_history_location {
+        display: block;
         width: 100%;
+        overflow: visible;
+        pointer-events: none;
     }
 
-    .taiwan_location path[style*="#b8b8b8"] {
-        cursor: pointer;
-        transition: fill-opacity 0.2s ease;
+    .location_index path[style*="#b8b8b8"] {
+        fill: var(--location-fill, #f4f4f4) !important;
+        fill-opacity: 1;
+        transition: fill 0.25s ease;
     }
 
-    .taiwan_location.is-selected path[style*="#b8b8b8"] {
-        fill: #858585 !important;
+    .taitung_island path[style*="#b8b8b8"] {
+        fill: var(--taitung-island-fill, #f4f4f4) !important;
+        transition: fill 0.25s ease;
     }
 
-    .taiwan_location:focus,
-    .taiwan_location:focus-visible {
-        outline: none !important;
-        box-shadow: none !important;
-    }
-
-    text{
-        cursor: pointer;
-    }
-
-    @media (hover: hover) {
-        .taiwan_location:hover path[style*="#b8b8b8"] {
-            fill-opacity: 0.6;
-        }
+    text {
+        display: none;
     }
 </style>

@@ -25,6 +25,99 @@
     "VoteAnalysis": true,
     "PartyHistory": true
   },
+  "partyHistory": {
+    "defaultYear": 2018,
+    "years": [
+      { "year": 2018, "status": "final" },
+      { "year": 2022, "status": "final" },
+      { "year": 2026, "status": "pending", "note": "選舉尚未開票" }
+    ],
+    "parties": {
+      "kmt": { "label": "國民黨", "color": "#425db5" },
+      "dpp": { "label": "民進黨", "color": "#45a168" },
+      "tpp": { "label": "民眾黨", "color": "#5fc5cf" },
+      "independent": { "label": "無黨籍", "color": "#b69b7c" },
+      "pending": { "label": "尚未開票", "color": "#f4f4f4" }
+    },
+    "results": {
+      "2018": {
+        "taipei_city": "independent",
+        "newtaipei_city": "kmt",
+        "taoyuan_city": "dpp",
+        "taichung_city": "kmt",
+        "tainan_city": "dpp",
+        "kaohsiung_city": "kmt",
+        "keelung_city": "dpp",
+        "hsinchu_city": "dpp",
+        "chiayi_city": "kmt",
+        "hsinchu_county": "kmt",
+        "miaoli_county": "kmt",
+        "changhua_county": "kmt",
+        "nantou_county": "kmt",
+        "yunlin_county": "kmt",
+        "chiayi_county": "dpp",
+        "pingtung_county": "dpp",
+        "yilan_county": "kmt",
+        "hualien_county": "kmt",
+        "taitung_county": "kmt",
+        "penghu_county": "kmt",
+        "kinmen_county": "kmt",
+        "lianjiang_county": "kmt"
+      },
+      "2022": {
+        "taipei_city": "kmt",
+        "newtaipei_city": "kmt",
+        "taoyuan_city": "kmt",
+        "taichung_city": "kmt",
+        "tainan_city": "dpp",
+        "kaohsiung_city": "dpp",
+        "keelung_city": "kmt",
+        "hsinchu_city": "tpp",
+        "chiayi_city": "kmt",
+        "hsinchu_county": "kmt",
+        "miaoli_county": "independent",
+        "changhua_county": "kmt",
+        "nantou_county": "kmt",
+        "yunlin_county": "kmt",
+        "chiayi_county": "dpp",
+        "pingtung_county": "dpp",
+        "yilan_county": "kmt",
+        "hualien_county": "kmt",
+        "taitung_county": "kmt",
+        "penghu_county": "dpp",
+        "kinmen_county": "independent",
+        "lianjiang_county": "kmt"
+      },
+      "2026": {
+        "taipei_city": "pending",
+        "newtaipei_city": "pending",
+        "taoyuan_city": "pending",
+        "taichung_city": "pending",
+        "tainan_city": "pending",
+        "kaohsiung_city": "pending",
+        "keelung_city": "pending",
+        "hsinchu_city": "pending",
+        "chiayi_city": "pending",
+        "hsinchu_county": "pending",
+        "miaoli_county": "pending",
+        "changhua_county": "pending",
+        "nantou_county": "pending",
+        "yunlin_county": "pending",
+        "chiayi_county": "pending",
+        "pingtung_county": "pending",
+        "yilan_county": "pending",
+        "hualien_county": "pending",
+        "taitung_county": "pending",
+        "penghu_county": "pending",
+        "kinmen_county": "pending",
+        "lianjiang_county": "pending"
+      }
+    },
+    "source": {
+      "label": "資料來源：中央選舉委員會選舉資料庫",
+      "url": "https://db.cec.gov.tw/"
+    }
+  },
   "flashNews": {
     "tag": {
       "label": "0050",

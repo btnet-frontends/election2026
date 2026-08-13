@@ -67,6 +67,7 @@
           "label": "開票首頁 ▼",
           "children": [
             { "id": "elected-search", "href": "#elected-search", "label": "當選快搜" },
+            { "id": "vote", "href": "#vote", "label": "開票速報" },
             { "id": "referendum", "href": "#referendum", "label": "公投" }
           ]
         },

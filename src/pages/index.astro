@@ -210,13 +210,25 @@ const structuredData = {
   <main>
     {componentVisibility.KV && <KV client:load />}
 
-    {componentVisibility.FlashNews && <FlashNews flashNewsList={flashNewsList} flashNewsApi={flashNewsApi} client:load />}
+    {componentVisibility.FlashNews && (
+      <div data-phase-component="FlashNews">
+        <FlashNews flashNewsList={flashNewsList} flashNewsApi={flashNewsApi} client:load />
+      </div>
+    )}
 
-    {componentVisibility.NewsReport && <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />}
+    {componentVisibility.NewsReport && (
+      <div data-phase-component="NewsReport">
+        <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />
+      </div>
+    )}
 
     {componentVisibility.LiveStreaming && <LiveStreaming client:load />}
 
-    {componentVisibility.PollsChart && <PollsChart client:load />}
+    {componentVisibility.PollsChart && (
+      <div data-phase-component="PollsChart">
+        <PollsChart client:load />
+      </div>
+    )}
 
     {componentVisibility.ElectedSearch && <ElectedSearch client:load />}
 
@@ -225,3 +237,21 @@ const structuredData = {
     {componentVisibility.Referendum && <Referendum client:load />}
   </main>
 </Layout>
+
+<script>
+  import { isPhaseComponentVisible } from '../utils/schedule.js';
+
+  // Phase-gate the statically rendered sections wrapped in
+  // [data-phase-component], mirroring usePhase's 15s clock check so an
+  // already-open tab hides/shows them the moment a phase boundary passes.
+  const gatedSections = document.querySelectorAll<HTMLElement>('[data-phase-component]');
+
+  const refresh = () => {
+    gatedSections.forEach((el) => {
+      el.hidden = !isPhaseComponentVisible(el.dataset.phaseComponent ?? '');
+    });
+  };
+
+  refresh();
+  setInterval(refresh, 15000);
+</script>

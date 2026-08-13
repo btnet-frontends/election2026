@@ -1,36 +1,97 @@
 {
-  "header": {
-    "navItems": [
-      {
-        "id": "kv",
-        "href": "#kv",
-        "label": "首頁 ▼",
-        "children": [
-          { "id": "flash-news", "href": "#flash-news", "label": "即時戰報" },
-          { "id": "tags", "href": "#tags", "label": "熱門話題" }
-        ]
-      },
-      {
-        "id": "page2",
-        "href": "page2",
-        "label": "選情統計 ▼",
-        "children": [
-          { "id": "seats", "href": "page2#seats", "label": "議員席次" },
-          { "id": "vote-analysis", "href": "page2#vote-analysis", "label": "投票分析" },
-          { "id": "partyHistory", "href": "page2#partyHistory", "label": "歷史版圖" }
-        ]
-      },
-      {
-        "id": "page3",
-        "href": "page3",
-        "label": "即時戰報 ▼",
-        "children": [
-          { "id": "flash-news", "href": "page3#flash-news", "label": "選情分析" },
-          { "id": "tags", "href": "page3#tags", "label": "熱門話題" }
-        ]
-      }
-    ]
-  },
+  "header": [
+    {
+      "navNo": 1,
+      "navItems": [
+        {
+          "id": "kv",
+          "href": "#kv",
+          "label": "首頁 ▼",
+          "children": [
+            { "id": "flash-news", "href": "#flash-news", "label": "即時戰報" },
+            { "id": "tags", "href": "#tags", "label": "熱門話題" }
+          ]
+        },
+        {
+          "id": "page2",
+          "href": "page2",
+          "label": "選情統計 ▼",
+          "children": [
+            { "id": "seats", "href": "page2#seats", "label": "議員席次" },
+            { "id": "vote-analysis", "href": "page2#vote-analysis", "label": "投票分析" },
+            { "id": "partyHistory", "href": "page2#partyHistory", "label": "歷史版圖" }
+          ]
+        }
+      ]
+    },
+    {
+      "navNo": 2,
+      "navItems": [
+        {
+          "id": "kv",
+          "href": "#kv",
+          "label": "開票首頁 ▼",
+          "children": [
+            { "id": "live-streaming", "href": "#live-streaming", "label": "現場直播" },
+            { "id": "vote", "href": "#vote", "label": "開票速報" },
+            { "id": "referendum", "href": "#referendum", "label": "公投" }
+          ]
+        },
+        {
+          "id": "page2",
+          "href": "page2",
+          "label": "選情統計 ▼",
+          "children": [
+            { "id": "seats", "href": "page2#seats", "label": "議員席次" },
+            { "id": "vote-analysis", "href": "page2#vote-analysis", "label": "投票分析" },
+            { "id": "partyHistory", "href": "page2#partyHistory", "label": "歷史版圖" }
+          ]
+        },
+        {
+          "id": "page3",
+          "href": "page3",
+          "label": "即時戰報 ▼",
+          "children": [
+            { "id": "flash-news", "href": "page3#flash-news", "label": "選情分析" },
+            { "id": "tags", "href": "page3#tags", "label": "熱門話題" }
+          ]
+        }
+      ]
+    },
+    {
+      "navNo": 3,
+      "navItems": [
+        {
+          "id": "kv",
+          "href": "#kv",
+          "label": "首頁 ▼",
+          "children": [
+            { "id": "elected-search", "href": "#elected-search", "label": "當選快搜" },
+            { "id": "referendum", "href": "#referendum", "label": "公投" }
+          ]
+        },
+        {
+          "id": "page2",
+          "href": "page2",
+          "label": "選情統計 ▼",
+          "children": [
+            { "id": "seats", "href": "page2#seats", "label": "議員席次" },
+            { "id": "vote-analysis", "href": "page2#vote-analysis", "label": "投票分析" },
+            { "id": "partyHistory", "href": "page2#partyHistory", "label": "歷史版圖" }
+          ]
+        },
+        {
+          "id": "page3",
+          "href": "page3",
+          "label": "即時戰報 ▼",
+          "children": [
+            { "id": "flash-news", "href": "page3#flash-news", "label": "選情分析" },
+            { "id": "tags", "href": "page3#tags", "label": "熱門話題" }
+          ]
+        }
+      ]
+    }
+  ],
   "components": {
     "KV": true,
     "FlashNews": false,

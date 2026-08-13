@@ -1,5 +1,5 @@
 <template>
-  <section id="live-streaming" class="live-streaming-section">
+  <section v-show="isComponentVisible('LiveStreaming')" id="live-streaming" class="live-streaming-section">
     <div class="container">
       <div class="section-header">
         <span class="live-streaming-title">
@@ -25,8 +25,9 @@
 import { ref, computed } from 'vue';
 import liveStreamingIcon from '../assets/images/live_streaming_icon.svg?url';
 import config from '../json/data.json';
+import { usePhase } from '../composables/usePhase.js';
 
-
+const { isComponentVisible } = usePhase();
 </script>
 
 <style scoped>

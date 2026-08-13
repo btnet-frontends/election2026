@@ -133,15 +133,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import btLogo from '../assets/images/BT_logo.svg?url';
 import electionLogo from '../assets/images/2026_logo.svg?url';
 import logoFb from '../assets/images/logo-fb.svg?url';
 import logoIg from '../assets/images/logo-ig.svg?url';
 import logoLine from '../assets/images/logo-line.svg?url';
 import config from '../json/data.json';
+import { usePhase } from '../composables/usePhase.js';
 
-const navItems = config.header.navItems;
+const { navNo } = usePhase();
+const navItems = computed(() => (
+  config.header.find((entry) => entry.navNo === navNo.value)?.navItems
+    ?? config.header[0]?.navItems
+    ?? []
+));
 
 const isScrolled = ref(false);
 const isMobileMenuOpen = ref(false);
@@ -168,7 +174,7 @@ const getItemPath = (item) => normalizePath(
 
 const getCurrentNavItem = () => {
   const currentPath = normalizePath(window.location.pathname);
-  return navItems.find((item) => getItemPath(item) === currentPath);
+  return navItems.value.find((item) => getItemPath(item) === currentPath);
 };
 
 const isNavItemActive = (item) => activePage.value === item.id;
@@ -264,6 +270,15 @@ const navigateToItem = (event, item) => {
 const scrollToSection = (event, id) => {
   navigateToItem(event, { id, href: `#${id}` });
 };
+
+// navItems changes shape when the phase switches (e.g. "現場直播" swaps for
+// "當選快搜"), so re-derive which item/section is active against the new set.
+watch(navNo, () => {
+  window.requestAnimationFrame(() => {
+    setActivePage();
+    handleScroll();
+  });
+});
 
 onMounted(() => {
   setActivePage();

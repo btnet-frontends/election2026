@@ -1,5 +1,5 @@
 <template>
-  <section id="elected-search" class="elected-search-section">
+  <section v-show="isComponentVisible('ElectedSearch')" id="elected-search" class="elected-search-section">
     <div class="container elected-search-container">
       <div class="section-header">
         <h2 class="elected-search-title">
@@ -250,7 +250,9 @@ import config from '../json/data.json';
 import electedIcon from '../assets/images/elected.png?url';
 import searchIcon from '../assets/images/search_icon.svg?url';
 import ElectedCandidateCard from './ElectedCandidateCard.vue';
+import { usePhase } from '../composables/usePhase.js';
 
+const { isComponentVisible } = usePhase();
 const searchData = config.electedSearch;
 const supportedTabIds = new Set(['office', 'party', 'name']);
 const tabs = searchData.tabs.filter((tab) => supportedTabIds.has(tab.id));

@@ -1,5 +1,5 @@
 <template>
-  <section id="referendum" class="referendum-section">
+  <section v-show="isComponentVisible('Referendum')" id="referendum" class="referendum-section">
     <div class="container">
       <div class="section-header">
         <h2 class="referendum-title">
@@ -105,7 +105,9 @@
 import { computed } from 'vue';
 import referendumIcon from '../assets/images/election_referendum_icon.svg?url';
 import config from '../json/data.json';
+import { usePhase } from '../composables/usePhase.js';
 
+const { isComponentVisible } = usePhase();
 const referendumConfig = config.referendum ?? {};
 
 const sectionTitle = computed(() => referendumConfig.sectionTitle || '公民投票');

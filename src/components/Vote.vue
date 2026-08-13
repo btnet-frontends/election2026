@@ -1,5 +1,5 @@
 <template>
-  <section id="vote" class="vote-section" :style="{ backgroundImage: `url(${pollsBg})`}">
+  <section v-show="isComponentVisible('Vote')" id="vote" class="vote-section" :style="{ backgroundImage: `url(${pollsBg})`}">
     <div class="container vote-container">
       <div class="section-header">
         <span class="vote-title">
@@ -30,7 +30,9 @@ import voteIcon from '../assets/images/election_vote_icon.svg?url';
 import pollsBg from '../assets/images/polls_bg.png?url';
 import taiwanLocation from './taiwanLocation.vue';
 import votePanel from './votePanel.vue';
+import { usePhase } from '../composables/usePhase.js';
 
+const { isComponentVisible } = usePhase();
 const selectedLocation = ref('台北市');
 const votePanelElement = ref(null);
 

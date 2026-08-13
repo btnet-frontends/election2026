@@ -44,6 +44,211 @@
     "PartyHistory": true,
     "ElectedSearch": true
   },
+  "electedSearch": {
+    "year": 2026,
+    "dataStatus": "demo",
+    "dataNotice": "示意資料，非正式選舉結果",
+    "defaultTab": "office",
+    "tabs": [
+      { "id": "office", "label": "公職人員類型" },
+      { "id": "party", "label": "政黨" },
+      { "id": "name", "label": "姓名" }
+    ],
+    "defaults": {
+      "officeTypeId": "city-councilor",
+      "cityId": "taoyuan-city",
+      "districtId": "all",
+      "partyId": "kmt"
+    },
+    "pagination": {
+      "desktopPageSize": 6,
+      "mobileBatchSize": 3
+    },
+    "officeTypes": [
+      { "id": "city-councilor", "label": "縣市議員" }
+    ],
+    "parties": [
+      { "id": "kmt", "label": "國民黨", "fullLabel": "中國國民黨", "badge": "國", "color": "#101490" },
+      { "id": "dpp", "label": "民進黨", "fullLabel": "民主進步黨", "badge": "民", "color": "#497b32" },
+      { "id": "tpp", "label": "民眾黨", "fullLabel": "台灣民眾黨", "badge": "眾", "color": "#3d7c82" },
+      { "id": "independent", "label": "無黨籍", "fullLabel": "無黨籍及未經政黨推薦", "badge": "無", "color": "#696969" }
+    ],
+    "cities": [
+      {
+        "id": "taoyuan-city",
+        "label": "桃園市",
+        "districts": [
+          { "id": "taoyuan-daxi", "label": "大溪區" },
+          { "id": "taoyuan-longtan", "label": "龍潭區" },
+          { "id": "taoyuan-fuxing", "label": "復興區" }
+        ]
+      },
+      {
+        "id": "taipei-city",
+        "label": "台北市",
+        "districts": [
+          { "id": "taipei-zhongzheng", "label": "中正區" },
+          { "id": "taipei-wanhua", "label": "萬華區" },
+          { "id": "taipei-daan", "label": "大安區" }
+        ]
+      },
+      {
+        "id": "new-taipei-city",
+        "label": "新北市",
+        "districts": [
+          { "id": "new-taipei-banqiao", "label": "板橋區" },
+          { "id": "new-taipei-sanxia", "label": "三峽區" },
+          { "id": "new-taipei-yingge", "label": "鶯歌區" }
+        ]
+      }
+    ],
+    "constituencies": [
+      {
+        "id": "taoyuan-demo-06",
+        "officeTypeId": "city-councilor",
+        "cityId": "taoyuan-city",
+        "label": "第六選區",
+        "districtIds": ["taoyuan-daxi", "taoyuan-longtan", "taoyuan-fuxing"]
+      },
+      {
+        "id": "taipei-demo-05",
+        "officeTypeId": "city-councilor",
+        "cityId": "taipei-city",
+        "label": "第五選區",
+        "districtIds": ["taipei-zhongzheng", "taipei-wanhua"]
+      },
+      {
+        "id": "new-taipei-demo-07",
+        "officeTypeId": "city-councilor",
+        "cityId": "new-taipei-city",
+        "label": "第七選區",
+        "districtIds": ["new-taipei-banqiao"]
+      },
+      {
+        "id": "new-taipei-demo-08",
+        "officeTypeId": "city-councilor",
+        "cityId": "new-taipei-city",
+        "label": "第八選區",
+        "districtIds": ["new-taipei-sanxia", "new-taipei-yingge"]
+      }
+    ],
+    "candidates": [
+      {
+        "id": "demo-candidate-01",
+        "name": "陳冠宇",
+        "partyId": "kmt",
+        "officeTypeId": "city-councilor",
+        "cityId": "taoyuan-city",
+        "constituencyId": "taoyuan-demo-06",
+        "resultStatus": "pending"
+      },
+      {
+        "id": "demo-candidate-02",
+        "name": "尤哈尼・伊斯卡卡夫特",
+        "partyId": "dpp",
+        "officeTypeId": "city-councilor",
+        "cityId": "taoyuan-city",
+        "constituencyId": "taoyuan-demo-06",
+        "hideConstituencyLabel": true,
+        "resultStatus": "elected"
+      },
+      {
+        "id": "demo-candidate-03",
+        "name": "黃雅婷",
+        "partyId": "tpp",
+        "officeTypeId": "city-councilor",
+        "cityId": "taoyuan-city",
+        "constituencyId": "taoyuan-demo-06",
+        "hideConstituencyLabel": true,
+        "resultStatus": "pending"
+      },
+      {
+        "id": "demo-candidate-04",
+        "name": "趙子豪",
+        "partyId": "kmt",
+        "officeTypeId": "city-councilor",
+        "cityId": "taoyuan-city",
+        "constituencyId": "taoyuan-demo-06",
+        "resultStatus": "elected"
+      },
+      {
+        "id": "demo-candidate-05",
+        "name": "郭怡君",
+        "partyId": "dpp",
+        "officeTypeId": "city-councilor",
+        "cityId": "taoyuan-city",
+        "constituencyId": "taoyuan-demo-06",
+        "resultStatus": "pending"
+      },
+      {
+        "id": "demo-candidate-06",
+        "name": "曾柏文",
+        "partyId": "tpp",
+        "officeTypeId": "city-councilor",
+        "cityId": "taoyuan-city",
+        "constituencyId": "taoyuan-demo-06",
+        "resultStatus": "elected"
+      },
+      {
+        "id": "demo-candidate-07",
+        "name": "許育誠",
+        "partyId": "dpp",
+        "officeTypeId": "city-councilor",
+        "cityId": "taoyuan-city",
+        "constituencyId": "taoyuan-demo-06",
+        "resultStatus": "elected"
+      },
+      {
+        "id": "demo-candidate-08",
+        "name": "張雅雯",
+        "partyId": "independent",
+        "officeTypeId": "city-councilor",
+        "cityId": "taoyuan-city",
+        "constituencyId": "taoyuan-demo-06",
+        "resultStatus": "pending"
+      },
+      {
+        "id": "demo-candidate-09",
+        "name": "王志明",
+        "partyId": "kmt",
+        "officeTypeId": "city-councilor",
+        "cityId": "taoyuan-city",
+        "constituencyId": "taoyuan-demo-06",
+        "resultStatus": "pending"
+      },
+      {
+        "id": "demo-candidate-10",
+        "name": "李欣怡",
+        "partyId": "dpp",
+        "officeTypeId": "city-councilor",
+        "cityId": "taipei-city",
+        "constituencyId": "taipei-demo-05",
+        "resultStatus": "elected"
+      },
+      {
+        "id": "demo-candidate-11",
+        "name": "周柏翰",
+        "partyId": "kmt",
+        "officeTypeId": "city-councilor",
+        "cityId": "new-taipei-city",
+        "constituencyId": "new-taipei-demo-07",
+        "resultStatus": "pending"
+      },
+      {
+        "id": "demo-candidate-12",
+        "name": "吳思妤",
+        "partyId": "tpp",
+        "officeTypeId": "city-councilor",
+        "cityId": "new-taipei-city",
+        "constituencyId": "new-taipei-demo-08",
+        "resultStatus": "elected"
+      }
+    ],
+    "emptyState": {
+      "title": "查無人員",
+      "description": "請調整查詢條件後再試一次"
+    }
+  },
   "referendum": {
     "sectionTitle": "憲法修正案公民複決",
     "items": [

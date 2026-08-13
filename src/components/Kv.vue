@@ -46,13 +46,17 @@
         <p class="kv-subtitle2">縣市長選舉 即時報導、參選人新聞一次看！</p>
 
         <div class="cd-row">
-          <span class="cd-num">{{ t.days }}</span><span class="cd-unit">天</span>
-          <span class="cd-sep">|</span>
-          <span class="cd-num">{{ t.hours }}</span><span class="cd-unit">時</span>
-          <span class="cd-sep">|</span>
-          <span class="cd-num">{{ t.minutes }}</span><span class="cd-unit">分</span>
-          <span class="cd-sep">|</span>
-          <span class="cd-num">{{ t.seconds }}</span><span class="cd-unit">秒</span>
+          <template v-if="phase === 'default'">
+            <span class="cd-num">{{ t.days }}</span><span class="cd-unit">天</span>
+            <span class="cd-sep">|</span>
+            <span class="cd-num">{{ t.hours }}</span><span class="cd-unit">時</span>
+            <span class="cd-sep">|</span>
+            <span class="cd-num">{{ t.minutes }}</span><span class="cd-unit">分</span>
+            <span class="cd-sep">|</span>
+            <span class="cd-num">{{ t.seconds }}</span><span class="cd-unit">秒</span>
+          </template>
+          <span v-else-if="phase === 'start'" class="cd-status">開票中</span>
+          <span v-else class="cd-status cd-status-end">開票完</span>
         </div>
       </div>
     </div>
@@ -73,6 +77,9 @@ import kvPeople    from '../assets/images/kv_people.svg?url';
 import kvSubtitle1 from '../assets/images/kv_subtitle1.png?url';
 import bgCircle    from '../assets/images/bg_circle.svg?url';
 import { SCHEDULE_START } from '../utils/schedule.js';
+import { usePhase } from '../composables/usePhase.js';
+
+const { phase } = usePhase();
 
 const electionDate = new Date(SCHEDULE_START).getTime();
 const t = ref({ days: '--', hours: '--', minutes: '--', seconds: '--' });
@@ -336,6 +343,18 @@ onUnmounted(() => {
   font-weight: 300;
 }
 
+.cd-status {
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 900;
+  color: var(--color-coffee-600);
+  line-height: 1;
+  letter-spacing: 0.06em;
+}
+
+.cd-status-end {
+  color: var(--color-primary);
+}
+
 .kv-right {
   position: absolute;
   right: 5%;
@@ -422,6 +441,7 @@ onUnmounted(() => {
   .cd-num { font-size: clamp(1.6rem, 3.5vw, 2.4rem); }
   .cd-unit { font-size: clamp(0.8rem, 1.5vw, 1rem); }
   .cd-sep { font-size: clamp(0.9rem, 1.5vw, 1.1rem); }
+  .cd-status { font-size: clamp(1.6rem, 3.5vw, 2.4rem); }
 
   .kv-right {
     position: static;
@@ -518,6 +538,7 @@ onUnmounted(() => {
   .cd-num { font-size: clamp(1.6rem, 5vw, 2.2rem); }
   .cd-unit { font-size: clamp(0.8rem, 2vw, 1rem); }
   .cd-sep { font-size: clamp(0.9rem, 2vw, 1.1rem); }
+  .cd-status { font-size: clamp(1.6rem, 5vw, 2.2rem); }
 
   .kv-right {
     position: static;

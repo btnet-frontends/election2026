@@ -3,7 +3,7 @@
     <div class="container">
       <div class="section-header">
         <span class="polls-title">
-          <img :src="searchIcon" alt="search" class="search-icon" />
+          <img :src="electionPollIcon" alt="election-poll-icon" class="election-poll-icon" />
           選舉民調
         </span>
         <div class="polls-divider"></div>
@@ -63,7 +63,7 @@
 <script setup>
 import { ref, computed, onBeforeUnmount, onMounted } from 'vue';
 import pollsBg from '../assets/images/polls_bg.png?url';
-import searchIcon from '../assets/images/search_icon.svg?url';
+import electionPollIcon from '../assets/images/election_poll_icon.svg?url';
 import config from '../json/data.json';
 
 const chartTabs = config.pollsChart.tabs;
@@ -187,11 +187,12 @@ onBeforeUnmount(() => {
   margin-bottom: 3.5rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  text-align: left;
+  flex-direction: column;
+  gap: 0rem;
+  text-align: center;
 }
 
-.search-icon {
+.election-poll-icon {
   width: 30px;
   height: 30px;
   flex-shrink: 0;
@@ -206,12 +207,13 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  margin: 0 auto;
 }
 
 .polls-divider {
-  flex: 1;
-  height: 1.5px;
-  background: var(--color-coffee-300);
+  width: 13rem;
+  height: 2px;
+  background-color: var(--color-coffee-300);
 }
 
 .polls-card {

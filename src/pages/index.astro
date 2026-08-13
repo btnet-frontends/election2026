@@ -8,6 +8,7 @@ import PollsChart from '../components/PollsChart.vue';
 import LiveStreaming from '../components/LiveStreaming.vue';
 import Referendum from '../components/Referendum.vue';
 import Vote from '../components/Vote.vue';
+import ElectedSearch from '../components/ElectedSearch.vue';
 
 import type { NewsData } from '../types/news';
 
@@ -22,7 +23,8 @@ const componentVisibility = {
   PollsChart: config.components?.PollsChart !== false,
   LiveStreaming: config.components?.LiveStreaming !== false,
   Referendum: config.components?.Referendum !== false,
-  Vote: config.components?.Vote !== false
+  Vote: config.components?.Vote !== false,
+  ElectedSearch: config.components?.ElectedSearch !== false
 };
 
 const hotTags = config.newsReport.hotTags;
@@ -219,5 +221,7 @@ const structuredData = {
     {componentVisibility.Vote && <Vote client:load />}
 
     {componentVisibility.Referendum && <Referendum client:load />}
+
+    {componentVisibility.ElectedSearch && <ElectedSearch client:load />}
   </main>
 </Layout>

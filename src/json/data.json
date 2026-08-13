@@ -41,7 +41,8 @@
     "Referendum": true,
     "Seats": true,
     "VoteAnalysis": true,
-    "PartyHistory": true
+    "PartyHistory": true,
+    "ElectedSearch": true
   },
   "referendum": {
     "sectionTitle": "憲法修正案公民複決",

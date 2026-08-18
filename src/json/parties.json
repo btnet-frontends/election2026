@@ -1,0 +1,482 @@
+[
+  {
+    "id": 0,
+    "name": "無黨籍及未經政黨推薦",
+    "image": "party0.png",
+    "color": null
+  },
+  {
+    "id": 1,
+    "name": "中國國民黨",
+    "image": "party1.png",
+    "color": "#000099"
+  },
+  {
+    "id": 2,
+    "name": "中國青年黨",
+    "image": "party2.png",
+    "color": "#FCE61E"
+  },
+  {
+    "id": 10,
+    "name": "中國民眾黨",
+    "image": "party3.png",
+    "color": "#0a92e8"
+  },
+  {
+    "id": 15,
+    "name": "勞動黨",
+    "image": "party4.png",
+    "color": "#FF0000"
+  },
+  {
+    "id": 16,
+    "name": "民主進步黨",
+    "image": "party5.png",
+    "color": "#1B9431"
+  },
+  {
+    "id": 73,
+    "name": "公民黨",
+    "image": "party6.png",
+    "color": "#DC143C"
+  },
+  {
+    "id": 74,
+    "name": "新黨",
+    "image": "party7.png",
+    "color": "#FFDA00"
+  },
+  {
+    "id": 79,
+    "name": "台灣綠黨",
+    "image": "party8.png",
+    "color": "#73BE00"
+  },
+  {
+    "id": 80,
+    "name": "家庭基本收入",
+    "image": "party9.png",
+    "color": "#ce342d"
+  },
+  {
+    "id": 90,
+    "name": "親民黨",
+    "image": "party10.png",
+    "color": "#FF6310"
+  },
+  {
+    "id": 95,
+    "name": "台聯黨",
+    "image": "party11.png",
+    "color": "#C69E6A"
+  },
+  {
+    "id": 98,
+    "name": "中華民族致公黨",
+    "image": "party12.png",
+    "color": "#e70012"
+  },
+  {
+    "id": 101,
+    "name": "台灣工黨",
+    "image": "party13.png",
+    "color": "#008001"
+  },
+  {
+    "id": 106,
+    "name": "無黨團結聯盟",
+    "image": "party14.png",
+    "color": "#C20F51"
+  },
+  {
+    "id": 113,
+    "name": "中華統一促進黨（114年1月2日政黨審議會第3屆第4次會議決議向憲法法庭聲請違憲解散）（115年8月7日內政部向憲法法庭聲請違憲解散）",
+    "image": "party15.png",
+    "color": "#000080"
+  },
+  {
+    "id": 127,
+    "name": "台灣國民黨",
+    "image": "party16.png",
+    "color": "#00d6e0"
+  },
+  {
+    "id": 151,
+    "name": "中華婦女黨",
+    "image": "party17.png",
+    "color": "#ff33ff"
+  },
+  {
+    "id": 153,
+    "name": "人民最大黨",
+    "image": "party18.png",
+    "color": "#005923"
+  },
+  {
+    "id": 188,
+    "name": "正黨",
+    "image": "party19.png",
+    "color": "#920683"
+  },
+  {
+    "id": 191,
+    "name": "中華聯合黨",
+    "image": "party20.png",
+    "color": "#a3765e"
+  },
+  {
+    "id": 195,
+    "name": "制度救世島",
+    "image": "party21.png",
+    "color": "#DDDDDD"
+  },
+  {
+    "id": 198,
+    "name": "新華勞動黨",
+    "image": "party22.png",
+    "color": "#5e843b"
+  },
+  {
+    "id": 199,
+    "name": "人民民主黨",
+    "image": "party23.png",
+    "color": "#FB0100"
+  },
+  {
+    "id": 203,
+    "name": "三勢團結促進聯盟",
+    "image": "party24.png",
+    "color": "#dd0d1a"
+  },
+  {
+    "id": 211,
+    "name": "台灣照生黨",
+    "image": "party25.png",
+    "color": "#26913b"
+  },
+  {
+    "id": 219,
+    "name": "台灣進步黨",
+    "image": "party26.png",
+    "color": "#f8b63c"
+  },
+  {
+    "id": 224,
+    "name": "台灣整復師聯盟工黨",
+    "image": "party27.png",
+    "color": "#e4222b"
+  },
+  {
+    "id": 236,
+    "name": "新生黨",
+    "image": "party28.png",
+    "color": "#DDDDDD"
+  },
+  {
+    "id": 240,
+    "name": "司法正義黨",
+    "image": "party29.png",
+    "color": "#801f1f"
+  },
+  {
+    "id": 250,
+    "name": "中國國家社會主義勞工黨",
+    "image": "party30.png",
+    "color": "#a67d2f"
+  },
+  {
+    "id": 257,
+    "name": "天宙和平統一家庭黨",
+    "image": "party31.png",
+    "color": "#e0a522"
+  },
+  {
+    "id": 264,
+    "name": "經濟黨",
+    "image": "party32.png",
+    "color": "#ff6600"
+  },
+  {
+    "id": 267,
+    "name": "時代力量",
+    "image": "party33.png",
+    "color": "#FBBE01"
+  },
+  {
+    "id": 269,
+    "name": "社會民主黨",
+    "image": "party34.png",
+    "color": "#FF0088"
+  },
+  {
+    "id": 293,
+    "name": "興中同盟會",
+    "image": "party35.png",
+    "color": "#2a278c"
+  },
+  {
+    "id": 295,
+    "name": "全國人民黨",
+    "image": "party36.png",
+    "color": "#be292d"
+  },
+  {
+    "id": 303,
+    "name": "台灣基進",
+    "image": "party37.png",
+    "color": "#A73F24"
+  },
+  {
+    "id": 306,
+    "name": "台灣動物保護黨",
+    "image": "party38.png",
+    "color": "#556B2F"
+  },
+  {
+    "id": 307,
+    "name": "中華文化復興在理黨",
+    "image": "party39.png",
+    "color": "#f8aa02"
+  },
+  {
+    "id": 310,
+    "name": "青年陽光黨",
+    "image": "party40.png",
+    "color": "#ef7f1b"
+  },
+  {
+    "id": 315,
+    "name": "臺灣人民共產黨",
+    "image": "party41.png",
+    "color": "#ee1c25"
+  },
+  {
+    "id": 316,
+    "name": "中國和平統一黨",
+    "image": "party42.png",
+    "color": "#dd6b60"
+  },
+  {
+    "id": 320,
+    "name": "龍黨",
+    "image": "party43.png",
+    "color": "#e50015"
+  },
+  {
+    "id": 321,
+    "name": "台灣學習黨",
+    "image": "party44.png",
+    "color": "#da251a"
+  },
+  {
+    "id": 338,
+    "name": "左翼聯盟",
+    "image": "party45.png",
+    "color": "#e53e2e"
+  },
+  {
+    "id": 339,
+    "name": "中華愛國同心黨",
+    "image": "party46.png",
+    "color": "#d40000"
+  },
+  {
+    "id": 340,
+    "name": "台灣經濟發展黨",
+    "image": "party47.png",
+    "color": "#d5a81c"
+  },
+  {
+    "id": 342,
+    "name": "合一行動聯盟",
+    "image": "party48.png",
+    "color": "#E32636"
+  },
+  {
+    "id": 343,
+    "name": "天一黨",
+    "image": "party49.png",
+    "color": "#aa5244"
+  },
+  {
+    "id": 348,
+    "name": "喜樂島聯盟",
+    "image": "party50.png",
+    "color": "#41bab1"
+  },
+  {
+    "id": 350,
+    "name": "台灣民眾黨",
+    "image": "party51.png",
+    "color": "#28C8C8"
+  },
+  {
+    "id": 353,
+    "name": "統一聯盟黨",
+    "image": "party52.png",
+    "color": "#e00025"
+  },
+  {
+    "id": 355,
+    "name": "台澎黨",
+    "image": "party53.png",
+    "color": "#dcdcdc"
+  },
+  {
+    "id": 357,
+    "name": "小民參政歐巴桑聯盟",
+    "image": "party54.png",
+    "color": "#F4E6D3"
+  },
+  {
+    "id": 366,
+    "name": "臺灣雙語無法黨",
+    "image": "party55.png",
+    "color": "#9dc3e8"
+  },
+  {
+    "id": 367,
+    "name": "夏潮聯合會",
+    "image": "party56.png",
+    "color": "#e60011"
+  },
+  {
+    "id": 370,
+    "name": "台灣新住民黨",
+    "image": "party57.png",
+    "color": "#7f7f7f"
+  },
+  {
+    "id": 371,
+    "name": "前進黨",
+    "image": "party58.png",
+    "color": "#f25822"
+  },
+  {
+    "id": 372,
+    "name": "台灣澎友黨",
+    "image": "party59.png",
+    "color": "#6b1786"
+  },
+  {
+    "id": 374,
+    "name": "中華文化共和黨",
+    "image": "party60.png",
+    "color": "#DDDDDD"
+  },
+  {
+    "id": 375,
+    "name": "正神名黨",
+    "image": "party61.png",
+    "color": "#A0D9F6"
+  },
+  {
+    "id": 376,
+    "name": "更生黨",
+    "image": "party62.png",
+    "color": "#9956fe"
+  },
+  {
+    "id": 379,
+    "name": "台灣麻將最大黨",
+    "image": "party63.png",
+    "color": "#226d2c"
+  },
+  {
+    "id": 380,
+    "name": "民主監督聯盟",
+    "image": "party64.png",
+    "color": "#a10f10"
+  },
+  {
+    "id": 381,
+    "name": "中華保台反共復國黨",
+    "image": "party65.png",
+    "color": "#0000fe"
+  },
+  {
+    "id": 382,
+    "name": "司法改革黨",
+    "image": "party66.png",
+    "color": "#549dbe"
+  },
+  {
+    "id": 383,
+    "name": "原民黨",
+    "image": "party67.png",
+    "color": "#a44c7e"
+  },
+  {
+    "id": 385,
+    "name": "嘉意公益黨",
+    "image": "party68.png",
+    "color": "#d33f11"
+  },
+  {
+    "id": 386,
+    "name": "中小企業團結聯盟",
+    "image": "party69.png",
+    "color": "#f70400"
+  },
+  {
+    "id": 387,
+    "name": "太易聯盟黨",
+    "image": "party70.png",
+    "color": "#22ad3a"
+  },
+  {
+    "id": 388,
+    "name": "中華梅花黨",
+    "image": "party71.png",
+    "color": "#fff00f"
+  },
+  {
+    "id": 389,
+    "name": "美麗無限黨",
+    "image": "party72.png",
+    "color": "#e83a6b"
+  },
+  {
+    "id": 390,
+    "name": "民生黨",
+    "image": "party73.png",
+    "color": "#e55757"
+  },
+  {
+    "id": 391,
+    "name": "愛民黨",
+    "image": "party74.png",
+    "color": "#45b9ea"
+  },
+  {
+    "id": 392,
+    "name": "商工統一促進會",
+    "image": "party75.png",
+    "color": "#2e679c"
+  },
+  {
+    "id": 393,
+    "name": "永續和平黨",
+    "image": "party76.png",
+    "color": "#cda337"
+  },
+  {
+    "id": 394,
+    "name": "台美黨",
+    "image": "party77.png",
+    "color": "#10214c"
+  },
+  {
+    "id": 395,
+    "name": "台灣民主黨",
+    "image": "party78.png",
+    "color": "#3d6eb2"
+  },
+  {
+    "id": 396,
+    "name": "藝術黨",
+    "image": "party79.png",
+    "color": "#f2b410"
+  }
+]

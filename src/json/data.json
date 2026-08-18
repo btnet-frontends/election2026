@@ -354,7 +354,6 @@
     ]
   },
   "partyHistory": {
-    "defaultYear": 2018,
     "years": [
       { "year": 2018, "status": "final" },
       { "year": 2022, "status": "final" },

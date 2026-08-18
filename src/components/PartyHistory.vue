@@ -86,10 +86,8 @@ const resultsByYear = {
   ...(props.history?.results ?? {})
 };
 
-const defaultYear = allYearOptions.some((item) => item.year === partyHistory.defaultYear)
-  ? partyHistory.defaultYear
-  : allYearOptions[0]?.year;
-const selectedYear = ref(defaultYear);
+// 預設顯示可見選項中最後（最新）的年份
+const selectedYear = ref(yearOptions.value[yearOptions.value.length - 1]?.year);
 
 const selectedYearOption = computed(() => (
   yearOptions.value.find((item) => item.year === selectedYear.value)

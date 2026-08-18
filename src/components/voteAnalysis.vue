@@ -81,9 +81,7 @@
       </div>
 
       <p class="source-note">
-        <a :href="voteAnalysis.source.url" target="_blank" rel="noopener noreferrer">
-          {{ voteAnalysis.source.label }}
-        </a>
+        {{ voteAnalysis.source.label }}
       </p>
     </div>
   </section>

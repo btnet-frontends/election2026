@@ -597,8 +597,8 @@
   "voteAnalysis": {
     "title": "投票分析",
     "source": {
-      "label": "資料來源：中央選舉委員會（依今周刊 2022 選舉專題圖表整理）",
-      "url": "https://www.cec.gov.tw/"
+      "label": "資料來源：中央選舉委員會",
+      "url": ""
     },
     "colors": {
       "accent": "#8e5f28",

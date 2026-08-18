@@ -1,4 +1,4 @@
-const HISTORY_API_URL = 'https://lazybusiness.s3.ap-northeast-1.amazonaws.com/2026election/getParliamentaryHistory';
+const HISTORY_API_URL = 'https://doqvf81n9htmm.cloudfront.net/2026election/getParliamentaryHistory';
 const PARTY_COLOR_CSV_URL = 'https://docs.google.com/spreadsheets/d/16UCNbkRG239e4Q4SiEXE9xn470I5Xs0b7h8DLa0g8D8/export?format=csv&gid=0';
 
 // API 的政黨名稱與色票表（Google Sheet）名稱不一致時的對照

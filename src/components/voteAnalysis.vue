@@ -116,8 +116,39 @@ use([
   LabelLayout
 ]);
 
+const props = defineProps({
+  // fetchElectionStat() 的結果；抓取失敗時為 null，退回 data.json 內建資料
+  stat: {
+    type: Object,
+    default: null
+  }
+});
+
 const voteAnalysis = config.voteAnalysis;
-const tabs = voteAnalysis.tabs;
+
+const partyTrend = props.stat?.partyTrend
+  ? { ...voteAnalysis.partyTrend, ...props.stat.partyTrend }
+  : voteAnalysis.partyTrend;
+
+const turnout = props.stat?.turnout
+  ? { ...voteAnalysis.turnout, items: props.stat.turnout.items }
+  : voteAnalysis.turnout;
+
+const municipalityYears = props.stat?.municipalityYears ?? voteAnalysis.municipality.years;
+
+// 圓餅圖 tab 依 API 提供的年份動態產生，其餘 tab 沿用 data.json 設定
+const tabs = props.stat?.municipalityYears
+  ? [
+      ...voteAnalysis.tabs.filter((tab) => tab.type !== 'pie'),
+      ...Object.keys(props.stat.municipalityYears).sort().map((year) => ({
+        id: `municipality-${year}`,
+        label: `${year}年直轄市長選舉各政黨候選人得票率`,
+        type: 'pie',
+        year: Number(year)
+      }))
+    ]
+  : voteAnalysis.tabs;
+
 const colors = voteAnalysis.colors;
 const fontFamily = "'Inter', 'Noto Sans TC', sans-serif";
 const chartInitOptions = Object.freeze({ renderer: 'svg' });
@@ -129,7 +160,7 @@ const activeTab = computed(() => (
 ));
 
 const activeMunicipalityData = computed(() => (
-  voteAnalysis.municipality.years[String(activeTab.value?.year)] ?? []
+  municipalityYears[String(activeTab.value?.year)] ?? []
 ));
 
 const activateTab = (tabId) => {
@@ -180,19 +211,22 @@ const tooltipBase = {
 };
 
 const lineOption = computed(() => {
-  const categoryLabels = voteAnalysis.partyTrend.categories.map(
+  const categories = partyTrend.categories;
+  const categoryLabels = categories.map(
     ({ year, election }) => `${year}\n${election}`
   );
+  const firstYear = categories[0]?.year ?? '';
+  const lastYear = categories[categories.length - 1]?.year ?? '';
 
   return {
     animationDuration: 550,
     color: [colors.kmt, colors.dpp],
     aria: {
       enabled: true,
-      description: '比較國民黨與民進黨自2002年至2022年重要選舉得票率。'
+      description: `比較國民黨與民進黨自${firstYear}至${lastYear}重要選舉得票率。`
     },
     title: {
-      text: voteAnalysis.partyTrend.axisTitle,
+      text: partyTrend.axisTitle,
       left: 4,
       top: 3,
       textStyle: {
@@ -212,7 +246,7 @@ const lineOption = computed(() => {
       },
       formatter: (params) => {
         const points = Array.isArray(params) ? params : [params];
-        const category = voteAnalysis.partyTrend.categories[points[0]?.dataIndex];
+        const category = partyTrend.categories[points[0]?.dataIndex];
         const heading = category ? `${category.year} ${category.election.replace('\n', '')}` : '';
         const rows = points.map((point) => (
           `${point.marker}${point.seriesName}：<strong>${formatPercentage(point.value)}%</strong>`
@@ -257,7 +291,7 @@ const lineOption = computed(() => {
       },
       splitLine: { lineStyle: { color: colors.grid } }
     },
-    series: voteAnalysis.partyTrend.series.map((series, index) => {
+    series: partyTrend.series.map((series, index) => {
       const seriesColor = colors[series.id];
       return {
         id: series.id,
@@ -283,13 +317,15 @@ const lineOption = computed(() => {
 });
 
 const turnoutOption = computed(() => {
-  const items = voteAnalysis.turnout.items;
+  const items = turnout.items;
+  const firstYear = items[0]?.label.slice(0, 5) ?? '';
+  const lastYear = items[items.length - 1]?.label.slice(0, 5) ?? '';
 
   return {
     animationDuration: 550,
     aria: {
       enabled: true,
-      description: '比較2008年至2022年台灣重要選舉投票率。'
+      description: `比較${firstYear}至${lastYear}台灣重要選舉投票率。`
     },
     tooltip: {
       ...tooltipBase,
@@ -313,7 +349,7 @@ const turnoutOption = computed(() => {
       min: 0,
       max: 80,
       interval: 20,
-      name: `(${voteAnalysis.turnout.unit})`,
+      name: `(${turnout.unit})`,
       nameLocation: 'end',
       nameGap: 16,
       nameTextStyle: { color: colors.text, fontFamily, fontSize: 13 },

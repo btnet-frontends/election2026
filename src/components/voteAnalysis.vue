@@ -586,8 +586,9 @@ function getPieAriaLabel(city) {
 }
 
 .chart-tabs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem 1.5rem;
   width: min(100%, 1120px);
   margin: 0 auto 3.75rem;
@@ -595,6 +596,7 @@ function getPieAriaLabel(city) {
 
 .chart-tab {
   display: flex;
+  flex: 0 1 calc(50% - 0.75rem);
   min-width: 0;
   min-height: 3.55rem;
   align-items: center;
@@ -718,13 +720,13 @@ function getPieAriaLabel(city) {
   }
 
   .chart-tabs {
-    grid-template-columns: 1fr;
     gap: 0.75rem;
     width: min(100%, 34rem);
     margin-bottom: 2.25rem;
   }
 
   .chart-tab {
+    flex-basis: 100%;
     min-height: 3rem;
     padding: 0.6rem 1rem;
     font-size: 0.9rem;

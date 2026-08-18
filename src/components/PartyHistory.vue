@@ -41,15 +41,9 @@
           </li>
         </ul>
 
-        <a
-          v-if="partyHistory.source?.url"
-          class="data-source"
-          :href="partyHistory.source.url"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <p class="data-source">
           {{ partyHistory.source.label }}
-        </a>
+        </p>
       </div>
     </div>
   </section>
@@ -60,16 +54,41 @@ import { computed, ref } from 'vue';
 import config from '../json/data.json';
 import TaiwanPartyHistoryLocation from './taiwanPartyHistoryLocation.vue';
 
+const props = defineProps({
+  // fetchMayorHistory() 的結果；抓取失敗時為 null，退回 data.json 內建資料
+  history: {
+    type: Object,
+    default: null
+  }
+});
+
 const partyHistory = config.partyHistory;
-const yearOptions = partyHistory.years;
-const selectedYear = ref(partyHistory.defaultYear);
+
+// API 有的年份以 API 為準，data.json 中未被覆蓋的年份（如 2026 尚未開票）保留
+const apiYears = props.history?.years ?? [];
+const yearOptions = [
+  ...apiYears.map((year) => (
+    partyHistory.years.find((item) => item.year === year) ?? { year, status: 'final' }
+  )),
+  ...partyHistory.years.filter((item) => !apiYears.includes(item.year))
+].sort((a, b) => a.year - b.year);
+
+const resultsByYear = {
+  ...partyHistory.results,
+  ...(props.history?.results ?? {})
+};
+
+const defaultYear = yearOptions.some((item) => item.year === partyHistory.defaultYear)
+  ? partyHistory.defaultYear
+  : yearOptions[0]?.year;
+const selectedYear = ref(defaultYear);
 
 const selectedYearOption = computed(() => (
   yearOptions.find((item) => item.year === selectedYear.value)
 ));
 
 const currentResults = computed(() => (
-  partyHistory.results[String(selectedYear.value)] ?? {}
+  resultsByYear[String(selectedYear.value)] ?? {}
 ));
 
 const locationColors = computed(() => Object.fromEntries(
@@ -220,7 +239,6 @@ const mapLabel = computed(() => {
   margin-top: 1.25rem;
   color: var(--color-coffee-300);
   font-size: 0.8rem;
-  text-decoration: underline;
   text-underline-offset: 0.2em;
 }
 

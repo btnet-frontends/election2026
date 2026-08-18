@@ -16,6 +16,7 @@ import { buildNewsApiUrl, getTagApi } from '../utils/newsApi.js';
 import { buildFlashNewsList } from '../utils/newsUtils.js';
 import { fetchSeatHistory } from '../utils/seatHistoryApi.js';
 import { fetchElectionStat } from '../utils/electionStatApi.js';
+import { fetchMayorHistory } from '../utils/mayorHistoryApi.js';
 
 const componentVisibility = {
   KV: config.components?.KV !== false,
@@ -106,6 +107,7 @@ if (componentVisibility.FlashNews) {
 
 const seatHistory = componentVisibility.Seats ? await fetchSeatHistory() : null;
 const electionStat = componentVisibility.VoteAnalysis ? await fetchElectionStat() : null;
+const mayorHistory = componentVisibility.PartyHistory ? await fetchMayorHistory() : null;
 
 const footerBgColor = componentVisibility.PollsChart ? 'var(--color-coffee-50)' : 'var(--color-coffee-0)';
 
@@ -215,7 +217,7 @@ const structuredData = {
 
     {componentVisibility.VoteAnalysis && <VoteAnalysis stat={electionStat} client:load />}
 
-    {componentVisibility.PartyHistory && <PartyHistory client:load />}
+    {componentVisibility.PartyHistory && <PartyHistory history={mayorHistory} client:load />}
 
   </main>
 </Layout>

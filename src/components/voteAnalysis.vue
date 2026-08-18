@@ -68,6 +68,14 @@
           :aria-label="activeTab.label"
         />
 
+        <p
+          v-else-if="activeMunicipalityData.length === 0"
+          class="chart-pending"
+          role="status"
+        >
+          尚未開票
+        </p>
+
         <VChart
           v-else
           :key="activeTab.id"
@@ -101,6 +109,8 @@ import {
 import { LabelLayout } from 'echarts/features';
 import VChart from 'vue-echarts';
 import config from '../json/data.json';
+import { usePhase } from '../composables/usePhase.js';
+import { ELECTION_YEAR } from '../utils/schedule.js';
 
 use([
   SVGRenderer,
@@ -123,38 +133,78 @@ const props = defineProps({
 });
 
 const voteAnalysis = config.voteAnalysis;
+const { phase } = usePhase();
+const isPreElection = computed(() => phase.value === 'default');
 
-const partyTrend = props.stat?.partyTrend
+const basePartyTrend = props.stat?.partyTrend
   ? { ...voteAnalysis.partyTrend, ...props.stat.partyTrend }
   : voteAnalysis.partyTrend;
 
-const turnout = props.stat?.turnout
+const baseTurnout = props.stat?.turnout
   ? { ...voteAnalysis.turnout, items: props.stat.turnout.items }
   : voteAnalysis.turnout;
 
 const municipalityYears = props.stat?.municipalityYears ?? voteAnalysis.municipality.years;
 
-// 圓餅圖 tab 依 API 提供的年份動態產生，其餘 tab 沿用 data.json 設定
-const tabs = props.stat?.municipalityYears
-  ? [
-      ...voteAnalysis.tabs.filter((tab) => tab.type !== 'pie'),
-      ...Object.keys(props.stat.municipalityYears).sort().map((year) => ({
-        id: `municipality-${year}`,
-        label: `${year}年直轄市長選舉各政黨候選人得票率`,
-        type: 'pie',
-        year: Number(year)
-      }))
-    ]
-  : voteAnalysis.tabs;
+// SCHEDULE_START 前不顯示 2026 的資料點
+const partyTrend = computed(() => {
+  if (!isPreElection.value) return basePartyTrend;
+
+  const keep = basePartyTrend.categories.map(
+    (category) => !category.year.startsWith(String(ELECTION_YEAR))
+  );
+
+  return {
+    ...basePartyTrend,
+    categories: basePartyTrend.categories.filter((_, index) => keep[index]),
+    series: basePartyTrend.series.map((series) => ({
+      ...series,
+      values: series.values.filter((_, index) => keep[index])
+    }))
+  };
+});
+
+const turnout = computed(() => (
+  isPreElection.value
+    ? {
+        ...baseTurnout,
+        items: baseTurnout.items.filter(
+          (item) => !String(item.label).startsWith(String(ELECTION_YEAR))
+        )
+      }
+    : baseTurnout
+));
+
+// 圓餅圖 tab：SCHEDULE_START 前只列歷史年份；之後補上 2026
+// （API 尚無 2026 資料時內容顯示「尚未開票」），其餘 tab 沿用 data.json 設定
+const tabs = computed(() => {
+  let pieYears = Object.keys(municipalityYears).sort();
+
+  if (isPreElection.value) {
+    pieYears = pieYears.filter((year) => Number(year) < ELECTION_YEAR);
+  } else if (!pieYears.includes(String(ELECTION_YEAR))) {
+    pieYears = [...pieYears, String(ELECTION_YEAR)];
+  }
+
+  return [
+    ...voteAnalysis.tabs.filter((tab) => tab.type !== 'pie'),
+    ...pieYears.map((year) => ({
+      id: `municipality-${year}`,
+      label: `${year}年直轄市長選舉各政黨候選人得票率`,
+      type: 'pie',
+      year: Number(year)
+    }))
+  ];
+});
 
 const colors = voteAnalysis.colors;
 const fontFamily = "'Inter', 'Noto Sans TC', sans-serif";
 const chartInitOptions = Object.freeze({ renderer: 'svg' });
 
-const activeTabId = ref(tabs[0]?.id ?? '');
+const activeTabId = ref(tabs.value[0]?.id ?? '');
 
 const activeTab = computed(() => (
-  tabs.find((tab) => tab.id === activeTabId.value) ?? tabs[0]
+  tabs.value.find((tab) => tab.id === activeTabId.value) ?? tabs.value[0]
 ));
 
 const activeMunicipalityData = computed(() => (
@@ -173,19 +223,19 @@ const handleTabKeydown = (event, currentIndex) => {
 
   let nextIndex = currentIndex;
   if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-    nextIndex = (currentIndex + 1) % tabs.length;
+    nextIndex = (currentIndex + 1) % tabs.value.length;
   } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-    nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+    nextIndex = (currentIndex - 1 + tabs.value.length) % tabs.value.length;
   } else if (event.key === 'Home') {
     nextIndex = 0;
   } else if (event.key === 'End') {
-    nextIndex = tabs.length - 1;
+    nextIndex = tabs.value.length - 1;
   } else {
     return;
   }
 
   event.preventDefault();
-  activateTab(tabs[nextIndex].id);
+  activateTab(tabs.value[nextIndex].id);
   tabElements[nextIndex]?.focus();
 };
 
@@ -209,7 +259,7 @@ const tooltipBase = {
 };
 
 const lineOption = computed(() => {
-  const categories = partyTrend.categories;
+  const categories = partyTrend.value.categories;
   const categoryLabels = categories.map(
     ({ year, election }) => `${year}\n${election}`
   );
@@ -224,7 +274,7 @@ const lineOption = computed(() => {
       description: `比較國民黨與民進黨自${firstYear}至${lastYear}重要選舉得票率。`
     },
     title: {
-      text: partyTrend.axisTitle,
+      text: partyTrend.value.axisTitle,
       left: 4,
       top: 3,
       textStyle: {
@@ -244,7 +294,7 @@ const lineOption = computed(() => {
       },
       formatter: (params) => {
         const points = Array.isArray(params) ? params : [params];
-        const category = partyTrend.categories[points[0]?.dataIndex];
+        const category = partyTrend.value.categories[points[0]?.dataIndex];
         const heading = category ? `${category.year} ${category.election.replace('\n', '')}` : '';
         const rows = points.map((point) => (
           `${point.marker}${point.seriesName}：<strong>${formatPercentage(point.value)}%</strong>`
@@ -289,7 +339,7 @@ const lineOption = computed(() => {
       },
       splitLine: { lineStyle: { color: colors.grid } }
     },
-    series: partyTrend.series.map((series, index) => {
+    series: partyTrend.value.series.map((series, index) => {
       const seriesColor = colors[series.id];
       return {
         id: series.id,
@@ -315,7 +365,7 @@ const lineOption = computed(() => {
 });
 
 const turnoutOption = computed(() => {
-  const items = turnout.items;
+  const items = turnout.value.items;
   const firstYear = items[0]?.label.slice(0, 5) ?? '';
   const lastYear = items[items.length - 1]?.label.slice(0, 5) ?? '';
 
@@ -347,7 +397,7 @@ const turnoutOption = computed(() => {
       min: 0,
       max: 80,
       interval: 20,
-      name: `(${turnout.unit})`,
+      name: `(${turnout.value.unit})`,
       nameLocation: 'end',
       nameGap: 16,
       nameTextStyle: { color: colors.text, fontFamily, fontSize: 13 },
@@ -614,6 +664,18 @@ function getPieAriaLabel(city) {
 
 .municipality-chart {
   height: 37rem;
+}
+
+.chart-pending {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26rem;
+  color: #777b84;
+  font-size: clamp(1.35rem, 2.5vw, 1.9rem);
+  font-weight: 300;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
 }
 
 .source-note {

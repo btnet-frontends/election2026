@@ -33,6 +33,9 @@
           </div>
         </div>
 
+        <p v-if="isPendingYear" class="seat-pending" role="status">尚未開票</p>
+
+        <template v-else>
         <div class="seat-chart">
           <svg
             class="seat-chart-svg"
@@ -91,6 +94,7 @@
           <p>⏹︎ 為得票率</p>
           <p>資料來源：中央選舉委員會</p>
         </div>
+        </template>
       </div>
 
       <p v-else class="seat-empty" role="status">席次資料載入中，請稍後再試。</p>
@@ -101,6 +105,8 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import statisticsIcon from '../assets/images/statistics_icon.svg?url';
+import { usePhase } from '../composables/usePhase.js';
+import { ELECTION_YEAR } from '../utils/schedule.js';
 
 const props = defineProps({
   // fetchSeatHistory() 的結果：{ years, data, source }；抓取失敗時為 null
@@ -145,11 +151,33 @@ const isLightColor = (hex) => {
   return brightness > 150;
 };
 
+const { phase } = usePhase();
+
 const seatsByYear = computed(() => props.history?.data ?? {});
-const years = computed(() => props.history?.years ?? []);
+const apiYears = computed(() => props.history?.years ?? []);
+
+// SCHEDULE_START 前隱藏 2026；之後即使 API 尚無 2026 資料也顯示選項（內容為尚未開票）
+const years = computed(() => {
+  if (phase.value === 'default') {
+    return apiYears.value.filter((year) => year < ELECTION_YEAR);
+  }
+  return apiYears.value.includes(ELECTION_YEAR)
+    ? apiYears.value
+    : [ELECTION_YEAR, ...apiYears.value];
+});
+
 const hasData = computed(() => years.value.length > 0);
 const selectedYear = ref(years.value[0] ?? null);
-const cities = computed(() => Object.keys(seatsByYear.value[selectedYear.value] ?? {}));
+
+const isPendingYear = computed(() => !seatsByYear.value[selectedYear.value]);
+
+// 尚未開票的年份沒有縣市清單，改用最近一屆的縣市維持選單可用
+const cities = computed(() => {
+  const ownCities = Object.keys(seatsByYear.value[selectedYear.value] ?? {});
+  if (ownCities.length > 0) return ownCities;
+  const fallbackYear = apiYears.value.find((year) => seatsByYear.value[year]);
+  return Object.keys(seatsByYear.value[fallbackYear] ?? {});
+});
 const selectedCity = ref(cities.value[0] ?? null);
 
 const currentSeatData = computed(() => (
@@ -272,6 +300,13 @@ const chartAriaLabel = computed(() => {
 watch(selectedYear, () => {
   if (!cities.value.includes(selectedCity.value)) {
     selectedCity.value = cities.value[0];
+  }
+});
+
+// 階段切換（SCHEDULE_START 跨過）時年份清單會變動，確保選取值仍有效
+watch(years, (nextYears) => {
+  if (!nextYears.includes(selectedYear.value)) {
+    selectedYear.value = nextYears[0] ?? null;
   }
 });
 
@@ -435,6 +470,19 @@ watch([selectedYear, selectedCity], () => {
   line-height: 1;
   transition: fill 0.2s ease;
   pointer-events: none;
+}
+
+.seat-pending {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18rem;
+  margin-top: 1.5rem;
+  color: #888888;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 300;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
 }
 
 .seat-notes {

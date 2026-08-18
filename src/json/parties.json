@@ -331,7 +331,7 @@
   },
   {
     "id": 366,
-    "name": "臺灣雙語無法黨",
+    "name": "臺灣SoR無法黨",
     "image": "party55.png",
     "color": "#9dc3e8"
   },
@@ -478,5 +478,11 @@
     "name": "藝術黨",
     "image": "party79.png",
     "color": "#f2b410"
+  },
+  {
+    "id": 397,
+    "name": "全民健康黨",
+    "image": "party80.png",
+    "color": "#eb0020"
   }
 ]

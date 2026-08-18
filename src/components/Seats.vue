@@ -86,6 +86,11 @@
             <span>{{ party.label }}：{{ party.voteRate }}%</span>
           </li>
         </ul>
+
+        <div class="seat-notes">
+          <p>⏹︎ 為得票率</p>
+          <p>資料來源：中央選舉委員會</p>
+        </div>
       </div>
 
       <p v-else class="seat-empty" role="status">席次資料載入中，請稍後再試。</p>
@@ -430,6 +435,14 @@ watch([selectedYear, selectedCity], () => {
   line-height: 1;
   transition: fill 0.2s ease;
   pointer-events: none;
+}
+
+.seat-notes {
+  margin-top: 1.35rem;
+  color: #777b84;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  text-align: right;
 }
 
 .seat-empty {

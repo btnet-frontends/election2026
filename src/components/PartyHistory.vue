@@ -165,10 +165,14 @@ const mapLabel = computed(() => {
 }
 
 .year-buttons {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 112px));
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: clamp(1rem, 5vw, 3rem);
+}
+
+.year-button {
+  flex: 0 1 112px;
 }
 
 .year-button {
@@ -260,11 +264,12 @@ const mapLabel = computed(() => {
   }
 
   .year-buttons {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.75rem;
   }
 
   .year-button {
+    flex: 1 1 0;
+    max-width: 8.5rem;
     min-height: 36px;
     padding-inline: 0.5rem;
     font-size: 1.05rem;

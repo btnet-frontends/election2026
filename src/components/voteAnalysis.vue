@@ -146,20 +146,38 @@ const baseTurnout = props.stat?.turnout
 
 const municipalityYears = props.stat?.municipalityYears ?? voteAnalysis.municipality.years;
 
-// SCHEDULE_START 前不顯示 2026 的資料點
+// SCHEDULE_START 前不顯示 2026 的資料點；
+// 開票後 API 尚無 2026 資料時，x 軸先開出 2026 類別、y 值留空（尚未開票）
 const partyTrend = computed(() => {
-  if (!isPreElection.value) return basePartyTrend;
+  if (isPreElection.value) {
+    const keep = basePartyTrend.categories.map(
+      (category) => !category.year.startsWith(String(ELECTION_YEAR))
+    );
 
-  const keep = basePartyTrend.categories.map(
-    (category) => !category.year.startsWith(String(ELECTION_YEAR))
+    return {
+      ...basePartyTrend,
+      categories: basePartyTrend.categories.filter((_, index) => keep[index]),
+      series: basePartyTrend.series.map((series) => ({
+        ...series,
+        values: series.values.filter((_, index) => keep[index])
+      }))
+    };
+  }
+
+  const hasElectionYear = basePartyTrend.categories.some(
+    (category) => category.year.startsWith(String(ELECTION_YEAR))
   );
+  if (hasElectionYear) return basePartyTrend;
 
   return {
     ...basePartyTrend,
-    categories: basePartyTrend.categories.filter((_, index) => keep[index]),
+    categories: [
+      ...basePartyTrend.categories,
+      { year: `${ELECTION_YEAR}年`, election: '直轄市長、\n縣市長' }
+    ],
     series: basePartyTrend.series.map((series) => ({
       ...series,
-      values: series.values.filter((_, index) => keep[index])
+      values: [...series.values, null]
     }))
   };
 });
@@ -296,9 +314,12 @@ const lineOption = computed(() => {
         const points = Array.isArray(params) ? params : [params];
         const category = partyTrend.value.categories[points[0]?.dataIndex];
         const heading = category ? `${category.year} ${category.election.replace('\n', '')}` : '';
-        const rows = points.map((point) => (
-          `${point.marker}${point.seriesName}：<strong>${formatPercentage(point.value)}%</strong>`
-        ));
+        const rows = points
+          .filter((point) => point.value != null)
+          .map((point) => (
+            `${point.marker}${point.seriesName}：<strong>${formatPercentage(point.value)}%</strong>`
+          ));
+        if (rows.length === 0) return `${heading}<br>尚未開票`;
         return [heading, ...rows].join('<br>');
       }
     },

@@ -182,16 +182,32 @@ const partyTrend = computed(() => {
   };
 });
 
-const turnout = computed(() => (
-  isPreElection.value
-    ? {
-        ...baseTurnout,
-        items: baseTurnout.items.filter(
-          (item) => !String(item.label).startsWith(String(ELECTION_YEAR))
-        )
-      }
-    : baseTurnout
-));
+// SCHEDULE_START 前不顯示 2026 的資料列；
+// 開票後 API 尚無 2026 資料時，y 軸先開出 2026 兩類選舉、值留空（尚未開票）
+const turnout = computed(() => {
+  if (isPreElection.value) {
+    return {
+      ...baseTurnout,
+      items: baseTurnout.items.filter(
+        (item) => !String(item.label).startsWith(String(ELECTION_YEAR))
+      )
+    };
+  }
+
+  const hasElectionYear = baseTurnout.items.some(
+    (item) => String(item.label).startsWith(String(ELECTION_YEAR))
+  );
+  if (hasElectionYear) return baseTurnout;
+
+  return {
+    ...baseTurnout,
+    items: [
+      ...baseTurnout.items,
+      { label: `${ELECTION_YEAR}年直轄市長`, value: null },
+      { label: `${ELECTION_YEAR}年縣市長`, value: null }
+    ]
+  };
+});
 
 // 圓餅圖 tab：SCHEDULE_START 前只列歷史年份；之後補上 2026
 // （API 尚無 2026 資料時內容顯示「尚未開票」），其餘 tab 沿用 data.json 設定
@@ -403,6 +419,7 @@ const turnoutOption = computed(() => {
       axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(100,56,81,.08)' } },
       formatter: (params) => {
         const point = Array.isArray(params) ? params[0] : params;
+        if (point.value == null || point.value === '') return `${point.name}<br>尚未開票`;
         return `${point.name}<br>${point.marker}投票率：<strong>${formatPercentage(point.value)}%</strong>`;
       }
     },

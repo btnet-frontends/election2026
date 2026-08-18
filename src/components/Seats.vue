@@ -12,7 +12,7 @@
         <h2>• 各縣市議員席次 •</h2>
       </div>
 
-      <div class="seat_area">
+      <div v-if="hasData" class="seat_area">
         <div class="seat-filters">
           <div class="select-wrap">
             <select v-model.number="selectedYear" aria-label="選擇年份">
@@ -44,12 +44,15 @@
               v-for="seat in seatPoints"
               :key="seat.id"
               class="seat-dot"
+              :class="{ 'is-dimmed': hoveredPartyKey && seat.partyKey !== hoveredPartyKey }"
               :cx="seat.x"
               :cy="seat.y"
               :r="seat.radius"
               :fill="seat.color"
               :data-party="seat.partyKey"
               aria-hidden="true"
+              @mouseenter="hoveredPartyKey = seat.partyKey"
+              @mouseleave="hoveredPartyKey = null"
             />
 
             <text
@@ -57,9 +60,10 @@
               x="500"
               y="535"
               text-anchor="middle"
+              :style="hoveredParty ? { fill: hoveredParty.textColor } : null"
               aria-hidden="true"
             >
-              {{ totalSeats }}
+              {{ hoveredParty ? hoveredParty.seats : totalSeats }}
             </text>
           </svg>
         </div>
@@ -67,7 +71,7 @@
         <ul
           class="seat-legend"
           :style="{ '--legend-columns': Math.min(currentParties.length, 3) }"
-          aria-label="政黨席次比例"
+          aria-label="政黨得票率"
         >
           <li
             v-for="party in legendParties"
@@ -79,10 +83,12 @@
               :style="{ backgroundColor: party.dotColor }"
               aria-hidden="true"
             ></span>
-            <span>{{ party.label }}：{{ party.percentage }}%</span>
+            <span>{{ party.label }}：{{ party.voteRate }}%</span>
           </li>
         </ul>
       </div>
+
+      <p v-else class="seat-empty" role="status">席次資料載入中，請稍後再試。</p>
     </div>
   </section>
 </template>
@@ -91,153 +97,80 @@
 import { computed, ref, watch } from 'vue';
 import statisticsIcon from '../assets/images/statistics_icon.svg?url';
 
-const partyCatalog = {
-  independent: {
-    key: 'independent',
-    label: '無黨',
-    dotColor: '#dedede',
-    textColor: '#888888',
-    chartOrder: 50,
-    legendOrder: 1
-  },
-  kmt: {
-    key: 'kmt',
-    label: '國民黨',
-    dotColor: '#3a51ba',
-    textColor: '#3a51ba',
-    chartOrder: 10,
-    legendOrder: 2
-  },
-  dpp: {
-    key: 'dpp',
-    label: '民進黨',
-    dotColor: '#3c9b63',
-    textColor: '#3c9b63',
-    chartOrder: 100,
-    legendOrder: 3
-  },
-  tpp: {
-    key: 'tpp',
-    label: '民眾黨',
-    dotColor: '#55c9d2',
-    textColor: '#31aab4',
-    chartOrder: 30,
-    legendOrder: 4
-  },
-  npp: {
-    key: 'npp',
-    label: '時代力量',
-    dotColor: '#f3cf37',
-    textColor: '#bd9600',
-    chartOrder: 40,
-    legendOrder: 5
-  },
-  sdp: {
-    key: 'sdp',
-    label: '社民黨',
-    dotColor: '#ee729b',
-    textColor: '#d9507d',
-    chartOrder: 60,
-    legendOrder: 6
-  },
-  green: {
-    key: 'green',
-    label: '台灣綠黨',
-    dotColor: '#7cb342',
-    textColor: '#62942f',
-    chartOrder: 60,
-    legendOrder: 6
-  },
-  tsp: {
-    key: 'tsp',
-    label: '台灣基進',
-    dotColor: '#a960a8',
-    textColor: '#914b99',
-    chartOrder: 70,
-    legendOrder: 5
+const props = defineProps({
+  // fetchSeatHistory() 的結果：{ years, data, source }；抓取失敗時為 null
+  history: {
+    type: Object,
+    default: null
   }
+});
+
+// 顯示名稱與排序設定；顏色一律來自 history 內的政黨色票，缺少時用 fallback
+const partyMeta = {
+  '無黨籍/其他': { label: '無黨籍', chartOrder: 50, legendOrder: 1, textColor: '#888888' },
+  中國國民黨: { label: '國民黨', chartOrder: 10, legendOrder: 2 },
+  民主進步黨: { label: '民進黨', chartOrder: 100, legendOrder: 3 },
+  台灣民眾黨: { label: '民眾黨', chartOrder: 30, legendOrder: 4 },
+  時代力量: { label: '時代力量', chartOrder: 40, legendOrder: 5 },
+  親民黨: { label: '親民黨', chartOrder: 35, legendOrder: 6 },
+  新黨: { label: '新黨', chartOrder: 20, legendOrder: 6 },
+  社會民主黨: { label: '社民黨', chartOrder: 60, legendOrder: 6 },
+  綠黨: { label: '台灣綠黨', chartOrder: 60, legendOrder: 6 },
+  台灣基進: { label: '台灣基進', chartOrder: 70, legendOrder: 6 },
+  台灣團結聯盟: { label: '台聯', chartOrder: 65, legendOrder: 6 },
+  無黨團結聯盟: { label: '無盟', chartOrder: 55, legendOrder: 6 }
 };
 
-// 2026 尚未有正式開票結果；此處只用來展示動態席次功能。
-// 正式資料接入後只需替換各城市的 parties 陣列。
-const demoSeatsByYear = {
-  2026: {
-    台北市: {
-      parties: [
-        { key: 'independent', seats: 10 },
-        { key: 'kmt', seats: 25 },
-        { key: 'dpp', seats: 21 },
-        { key: 'tpp', seats: 4 },
-        { key: 'sdp', seats: 1 }
-      ]
-    },
-    新北市: {
-      parties: [
-        { key: 'independent', seats: 8 },
-        { key: 'kmt', seats: 29 },
-        { key: 'dpp', seats: 25 },
-        { key: 'tpp', seats: 5 },
-        { key: 'npp', seats: 1 }
-      ]
-    },
-    桃園市: {
-      parties: [
-        { key: 'independent', seats: 10 },
-        { key: 'kmt', seats: 26 },
-        { key: 'dpp', seats: 23 },
-        { key: 'tpp', seats: 5 },
-        { key: 'green', seats: 1 }
-      ]
-    },
-    台中市: {
-      parties: [
-        { key: 'independent', seats: 9 },
-        { key: 'kmt', seats: 29 },
-        { key: 'dpp', seats: 24 },
-        { key: 'tpp', seats: 2 },
-        { key: 'tsp', seats: 1 }
-      ]
-    },
-    台南市: {
-      parties: [
-        { key: 'independent', seats: 14 },
-        { key: 'kmt', seats: 15 },
-        { key: 'dpp', seats: 26 },
-        { key: 'tsp', seats: 2 }
-      ]
-    },
-    高雄市: {
-      parties: [
-        { key: 'independent', seats: 9 },
-        { key: 'kmt', seats: 21 },
-        { key: 'dpp', seats: 29 },
-        { key: 'tpp', seats: 3 },
-        { key: 'tsp', seats: 2 },
-        { key: 'npp', seats: 1 }
-      ]
-    }
-  }
+const FALLBACK_DOT_COLOR = '#dedede';
+
+const darkenHex = (hex, ratio) => {
+  const num = parseInt(hex.slice(1), 16);
+  return `#${[16, 8, 0]
+    .map((shift) => Math.round(((num >> shift) & 0xff) * (1 - ratio))
+      .toString(16)
+      .padStart(2, '0'))
+    .join('')}`;
 };
 
-const years = Object.keys(demoSeatsByYear)
-  .map(Number)
-  .sort((a, b) => b - a);
-const selectedYear = ref(years[0]);
-const cities = computed(() => Object.keys(demoSeatsByYear[selectedYear.value] ?? {}));
-const selectedCity = ref(cities.value[0]);
+const isLightColor = (hex) => {
+  const num = parseInt(hex.slice(1), 16);
+  const brightness = (0.299 * ((num >> 16) & 0xff))
+    + (0.587 * ((num >> 8) & 0xff))
+    + (0.114 * (num & 0xff));
+  return brightness > 150;
+};
+
+const seatsByYear = computed(() => props.history?.data ?? {});
+const years = computed(() => props.history?.years ?? []);
+const hasData = computed(() => years.value.length > 0);
+const selectedYear = ref(years.value[0] ?? null);
+const cities = computed(() => Object.keys(seatsByYear.value[selectedYear.value] ?? {}));
+const selectedCity = ref(cities.value[0] ?? null);
 
 const currentSeatData = computed(() => (
-  demoSeatsByYear[selectedYear.value]?.[selectedCity.value]
-  ?? demoSeatsByYear[years[0]][Object.keys(demoSeatsByYear[years[0]])[0]]
+  seatsByYear.value[selectedYear.value]?.[selectedCity.value] ?? null
 ));
 
 const currentParties = computed(() => (
-  currentSeatData.value.parties
-    .filter(({ key, seats }) => partyCatalog[key] && seats > 0)
-    .map(({ key, seats }) => ({
-      ...partyCatalog[key],
-      seats
-    }))
+  (currentSeatData.value?.parties ?? [])
+    .filter(({ seats }) => seats > 0)
+    .map(({ name, seats, voteRate, color }) => {
+      const meta = partyMeta[name] ?? {};
+      const dotColor = color ?? FALLBACK_DOT_COLOR;
+      const textColor = meta.textColor
+        ?? (isLightColor(dotColor) ? darkenHex(dotColor, 0.3) : dotColor);
+
+      return {
+        key: name,
+        label: meta.label ?? name,
+        seats,
+        voteRate,
+        dotColor,
+        textColor,
+        chartOrder: meta.chartOrder ?? 60,
+        legendOrder: meta.legendOrder ?? 6
+      };
+    })
 ));
 
 const totalSeats = computed(() => (
@@ -313,19 +246,15 @@ const seatPoints = computed(() => {
   }));
 });
 
-const legendParties = computed(() => {
-  const percentages = allocateByLargestRemainder(
-    100,
-    currentParties.value.map((party) => party.seats)
-  );
+const legendParties = computed(() => (
+  [...currentParties.value].sort((a, b) => a.legendOrder - b.legendOrder || b.seats - a.seats)
+));
 
-  return currentParties.value
-    .map((party, index) => ({
-      ...party,
-      percentage: percentages[index]
-    }))
-    .sort((a, b) => a.legendOrder - b.legendOrder);
-});
+const hoveredPartyKey = ref(null);
+
+const hoveredParty = computed(() => (
+  currentParties.value.find((party) => party.key === hoveredPartyKey.value) ?? null
+));
 
 const chartAriaLabel = computed(() => {
   const partySummary = currentParties.value
@@ -339,6 +268,11 @@ watch(selectedYear, () => {
   if (!cities.value.includes(selectedCity.value)) {
     selectedCity.value = cities.value[0];
   }
+});
+
+// 切換年份/縣市後點點重繪，mouseleave 不會觸發，需手動清除 hover 狀態
+watch([selectedYear, selectedCity], () => {
+  hoveredPartyKey.value = null;
 });
 </script>
 
@@ -480,7 +414,12 @@ watch(selectedYear, () => {
 }
 
 .seat-dot {
-  transition: fill 0.25s ease;
+  transition: fill 0.25s ease, opacity 0.2s ease;
+  cursor: pointer;
+}
+
+.seat-dot.is-dimmed {
+  opacity: 0.3;
 }
 
 .seat-total {
@@ -489,6 +428,15 @@ watch(selectedYear, () => {
   font-size: 150px;
   font-weight: 300;
   line-height: 1;
+  transition: fill 0.2s ease;
+  pointer-events: none;
+}
+
+.seat-empty {
+  margin-top: 2.5rem;
+  text-align: center;
+  color: var(--color-coffee-600);
+  font-size: 1.05rem;
 }
 
 .seat-legend {

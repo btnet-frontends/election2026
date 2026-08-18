@@ -14,6 +14,7 @@ import PartyHistory from '../components/PartyHistory.vue';
 import config from '../json/data.json';
 import { buildNewsApiUrl, getTagApi } from '../utils/newsApi.js';
 import { buildFlashNewsList } from '../utils/newsUtils.js';
+import { fetchSeatHistory } from '../utils/seatHistoryApi.js';
 
 const componentVisibility = {
   KV: config.components?.KV !== false,
@@ -101,6 +102,8 @@ if (componentVisibility.FlashNews) {
     flashNewsLimit
   );
 }
+
+const seatHistory = componentVisibility.Seats ? await fetchSeatHistory() : null;
 
 const footerBgColor = componentVisibility.PollsChart ? 'var(--color-coffee-50)' : 'var(--color-coffee-0)';
 
@@ -206,7 +209,7 @@ const structuredData = {
   <main>
     {componentVisibility.KV && <KV client:load />}
 
-    {componentVisibility.Seats && <Seats client:load />}
+    {componentVisibility.Seats && <Seats history={seatHistory} client:load />}
 
     {componentVisibility.VoteAnalysis && <VoteAnalysis client:load />}
 

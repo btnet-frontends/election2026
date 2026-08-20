@@ -1,6 +1,6 @@
 import parties from '../json/parties.json';
 
-const HISTORY_API_URL = 'https://doqvf81n9htmm.cloudfront.net/2026election/getParliamentaryHistory';
+const HISTORY_API_URL = 'https://doqvf81n9htmm.cloudfront.net/2026election/files/getParliamentaryHistory';
 
 // API 的政黨名稱與色票表（parties.json）名稱不一致時的對照
 const COLOR_NAME_ALIASES = {

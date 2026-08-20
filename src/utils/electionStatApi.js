@@ -1,4 +1,4 @@
-const ELECTION_STAT_URL = 'https://doqvf81n9htmm.cloudfront.net/2026election/files/getElectionStat';
+const ELECTION_STAT_URL = 'https://doqvf81n9htmm.cloudfront.net/files/2026election/getElectionStat';
 
 const PARTY_TREND_KEY = '國、民兩黨20年來重要選舉得票率';
 const TURNOUT_KEY = '2008年以來台灣重要選舉投票率';

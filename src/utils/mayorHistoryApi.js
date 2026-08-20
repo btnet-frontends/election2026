@@ -1,4 +1,4 @@
-const MAYOR_HISTORY_URL = 'https://doqvf81n9htmm.cloudfront.net/2026election/files/getMayorHistory';
+const MAYOR_HISTORY_URL = 'https://doqvf81n9htmm.cloudfront.net/files/2026election/getMayorHistory';
 
 // API 縣市名稱（用「臺」）→ 地圖元件的 data-name slug
 const CITY_SLUGS = {

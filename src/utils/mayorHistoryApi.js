@@ -26,7 +26,7 @@ const CITY_SLUGS = {
   連江縣: 'lianjiang_county'
 };
 
-// 當選人政黨 → partyHistory.parties 的 key；未列出的政黨歸為無黨籍
+// 當選人政黨 → partyHistory.parties 的 key；有當選人但政黨未列出者歸為無黨籍
 const PARTY_KEYS = {
   中國國民黨: 'kmt',
   民主進步黨: 'dpp',
@@ -50,7 +50,12 @@ const normalizeMayorHistory = (historyJson) => {
     election.results.forEach((result) => {
       const slug = toSlug(result.prvCityName);
       if (!slug) return;
-      yearResults[slug] = PARTY_KEYS[result.winner?.party] ?? 'independent';
+
+      // 尚無當選人資料的縣市直接略過，地圖會顯示灰色與「尚無資料」，不誤標成無黨籍
+      const winnerParty = result.winner?.party;
+      if (!winnerParty) return;
+
+      yearResults[slug] = PARTY_KEYS[winnerParty] ?? 'independent';
     });
 
     if (Object.keys(yearResults).length > 0) {

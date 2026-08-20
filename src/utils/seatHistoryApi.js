@@ -50,7 +50,7 @@ const normalizeHistory = (historyJson) => {
  */
 export async function fetchSeatHistory() {
   try {
-    const response = await fetch(HISTORY_API_URL);
+    const response = await fetch(HISTORY_API_URL+'?v='+new Date());
     if (!response.ok) {
       throw new Error(`議員席次 API 回應 ${response.status}`);
     }

@@ -73,7 +73,7 @@ const normalizeMayorHistory = (historyJson) => {
  */
 export async function fetchMayorHistory() {
   try {
-    const response = await fetch(MAYOR_HISTORY_URL+'?v='+new Date());
+    const response = await fetch(`${MAYOR_HISTORY_URL}?v=${Date.now()}`);
     if (!response.ok) {
       throw new Error(`縣市首長歷史 API 回應 ${response.status}`);
     }

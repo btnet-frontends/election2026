@@ -62,7 +62,7 @@ const normalizeMunicipalityYears = (statJson) => {
  */
 export async function fetchElectionStat() {
   try {
-    const response = await fetch(ELECTION_STAT_URL+'?v='+new Date());
+    const response = await fetch(`${ELECTION_STAT_URL}?v=${Date.now()}`);
     if (!response.ok) {
       throw new Error(`投票分析 API 回應 ${response.status}`);
     }

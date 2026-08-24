@@ -7,5 +7,9 @@ import vue from '@astrojs/vue';
 export default defineConfig({
   site: 'https://www.businesstoday.com.tw',
   base: '/bt_topic/2026/election/',
+  redirects: {
+    '/page2': '/bt_topic/2026/election/',
+    '/page3': '/bt_topic/2026/election/'
+  },
   integrations: [vue()]
 });

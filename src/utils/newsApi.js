@@ -12,6 +12,7 @@ export const buildNewsApiUrl = (api, page = 1) => {
   const params = new URLSearchParams({
     name: api?.tagName || '',
     limit: String(api?.limit || 10),
+    v: String(Date.now()),
   });
 
   if (page > 1) {

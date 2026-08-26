@@ -33,6 +33,7 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
   const activeTag = ref(defaultTagLabel);
   const isNewsLoading = ref(false);
   const isMoreLoading = ref(false);
+  const isInitialRefreshing = ref(false);
   let latestRequestId = 0;
 
   const apiExhaustedTags = reactive(new Set());
@@ -47,7 +48,7 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
     const api = getTagApi(tag);
     if (!api?.tagName) return {};
 
-    const response = await fetch(buildNewsApiUrl(api, page));
+    const response = await fetch(buildNewsApiUrl(api, page), { cache: 'no-store' });
     if (!response.ok) throw new Error('無法載入新聞');
 
     return await response.json();
@@ -84,9 +85,37 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
   });
 
   const hasMoreNews = computed(() => {
+    if (isInitialRefreshing.value && activeTag.value === defaultTagLabel) return false;
     if (apiExhaustedTags.has(activeTag.value)) return false;
     return Boolean(getTagApi(activeTagConfig.value)?.tagName);
   });
+
+  const refreshDefaultTag = async () => {
+    if (isInitialRefreshing.value) return;
+
+    const tag = hotTags[0];
+    const api = getTagApi(tag);
+    if (!api?.tagName) return;
+
+    isInitialRefreshing.value = true;
+
+    try {
+      const rawData = await fetchRawPage(tag, 1);
+      const rawArticles = Array.isArray(rawData?.article_lists) ? rawData.article_lists : [];
+
+      // Keep the statically rendered list as a fallback when the runtime API
+      // temporarily returns no articles.
+      if (rawArticles.length === 0) return;
+
+      apiExhaustedTags.delete(defaultTagLabel);
+      delete nextPageCache[defaultTagLabel];
+      newsByTag[defaultTagLabel] = processApiData(rawData, defaultTagLabel, api.limit, 1);
+    } catch (error) {
+      console.error('更新預設新聞出錯:', error);
+    } finally {
+      isInitialRefreshing.value = false;
+    }
+  };
 
   const probeForward = async ({ tag, tagLabel, limit, existingIds, startPage, maxPages }) => {
     const shouldFilter = shouldFilterYear(tagLabel);
@@ -189,6 +218,7 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
   };
 
   const loadMore = async () => {
+    if (activeTag.value === defaultTagLabel && isInitialRefreshing.value) return;
     if (isMoreLoading.value || !hasMoreNews.value) return;
     isMoreLoading.value = true;
 
@@ -258,6 +288,7 @@ export function useNewsFeed(initialNews, hotTags, carouselCount = 0) {
     filterTags,
     visibleNews,
     hasMoreNews,
+    refreshDefaultTag,
     selectTag,
     loadMore,
   };

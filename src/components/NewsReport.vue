@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { onMounted, ref } from 'vue';
 import NewsCarousel from './NewsCarousel.vue';
 import HotTags from './HotTags.vue';
 import { useNewsFeed } from '../composables/useNewsFeed.js';
@@ -103,11 +103,16 @@ const {
   filterTags,
   visibleNews,
   hasMoreNews,
+  refreshDefaultTag,
   selectTag,
   loadMore,
 } = useNewsFeed(props.initialNews, props.hotTags, CAROUSEL_COUNT);
 
 const carouselItems = ref(siteData.newsReport.carouselItems);
+
+onMounted(() => {
+  void refreshDefaultTag();
+});
 </script>
 
 <style scoped>

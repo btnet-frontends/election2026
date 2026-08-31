@@ -386,7 +386,7 @@ watch([selectedYear, selectedCity], () => {
 .seat_area {
   --seat-coffee: #917f6b;
   --seat-arrow: #8e6429;
-  --seat-total: #888888;
+  --seat-total: #000000;
   margin-top: 2.5rem;
 }
 

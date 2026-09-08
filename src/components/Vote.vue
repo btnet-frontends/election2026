@@ -17,7 +17,7 @@
           />
         </div>
         <div ref="votePanelElement" class="vote_panel_box">
-          <votePanel v-model:selected-location="selectedLocation" />
+          <votePanel v-model:selected-location="selectedLocation" :initial-result="initialResult" />
         </div>
       </div>
     </div>
@@ -31,6 +31,8 @@ import pollsBg from '../assets/images/polls_bg.png?url';
 import taiwanLocation from './taiwanLocation.vue';
 import votePanel from './votePanel.vue';
 import { usePhase } from '../composables/usePhase.js';
+
+defineProps({ initialResult: { type: Object, default: null } });
 
 const { isComponentVisible } = usePhase();
 const selectedLocation = ref('台北市');

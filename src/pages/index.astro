@@ -8,6 +8,7 @@ import PollsChart from '../components/PollsChart.vue';
 import LiveStreaming from '../components/LiveStreaming.vue';
 import Referendum from '../components/Referendum.vue';
 import Vote from '../components/Vote.vue';
+import { fetchInvoicingResult } from '../utils/invoicingResultApi.js';
 import ElectedSearch from '../components/ElectedSearch.vue';
 
 import type { NewsData } from '../types/news';
@@ -28,6 +29,14 @@ const componentVisibility = {
 };
 
 const hotTags = config.newsReport.hotTags;
+let initialVoteResult = null;
+if (componentVisibility.Vote) {
+  try {
+    initialVoteResult = await fetchInvoicingResult();
+  } catch (error) {
+    console.error('載入開票資料失敗:', error);
+  }
+}
 const defaultTagApi = getTagApi(hotTags[0]);
 const flashNewsTag = config.flashNews?.tag || hotTags[0];
 const flashNewsApi = getTagApi(flashNewsTag);
@@ -232,7 +241,7 @@ const structuredData = {
 
     {componentVisibility.ElectedSearch && <ElectedSearch client:load />}
 
-    {componentVisibility.Vote && <Vote client:load />}
+    {componentVisibility.Vote && <Vote initialResult={initialVoteResult} client:load />}
 
     {componentVisibility.Referendum && <Referendum client:load />}
   </main>

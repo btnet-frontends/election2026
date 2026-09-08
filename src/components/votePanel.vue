@@ -21,10 +21,27 @@
         <h3>{{ election.year }}</h3>
         <div class="year-divider"></div>
 
-        <ul class="candidate-list">
-          <li v-for="candidate in election.candidates" :key="`${election.year}-${candidate.name}`">
+        <p v-if="!election.candidates.length" class="counting-state" role="status">開票中</p>
+        <ul v-else class="candidate-list">
+          <li v-for="candidate in election.candidates" :key="candidate.id">
             <div class="candidate">
               <span
+                v-if="candidate.elected"
+                class="elected-mark"
+                aria-label="當選"
+                title="當選"
+              >
+                <img :src="elected_icon" alt="當選">
+            </span>
+              <img
+                v-if="partyImageUrl(candidate.partyImage)"
+                class="party-icon"
+                :src="partyImageUrl(candidate.partyImage)"
+                :alt="candidate.party"
+                :title="candidate.party"
+              />
+              <span
+                v-else
                 class="party-badge"
                 :style="{ backgroundColor: candidate.color }"
                 :aria-label="candidate.party"
@@ -36,19 +53,12 @@
             </div>
 
             <div class="vote-result">
-              <span
-                v-if="candidate.elected"
-                class="elected-mark"
-                aria-label="當選"
-                title="當選"
-              >
-                <img :src="elected_icon" alt="當選">
-            </span>
+              
               <div class="numbers">
                 <strong :style="{ color: candidate.color }">
-                  {{ formatPercent(candidate.percent) }}
+                  {{ candidate.percent === null ? '開票中' : formatPercent(candidate.percent) }}
                 </strong>
-                <span>{{ formatVotes(candidate.votes) }} 票</span>
+                <span>{{ candidate.votes === null ? '開票中' : `${formatVotes(candidate.votes)} 票` }}</span>
               </div>
             </div>
           </li>
@@ -61,13 +71,23 @@
     <div class="data-note">
       <p>資料更新時間：{{ updateTime }}</p>
       <p>資料來源：中央選舉委員會</p>
+      <p v-if="refreshFailed && result" role="status">資料更新暫時中斷，顯示最後取得資料</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { fetchInvoicingResult, INVOICING_RESULT_URL } from '../utils/invoicingResultApi.js';
+import { ELECTION_YEAR } from '../utils/schedule.js';
 import elected_icon from '../assets/images/elected.png?url';
+
+const partyImages = import.meta.glob('../assets/images/party_icon/*.png', {
+  eager: true,
+  query: '?url',
+  import: 'default'
+});
+const partyImageUrl = (filename) => partyImages[`../assets/images/party_icon/${filename}`];
 
 const selectedLocation = defineModel('selectedLocation', {
   type: String,
@@ -99,38 +119,45 @@ const locations = [
   '連江縣'
 ];
 
-const partyStyles = {
-  kmt: { party: '中國國民黨', shortName: '國', color: '#1717a8' },
-  dpp: { party: '民主進步黨', shortName: '民', color: '#559637' },
-  tpp: { party: '台灣民眾黨', shortName: '眾', color: '#72c3ca' }
+const props = defineProps({ initialResult: { type: Object, default: null } });
+const result = ref(props.initialResult);
+const refreshFailed = ref(false);
+const updateTime = computed(() => result.value?.updateTime || '開票中');
+const selectedElections = computed(() => [{
+  year: ELECTION_YEAR,
+  candidates: result.value?.cities[selectedLocation.value] ?? []
+}]);
+let refreshTimer;
+let controller;
+let stopped = false;
+
+const refresh = async () => {
+  controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const url = import.meta.env.DEV ? '/api/invoicing-result' : INVOICING_RESULT_URL;
+    const nextResult = await fetchInvoicingResult(url, controller.signal);
+    if (!stopped) {
+      result.value = nextResult;
+      refreshFailed.value = false;
+    }
+  } catch (error) {
+    if (!stopped) {
+      refreshFailed.value = true;
+      console.error('更新開票資料失敗:', error);
+    }
+  } finally {
+    clearTimeout(timeout);
+    if (!stopped) refreshTimer = setTimeout(refresh, 30000);
+  }
 };
 
-const defaultElections = [
-  {
-    year: 2026,
-    candidates: [
-      { ...partyStyles.kmt, name: '某某某', percent: 50.02, votes: 500000, elected: true },
-      { ...partyStyles.dpp, name: '某某某', percent: 50.02, votes: 500000 },
-      { ...partyStyles.tpp, name: '某某某', percent: 50.02, votes: 500000 },
-      { ...partyStyles.dpp, name: '某某某', percent: 50.02, votes: 500000 },
-      { ...partyStyles.dpp, name: '某某某', percent: 50.02, votes: 500000 }
-    ]
-  },
-  {
-    year: 2022,
-    candidates: [
-      { ...partyStyles.kmt, name: '某某某', percent: 50.02, votes: 500000, elected: true },
-      { ...partyStyles.dpp, name: '某某某', percent: 50.02, votes: 500000 }
-    ]
-  }
-];
-
-const electionData = Object.fromEntries(
-  locations.map((location) => [location, defaultElections])
-);
-
-const updateTime = '2022/11/26 23:53';
-const selectedElections = computed(() => electionData[selectedLocation.value] ?? defaultElections);
+onMounted(refresh);
+onUnmounted(() => {
+  stopped = true;
+  clearTimeout(refreshTimer);
+  controller?.abort();
+});
 
 const formatVotes = (votes) => new Intl.NumberFormat('zh-TW').format(votes);
 const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
@@ -225,6 +252,12 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
   background: var(--panel-brown);
 }
 
+.counting-state {
+  padding: 2rem 0;
+  text-align: center;
+  font-size: 1.25rem;
+}
+
 .candidate-list {
   display: flex;
   flex-direction: column;
@@ -249,6 +282,13 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
 .candidate {
   min-width: 0;
   gap: 0.9rem;
+}
+
+.party-icon {
+  flex: 0 0 auto;
+  width: 2.55rem;
+  height: 2.55rem;
+  object-fit: contain;
 }
 
 .party-badge {
@@ -382,6 +422,7 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
     gap: 0.55rem;
   }
 
+  .party-icon,
   .party-badge {
     width: 2.15rem;
     height: 2.15rem;

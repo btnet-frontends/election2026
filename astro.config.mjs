@@ -11,6 +11,11 @@ export default defineConfig({
   vite: {
     server: {
       proxy: {
+        '/api/referendum': {
+          target: 'https://doqvf81n9htmm.cloudfront.net',
+          changeOrigin: true,
+          rewrite: () => '/files/2026election/getReferendum'
+        },
         '/api/invoicing-result': {
           target: 'https://doqvf81n9htmm.cloudfront.net',
           changeOrigin: true,

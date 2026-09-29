@@ -9,6 +9,11 @@
         <div class="referendum-divider"></div>
       </div>
 
+      <div class="referendum-update" role="status">
+        <p v-if="referendumResult?.updateTime">資料更新時間：{{ referendumResult.updateTime }}</p>
+        <p v-if="refreshFailed">{{ referendumResult ? '資料更新失敗，顯示上次成功取得的資料，稍後自動重試。' : '公投資料暫時無法載入，稍後自動重試。' }}</p>
+        <p v-else-if="!referendumResult">公投資料載入中…</p>
+      </div>
       <div class="referendum_area referendum-list">
         <article
           v-for="(item, itemIndex) in referendumItems"
@@ -64,7 +69,7 @@
                   role="meter"
                   aria-valuemin="0"
                   aria-valuemax="100"
-                  :aria-valuenow="clampPercentage(result.percentage)"
+                  :aria-valuenow="result.percentage == null ? undefined : clampPercentage(result.percentage)"
                   :aria-valuetext="getResultAriaText(result)"
                 >
                   <span
@@ -102,18 +107,67 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import referendumIcon from '../assets/images/election_referendum_icon.svg?url';
 import config from '../json/data.json';
 import { usePhase } from '../composables/usePhase.js';
+import { fetchReferendum, REFERENDUM_URL } from '../utils/referendumApi.js';
 
 const { isComponentVisible } = usePhase();
 const referendumConfig = config.referendum ?? {};
+const referendumResult = ref(null);
+const refreshFailed = ref(false);
 
 const sectionTitle = computed(() => referendumConfig.sectionTitle || '公民投票');
 const referendumItems = computed(() => (
-  Array.isArray(referendumConfig.items) ? referendumConfig.items : []
+  // The endpoint returns one referendum without a case ID; bind it to the first configured case.
+  Array.isArray(referendumConfig.items) ? referendumConfig.items.map((item, index) => ({
+    ...item,
+    status: index === 0 ? referendumResult.value?.status ?? 'pending' : 'pending',
+    results: (item.results ?? []).map((result) => ({
+      ...result,
+      percentage: null,
+      votes: null,
+      ...(index === 0 ? referendumResult.value?.results[result.id] : {})
+    }))
+  })) : []
 ));
+
+let refreshTimer;
+let controller;
+let stopped = false;
+
+const refresh = async () => {
+  if (!isComponentVisible('Referendum')) {
+    refreshTimer = setTimeout(refresh, 30000);
+    return;
+  }
+  controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const url = import.meta.env.DEV ? '/api/referendum' : REFERENDUM_URL;
+    const nextResult = await fetchReferendum(url, controller.signal);
+    if (!stopped) {
+      referendumResult.value = nextResult;
+      refreshFailed.value = false;
+    }
+  } catch (error) {
+    if (!stopped) {
+      refreshFailed.value = true;
+      console.error('更新公投資料失敗:', error);
+    }
+  } finally {
+    clearTimeout(timeout);
+    if (!stopped) refreshTimer = setTimeout(refresh, 30000);
+  }
+};
+
+onMounted(refresh);
+onUnmounted(() => {
+  stopped = true;
+  clearTimeout(refreshTimer);
+  controller?.abort();
+});
 
 const clampPercentage = (value) => {
   const percentage = Number(value);
@@ -128,9 +182,10 @@ const voteFormatter = new Intl.NumberFormat('zh-TW', {
   maximumFractionDigits: 0
 });
 
-const formatPercentage = (value) => `${percentageFormatter.format(clampPercentage(value))}%`;
+const formatPercentage = (value) => value == null ? '—' : `${percentageFormatter.format(clampPercentage(value))}%`;
 
 const formatVotes = (value) => {
+  if (value == null) return '—';
   const votes = Number(value);
   return voteFormatter.format(Number.isFinite(votes) ? Math.max(0, votes) : 0);
 };
@@ -204,6 +259,17 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
 
 .referendum-case {
   min-width: 0;
+}
+
+.referendum-update {
+  margin-bottom: 1.5rem;
+  color: var(--color-coffee-900);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.referendum-update p {
+  margin: 0.35rem 0;
 }
 
 .referendum-case + .referendum-case {

@@ -10,6 +10,7 @@ import Vote from '../components/Vote.vue';
 import Seats from '../components/Seats.vue';
 import VoteAnalysis from '../components/voteAnalysis.vue';
 import PartyHistory from '../components/PartyHistory.vue';
+import BattleReportLink from '../components/BattleReportLink.vue';
 
 import config from '../json/data.json';
 import { buildNewsApiUrl, getTagApi } from '../utils/newsApi.js';
@@ -218,6 +219,8 @@ const structuredData = {
     {componentVisibility.VoteAnalysis && <VoteAnalysis stat={electionStat} client:load />}
 
     {componentVisibility.PartyHistory && <PartyHistory history={mayorHistory} client:load />}
+
+    <BattleReportLink client:load />
 
   </main>
 </Layout>

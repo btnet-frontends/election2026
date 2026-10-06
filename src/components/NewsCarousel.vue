@@ -3,7 +3,8 @@
     <Swiper
       :modules="modules"
       :pagination="{ clickable: true }"
-      :autoplay="{ delay: 5000, disableOnInteraction: false }"
+      :autoplay="{ delay: 7000, disableOnInteraction: false }"
+      :speed="700"
       :loop="canLoop"
       class="carousel-track"
     >
@@ -59,6 +60,7 @@ const canLoop = computed(() => props.items.length > 1);
 </script>
 
 <style scoped>
+
 .carousel-wrapper {
   margin-bottom: 3rem;
 }
@@ -196,6 +198,12 @@ const canLoop = computed(() => props.items.length > 1);
   display: flex;
   justify-content: center;
   gap: 0.4rem;
+}
+
+@media (min-width: 768px) {
+  .slide-title :deep(.br_sm_hidden) {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {

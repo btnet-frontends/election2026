@@ -9,7 +9,7 @@
         <div class="seats-divider"></div>
       </div>
       <div class="section-subtitle">
-        <h2>• 各縣市議員席次 •</h2>
+        <h2>• 六都議員席次 •</h2>
       </div>
 
       <div v-if="hasData" class="seat_area">

@@ -4,6 +4,8 @@
 
       <NewsCarousel :items="carouselItems" />
 
+      <CandidateInterviews :initial-articles="initialInterviews" />
+
       <HotTags :model-value="activeTag" :tags="hotTags" @update:model-value="selectTag" />
 
       <div class="news-list-container">
@@ -78,6 +80,7 @@
 import { onMounted, ref } from 'vue';
 import NewsCarousel from './NewsCarousel.vue';
 import HotTags from './HotTags.vue';
+import CandidateInterviews from './CandidateInterviews.vue';
 import { useNewsFeed } from '../composables/useNewsFeed.js';
 import { formatDate, getItemTags } from '../utils/newsUtils.js';
 import siteData from '../json/data.json';
@@ -86,6 +89,10 @@ const props = defineProps({
   initialNews: {
     type: Object,
     required: true,
+  },
+  initialInterviews: {
+    type: Array,
+    default: () => [],
   },
   hotTags: {
     type: Array,

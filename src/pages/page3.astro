@@ -61,9 +61,15 @@ const fallbackNewsData = {
 };
 
 let initialNews = getEmptyNewsData();
+let initialInterviews: NewsData['article_lists'] = [];
 
 if (componentVisibility.NewsReport) {
-  initialNews = await fetchNewsByApi(defaultTagApi, '新聞列表');
+  const [newsData, interviewData] = await Promise.all([
+    fetchNewsByApi(defaultTagApi, '新聞列表'),
+    fetchNewsByApi(config.newsReport.candidateInterviews.api, '選將專訪'),
+  ]);
+  initialNews = newsData;
+  initialInterviews = Array.isArray(interviewData.article_lists) ? interviewData.article_lists : [];
 
   if (!initialNews.article_lists || initialNews.article_lists.length === 0) {
     initialNews = fallbackNewsData;
@@ -203,6 +209,6 @@ const structuredData = {
 
     {componentVisibility.FlashNews && <FlashNews flashNewsList={flashNewsList} flashNewsApi={flashNewsApi} client:load />}
 
-    {componentVisibility.NewsReport && <NewsReport initialNews={initialNews} hotTags={hotTags} client:load />}
+    {componentVisibility.NewsReport && <NewsReport initialNews={initialNews} initialInterviews={initialInterviews} hotTags={hotTags} client:load />}
   </main>
 </Layout>

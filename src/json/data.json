@@ -9,6 +9,7 @@
           "label": "即時戰報 ▼",
           "children": [
             { "id": "flash-news", "href": "#flash-news", "label": "選情分析" },
+            { "id": "candidate-interviews", "href": "#candidate-interviews", "label": "選將專訪" },
             { "id": "tags", "href": "#tags", "label": "熱門話題" }
           ]
         },
@@ -53,6 +54,7 @@
           "label": "即時戰報 ▼",
           "children": [
             { "id": "flash-news", "href": "page3#flash-news", "label": "選情分析" },
+            { "id": "candidate-interviews", "href": "page3#candidate-interviews", "label": "選將專訪" },
             { "id": "tags", "href": "page3#tags", "label": "熱門話題" }
           ]
         }
@@ -87,6 +89,7 @@
           "label": "即時戰報 ▼",
           "children": [
             { "id": "flash-news", "href": "page3#flash-news", "label": "選情分析" },
+            { "id": "candidate-interviews", "href": "page3#candidate-interviews", "label": "選將專訪" },
             { "id": "tags", "href": "page3#tags", "label": "熱門話題" }
           ]
         }
@@ -455,6 +458,12 @@
     }
   },
   "newsReport": {
+    "candidateInterviews": {
+      "api": {
+        "tagName": "2026縣市長參選人專訪",
+        "limit": 99
+      }
+    },
     "hotTags": [
       {
         "label": "2026縣市長選舉報導",

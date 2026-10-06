@@ -2,7 +2,7 @@
   <header :class="['site-header', { 'scrolled': isScrolled, 'menu-open': isMobileMenuOpen }]">
     <div class="header-container">
       <div class="header-left">
-        <a :href="getLocalHref('#kv')" class="logo-link" @click="scrollToSection($event, 'kv')">
+        <a href="https://www.businesstoday.com.tw/" class="logo-link" target="_blank" rel="noopener noreferrer">
           <img :src="btLogo" alt="今周刊" class="logo-bt" />
         </a>
         <div class="logo-divider"></div>

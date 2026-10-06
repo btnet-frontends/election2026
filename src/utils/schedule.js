@@ -13,8 +13,8 @@
 // (navNo 1 has no live-streaming/vote/referendum/elected-search links at
 // all; navNo 2 links to live-streaming instead of elected-search; navNo 3
 // links to elected-search instead of live-streaming).
-export const SCHEDULE_START = '2026-10-07T16:00:00+08:00';
-export const SCHEDULE_END = '2026-10-08T00:00:00+08:00';
+export const SCHEDULE_START = '2026-11-28T16:00:00+08:00';
+export const SCHEDULE_END = '2026-11-29T00:00:00+08:00';
 
 // 本屆選舉年份：SCHEDULE_START 前各資料區塊隱藏此年份，之後顯示
 // （API 尚無該年資料時內容為「尚未開票」）。

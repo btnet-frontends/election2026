@@ -75,7 +75,7 @@
                 <span>只看當選</span>
               </label>
 
-              <button class="query-button" type="submit">查詢</button>
+              <button class="query-button" type="submit" :disabled="isLoading">查詢</button>
             </form>
 
             <form
@@ -100,7 +100,7 @@
                 <span>只看當選</span>
               </label>
 
-              <button class="query-button" type="submit">查詢</button>
+              <button class="query-button" type="submit" :disabled="isLoading">查詢</button>
             </form>
 
             <form
@@ -123,7 +123,7 @@
                 />
               </div>
 
-              <button class="query-button" type="submit">查詢</button>
+              <button class="query-button" type="submit" :disabled="isLoading">查詢</button>
             </form>
           </div>
 
@@ -136,16 +136,17 @@
             </div>
             <p class="sr-only" role="status" aria-live="polite">{{ resultAnnouncement }}</p>
 
-            <template v-if="filteredCandidates.length">
+            <div v-if="hasError" class="empty-state">
+              <strong>{{ errorState.title }}</strong>
+              <p>{{ errorState.description }}</p>
+            </div>
+
+            <template v-else-if="total > 0">
               <div class="candidate-grid candidate-grid--desktop">
                 <ElectedCandidateCard
                   v-for="candidate in desktopCandidates"
-                  :key="candidate.id"
+                  :key="candidate.key"
                   :candidate="candidate"
-                  :party="partyFor(candidate.partyId)"
-                  :city-label="cityLabelFor(candidate.cityId)"
-                  :constituency-label="constituencyLabelFor(candidate)"
-                  :administrative-areas="administrativeAreasFor(candidate)"
                   :elected-icon="electedIcon"
                 />
               </div>
@@ -153,17 +154,18 @@
               <div class="candidate-grid candidate-grid--mobile">
                 <ElectedCandidateCard
                   v-for="candidate in mobileCandidates"
-                  :key="candidate.id"
+                  :key="candidate.key"
                   :candidate="candidate"
-                  :party="partyFor(candidate.partyId)"
-                  :city-label="cityLabelFor(candidate.cityId)"
-                  :constituency-label="constituencyLabelFor(candidate)"
-                  :administrative-areas="administrativeAreasFor(candidate)"
                   :elected-icon="electedIcon"
                 />
               </div>
 
-              <nav v-if="totalPages > 1" class="desktop-pagination" aria-label="查詢結果分頁">
+              <nav
+                v-if="totalPages > 1"
+                class="desktop-pagination"
+                :class="{ 'is-loading': isLoading }"
+                aria-label="查詢結果分頁"
+              >
                 <button
                   type="button"
                   class="page-button page-arrow"
@@ -205,19 +207,27 @@
               </nav>
 
               <button
-                v-if="mobileVisibleCount < filteredCandidates.length"
+                v-if="mobileVisibleCount < total"
                 type="button"
                 class="load-more-button"
+                :class="{ 'is-loading': isLoading }"
+                :aria-disabled="isLoading"
                 @click="loadMore"
               >
-                <span>展開更多</span>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
+                <span>{{ isLoading ? '載入中…' : '展開更多' }}</span>
+                <svg v-if="!isLoading" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="m6.5 9 5.5 5.5L17.5 9" />
                 </svg>
               </button>
+
+              <p v-if="hasPageError" class="page-error">
+                {{ errorState.title }}，{{ errorState.description }}
+              </p>
             </template>
 
-            <div v-else class="empty-state">
+            <p v-else-if="isLoading" class="loading-state">查詢中…</p>
+
+            <div v-else-if="hasSearched" class="empty-state">
               <svg class="empty-illustration" viewBox="0 0 240 240" aria-hidden="true">
                 <circle cx="120" cy="120" r="116" fill="#f3f1ef" />
                 <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -247,10 +257,12 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
 import config from '../json/data.json';
+import electionAreas from '../json/electionAreas.json';
 import electedIcon from '../assets/images/elected.png?url';
 import searchIcon from '../assets/images/search_icon.svg?url';
 import ElectedCandidateCard from './ElectedCandidateCard.vue';
 import { usePhase } from '../composables/usePhase.js';
+import { SEARCH_MODE, fetchElectionSearch } from '../utils/electionSearchApi.js';
 
 const { isComponentVisible } = usePhase();
 const searchData = config.electedSearch;
@@ -258,10 +270,19 @@ const supportedTabIds = new Set(['office', 'party', 'name']);
 const tabs = searchData.tabs.filter((tab) => supportedTabIds.has(tab.id));
 const officeTypes = searchData.officeTypes;
 const parties = searchData.parties;
-const cities = searchData.cities;
-const constituencies = searchData.constituencies ?? [];
-const candidates = searchData.candidates;
+// 區代碼在各縣市都從 010 起編，id 需加上縣市代碼才不會重複
+// code 為後端的 deptCode, 來源為final.json整理
+const cities = electionAreas.map((city) => ({
+  id: city.code,
+  label: city.name,
+  districts: city.districts.map((district) => ({
+    id: `${city.code}-${district.code}`,
+    code: district.code,
+    label: district.name
+  }))
+}));
 const emptyState = searchData.emptyState;
+const errorState = searchData.errorState;
 const dataNotice = searchData.dataStatus === 'demo' ? searchData.dataNotice : '';
 const toPositiveInteger = (value, fallback) => {
   const parsedValue = Number(value);
@@ -275,6 +296,11 @@ const initialTab = tabs.some((tab) => tab.id === searchData.defaultTab)
   : (tabs[0]?.id || 'office');
 const activeTab = ref(initialTab);
 const appliedQuery = ref(null);
+const pages = ref(new Map());
+const total = ref(0);
+const isLoading = ref(false);
+const hasError = ref(false);
+const hasPageError = ref(false);
 const currentPage = ref(1);
 const mobileVisibleCount = ref(mobileBatchSize);
 
@@ -294,12 +320,8 @@ const draft = reactive({
 
 const partyMap = new Map(parties.map((party) => [party.id, party]));
 const cityMap = new Map(cities.map((city) => [city.id, city]));
-const constituencyMap = new Map(constituencies.map((constituency) => [
-  constituency.id,
-  constituency
-]));
-const districtMap = new Map(
-  cities.flatMap((city) => (city.districts || []).map((district) => [district.id, district.label]))
+const districtCodeMap = new Map(
+  cities.flatMap((city) => city.districts.map((district) => [district.id, district.code]))
 );
 
 const cityDistricts = computed(() => cityMap.get(draft.office.cityId)?.districts ?? []);
@@ -313,52 +335,11 @@ watch(() => draft.office.cityId, () => {
   }
 });
 
-const normalizeName = (value) => String(value || '')
-  .normalize('NFKC')
-  .toLocaleLowerCase('zh-Hant-TW')
-  .replace(/[\s·‧・．.]/g, '');
-
-const districtIdsFor = (candidate) => (
-  constituencyMap.get(candidate.constituencyId)?.districtIds
-  ?? candidate.districtIds
-  ?? []
-);
-
-const filteredCandidates = computed(() => {
-  const query = appliedQuery.value;
-
-  if (!query || query.tab !== activeTab.value) {
-    return candidates;
-  }
-
-  return candidates.filter((candidate) => {
-    if (query.tab === 'office') {
-      const matchesOffice = candidate.officeTypeId === query.officeTypeId;
-      const matchesCity = candidate.cityId === query.cityId;
-      const matchesDistrict = query.districtId === 'all'
-        || districtIdsFor(candidate).includes(query.districtId);
-      const matchesElected = !query.onlyElected || candidate.resultStatus === 'elected';
-      return matchesOffice && matchesCity && matchesDistrict && matchesElected;
-    }
-
-    if (query.tab === 'party') {
-      const matchesParty = candidate.partyId === query.partyId;
-      const matchesElected = !query.onlyElected || candidate.resultStatus === 'elected';
-      return matchesParty && matchesElected;
-    }
-
-    if (query.tab === 'name') {
-      const keyword = normalizeName(query.name);
-      return !keyword || normalizeName(candidate.name).includes(keyword);
-    }
-
-    return true;
-  });
-});
+const hasSearched = computed(() => appliedQuery.value !== null);
 
 const totalPages = computed(() => Math.max(
   1,
-  Math.ceil(filteredCandidates.value.length / desktopPageSize)
+  Math.ceil(total.value / desktopPageSize)
 ));
 
 const pageItems = computed(() => {
@@ -383,30 +364,78 @@ const pageItems = computed(() => {
   return items;
 });
 
-const desktopCandidates = computed(() => {
-  const start = (currentPage.value - 1) * desktopPageSize;
-  return filteredCandidates.value.slice(start, start + desktopPageSize);
+const desktopCandidates = computed(() => pages.value.get(currentPage.value) ?? []);
+
+// 小螢幕「展開更多」由第 1 頁起連續累加，桌機跳頁載入的不連續頁不計入
+const loadedPageCount = computed(() => {
+  let count = 0;
+  while (pages.value.has(count + 1)) count += 1;
+  return count;
 });
 
+const loadedCandidates = computed(() => Array.from(
+  { length: loadedPageCount.value },
+  (_, index) => pages.value.get(index + 1)
+).flat());
+
 const mobileCandidates = computed(() => (
-  filteredCandidates.value.slice(0, mobileVisibleCount.value)
+  loadedCandidates.value.slice(0, mobileVisibleCount.value)
 ));
 
-const resultAnnouncement = computed(() => (
-  filteredCandidates.value.length
-    ? `共找到 ${filteredCandidates.value.length} 位人員，桌機目前為第 ${currentPage.value} 頁，小螢幕目前顯示 ${Math.min(mobileVisibleCount.value, filteredCandidates.value.length)} 位`
-    : `${emptyState.title}，${emptyState.description}`
-));
+const resultAnnouncement = computed(() => {
+  if (!hasSearched.value) return '';
+  if (hasError.value || hasPageError.value) return `${errorState.title}，${errorState.description}`;
+  if (total.value) {
+    if (isLoading.value) return '載入中';
+    return `共找到 ${total.value} 位人員，桌機目前為第 ${currentPage.value} 頁，小螢幕目前顯示 ${mobileCandidates.value.length} 位`;
+  }
+  return isLoading.value ? '查詢中' : `${emptyState.title}，${emptyState.description}`;
+});
 
-const resetResultWindow = () => {
+const resetResults = () => {
+  pages.value = new Map();
+  total.value = 0;
+  hasError.value = false;
+  hasPageError.value = false;
   currentPage.value = 1;
   mobileVisibleCount.value = mobileBatchSize;
 };
 
+const fetchPage = async (page) => {
+  hasPageError.value = false;
+  if (pages.value.has(page)) return true;
+
+  isLoading.value = true;
+
+  try {
+    const result = await fetchElectionSearch({
+      ...appliedQuery.value,
+      page,
+      pageSize: desktopPageSize
+    });
+    pages.value.set(page, result.candidates.map((candidate, index) => ({
+      ...candidate,
+      key: `${page}-${index}`
+    })));
+    total.value = result.total;
+    return true;
+  } catch (error) {
+    console.error('當選快搜查詢失敗', error);
+    // 換頁或展開更多失敗時保留已載入的結果，只有首次查詢失敗才顯示錯誤版面
+    if (total.value) hasPageError.value = true;
+    else hasError.value = true;
+    return false;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const setActiveTab = (tabId) => {
-  if (activeTab.value === tabId) return;
+  // 查詢中不切換分頁，避免回應寫進已清空的結果
+  if (isLoading.value || activeTab.value === tabId) return;
   activeTab.value = tabId;
   appliedQuery.value = null;
+  resetResults();
   if (tabId === 'office') {
     draft.office.officeTypeId = searchData.defaults.officeTypeId;
     draft.office.cityId = searchData.defaults.cityId;
@@ -418,10 +447,10 @@ const setActiveTab = (tabId) => {
   } else {
     draft.name = '';
   }
-  resetResultWindow();
 };
 
 const focusTabAt = (index) => {
+  if (isLoading.value) return;
   const nextIndex = (index + tabs.length) % tabs.length;
   const nextTab = tabs[nextIndex];
   setActiveTab(nextTab.id);
@@ -433,59 +462,51 @@ const focusAdjacentTab = (offset) => {
   focusTabAt(currentIndex + offset);
 };
 
-const applySearch = () => {
+const applySearch = async () => {
+  if (isLoading.value) return;
+
+  let query;
   if (activeTab.value === 'office') {
-    appliedQuery.value = {
-      tab: 'office',
-      officeTypeId: draft.office.officeTypeId,
-      cityId: draft.office.cityId,
-      districtId: draft.office.districtId,
+    query = {
+      searchMode: SEARCH_MODE.office,
+      candidateType: draft.office.officeTypeId,
+      prvCityCode: draft.office.cityId,
+      // 「全部行政區」不送 deptCode
+      deptCode: districtCodeMap.get(draft.office.districtId),
       onlyElected: draft.office.onlyElected
     };
   } else if (activeTab.value === 'party') {
-    appliedQuery.value = {
-      tab: 'party',
-      partyId: draft.party.partyId,
+    query = {
+      searchMode: SEARCH_MODE.party,
+
+      party: partyMap.get(draft.party.partyId)?.fullLabel,
       onlyElected: draft.party.onlyElected
     };
   } else {
-    appliedQuery.value = {
-      tab: 'name',
-      name: draft.name
-    };
+    // 姓名不做正規化（全形轉半形、去除中間空白），不然會和資料對不上而查不到
+    // 頭尾空白由 buildElectionSearchPayload 去除
+    query = { searchMode: SEARCH_MODE.name, name: draft.name };
   }
 
-  resetResultWindow();
+  resetResults();
+  appliedQuery.value = query;
+  await fetchPage(1);
 };
 
-const goToPage = (page) => {
-  currentPage.value = Math.min(Math.max(page, 1), totalPages.value);
+const goToPage = async (page) => {
+  if (isLoading.value) return;
+  const targetPage = Math.min(Math.max(page, 1), totalPages.value);
+  if (await fetchPage(targetPage)) currentPage.value = targetPage;
 };
 
-const loadMore = () => {
-  mobileVisibleCount.value = Math.min(
-    mobileVisibleCount.value + mobileBatchSize,
-    filteredCandidates.value.length
-  );
+const loadMore = async () => {
+  if (isLoading.value) return;
+  const nextCount = Math.min(mobileVisibleCount.value + mobileBatchSize, total.value);
+  if (nextCount > loadedCandidates.value.length && !(await fetchPage(loadedPageCount.value + 1))) {
+    return;
+  }
+  mobileVisibleCount.value = nextCount;
 };
-
-const partyFor = (partyId) => partyMap.get(partyId) || {
-  label: '其他',
-  fullLabel: '其他',
-  badge: '其',
-  color: '#9b9b9b'
-};
-
-const cityLabelFor = (cityId) => cityMap.get(cityId)?.label || '';
-
-const constituencyLabelFor = (candidate) => {
-  if (candidate.hideConstituencyLabel) return '';
-  return constituencyMap.get(candidate.constituencyId)?.label || candidate.constituencyLabel || '';
-};
-
-const administrativeAreasFor = (candidate) => districtIdsFor(candidate)
-  .map((districtId) => districtMap.get(districtId))
-  .filter(Boolean);
 </script>
 
 <style scoped>
@@ -714,6 +735,12 @@ const administrativeAreasFor = (candidate) => districtIdsFor(candidate)
   transform: translateY(1px);
 }
 
+.query-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
 .search-divider {
   height: 1px;
   margin: 0 1.75rem;
@@ -752,6 +779,13 @@ const administrativeAreasFor = (candidate) => districtIdsFor(candidate)
   content: '※ ';
 }
 
+.loading-state {
+  padding: 3rem 1rem;
+  color: var(--color-coffee-600);
+  font-size: 1.15rem;
+  text-align: center;
+}
+
 .candidate-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -774,8 +808,9 @@ const administrativeAreasFor = (candidate) => districtIdsFor(candidate)
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.8rem;
+  min-width: 1.8rem;
   height: 1.8rem;
+  padding: 0 0.3rem;
   border: 1px solid var(--color-coffee-200);
   background: var(--color-coffee-0);
   color: var(--color-coffee-600);
@@ -815,8 +850,21 @@ const administrativeAreasFor = (candidate) => districtIdsFor(candidate)
   font-weight: 400;
 }
 
+.desktop-pagination.is-loading .page-button,
+.load-more-button.is-loading {
+  cursor: progress;
+  opacity: 0.6;
+}
+
 .load-more-button {
   display: none;
+}
+
+.page-error {
+  margin-top: 1rem;
+  color: var(--color-primary);
+  font-size: 0.95rem;
+  text-align: center;
 }
 
 .empty-state {

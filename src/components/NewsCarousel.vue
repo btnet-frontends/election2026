@@ -231,7 +231,7 @@ const canLoop = computed(() => props.items.length > 1);
     font-size: 1rem;
     -webkit-line-clamp: 3;
     line-clamp: 3;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .slide-excerpt {

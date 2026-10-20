@@ -204,9 +204,16 @@ const canLoop = computed(() => props.items.length > 1);
   .slide-title :deep(.br_sm_hidden) {
     display: none;
   }
+  .slide-title :deep(.br_sm_block) {
+    display: block;
+  }
 }
 
 @media (max-width: 768px) {
+  .slide-title :deep(.br_sm_block) {
+    display: none;
+  }
+
   .carousel-track {
     border-radius: 16px;
   }

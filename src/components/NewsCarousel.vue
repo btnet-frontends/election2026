@@ -95,7 +95,7 @@ const canLoop = computed(() => props.items.length > 1);
   background: linear-gradient(
     to bottom,
     rgba(124, 255, 176, 0) 9%,
-    rgba(41, 217, 202, 0.53) 62%,
+    rgba(41, 217, 202, 0.48) 62%,
     rgba(73, 133, 217, 0.32) 100%
   );
 }

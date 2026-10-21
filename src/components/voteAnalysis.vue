@@ -97,6 +97,8 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import { useLiveStatistics } from '../composables/useLiveStatistics.js';
+import { fetchElectionStat } from '../utils/electionStatApi.js';
 import { use } from 'echarts/core';
 import { SVGRenderer } from 'echarts/renderers';
 import { BarChart, LineChart, PieChart } from 'echarts/charts';
@@ -136,46 +138,47 @@ const voteAnalysis = config.voteAnalysis;
 const { phase } = usePhase();
 const isPreElection = computed(() => phase.value === 'default');
 
-const basePartyTrend = props.stat?.partyTrend
-  ? { ...voteAnalysis.partyTrend, ...props.stat.partyTrend }
-  : voteAnalysis.partyTrend;
+const stat = useLiveStatistics(props.stat, fetchElectionStat);
+const basePartyTrend = computed(() => stat.value?.partyTrend
+  ? { ...voteAnalysis.partyTrend, ...stat.value.partyTrend }
+  : voteAnalysis.partyTrend);
 
-const baseTurnout = props.stat?.turnout
-  ? { ...voteAnalysis.turnout, items: props.stat.turnout.items }
-  : voteAnalysis.turnout;
+const baseTurnout = computed(() => stat.value?.turnout
+  ? { ...voteAnalysis.turnout, items: stat.value.turnout.items }
+  : voteAnalysis.turnout);
 
-const municipalityYears = props.stat?.municipalityYears ?? voteAnalysis.municipality.years;
+const municipalityYears = computed(() => stat.value?.municipalityYears ?? voteAnalysis.municipality.years);
 
 // SCHEDULE_START 前不顯示 2026 的資料點；
 // 開票後 API 尚無 2026 資料時，x 軸先開出 2026 類別、y 值留空（尚未開票）
 const partyTrend = computed(() => {
   if (isPreElection.value) {
-    const keep = basePartyTrend.categories.map(
+    const keep = basePartyTrend.value.categories.map(
       (category) => !category.year.startsWith(String(ELECTION_YEAR))
     );
 
     return {
-      ...basePartyTrend,
-      categories: basePartyTrend.categories.filter((_, index) => keep[index]),
-      series: basePartyTrend.series.map((series) => ({
+      ...basePartyTrend.value,
+      categories: basePartyTrend.value.categories.filter((_, index) => keep[index]),
+      series: basePartyTrend.value.series.map((series) => ({
         ...series,
         values: series.values.filter((_, index) => keep[index])
       }))
     };
   }
 
-  const hasElectionYear = basePartyTrend.categories.some(
+  const hasElectionYear = basePartyTrend.value.categories.some(
     (category) => category.year.startsWith(String(ELECTION_YEAR))
   );
-  if (hasElectionYear) return basePartyTrend;
+  if (hasElectionYear) return basePartyTrend.value;
 
   return {
-    ...basePartyTrend,
+    ...basePartyTrend.value,
     categories: [
-      ...basePartyTrend.categories,
+      ...basePartyTrend.value.categories,
       { year: `${ELECTION_YEAR}年`, election: '直轄市長、\n縣市長' }
     ],
-    series: basePartyTrend.series.map((series) => ({
+    series: basePartyTrend.value.series.map((series) => ({
       ...series,
       values: [...series.values, null]
     }))
@@ -187,22 +190,22 @@ const partyTrend = computed(() => {
 const turnout = computed(() => {
   if (isPreElection.value) {
     return {
-      ...baseTurnout,
-      items: baseTurnout.items.filter(
+      ...baseTurnout.value,
+      items: baseTurnout.value.items.filter(
         (item) => !String(item.label).startsWith(String(ELECTION_YEAR))
       )
     };
   }
 
-  const hasElectionYear = baseTurnout.items.some(
+  const hasElectionYear = baseTurnout.value.items.some(
     (item) => String(item.label).startsWith(String(ELECTION_YEAR))
   );
-  if (hasElectionYear) return baseTurnout;
+  if (hasElectionYear) return baseTurnout.value;
 
   return {
-    ...baseTurnout,
+    ...baseTurnout.value,
     items: [
-      ...baseTurnout.items,
+      ...baseTurnout.value.items,
       { label: `${ELECTION_YEAR}年直轄市長`, value: null },
       { label: `${ELECTION_YEAR}年縣市長`, value: null }
     ]
@@ -212,7 +215,7 @@ const turnout = computed(() => {
 // 圓餅圖 tab：SCHEDULE_START 前只列歷史年份；之後補上 2026
 // （API 尚無 2026 資料時內容顯示「尚未開票」），其餘 tab 沿用 data.json 設定
 const tabs = computed(() => {
-  let pieYears = Object.keys(municipalityYears).sort();
+  let pieYears = Object.keys(municipalityYears.value).sort();
 
   if (isPreElection.value) {
     pieYears = pieYears.filter((year) => Number(year) < ELECTION_YEAR);
@@ -242,7 +245,7 @@ const activeTab = computed(() => (
 ));
 
 const activeMunicipalityData = computed(() => (
-  municipalityYears[String(activeTab.value?.year)] ?? []
+  municipalityYears.value[String(activeTab.value?.year)] ?? []
 ));
 
 const activateTab = (tabId) => {

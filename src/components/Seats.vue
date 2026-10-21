@@ -104,6 +104,8 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue';
+import { useLiveStatistics } from '../composables/useLiveStatistics.js';
+import { fetchSeatHistory } from '../utils/seatHistoryApi.js';
 import statisticsIcon from '../assets/images/statistics_icon.svg?url';
 import { usePhase } from '../composables/usePhase.js';
 import { ELECTION_YEAR } from '../utils/schedule.js';
@@ -153,8 +155,10 @@ const isLightColor = (hex) => {
 
 const { phase } = usePhase();
 
-const seatsByYear = computed(() => props.history?.data ?? {});
-const apiYears = computed(() => props.history?.years ?? []);
+const history = useLiveStatistics(props.history, fetchSeatHistory);
+
+const seatsByYear = computed(() => history.value?.data ?? {});
+const apiYears = computed(() => history.value?.years ?? []);
 
 // SCHEDULE_START 前隱藏 2026；之後即使 API 尚無 2026 資料也顯示選項（內容為尚未開票）
 const years = computed(() => {
@@ -297,7 +301,7 @@ const chartAriaLabel = computed(() => {
   return `${selectedYear.value} 年${selectedCity.value}議員共 ${totalSeats.value} 席：${partySummary}`;
 });
 
-watch(selectedYear, () => {
+watch(cities, () => {
   if (!cities.value.includes(selectedCity.value)) {
     selectedCity.value = cities.value[0];
   }

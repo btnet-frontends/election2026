@@ -1,3 +1,13 @@
+# 選情統計資料更新
+
+`page2` 的六都議員席次、投票分析及歷史版圖會在瀏覽器載入時、每 60 秒，以及切回分頁時重新抓取資料。背景分頁暫停更新；抓取失敗保留上次成功的資料。年份、縣市選取值仍有效時會保留。
+
+瀏覽器使用同網域的 `/files/2026election/getParliamentaryHistory`、`getElectionStat`、`getMayorHistory`，避免資料 CDN 沒有 CORS 標頭的問題。正式站已提供這些路徑，本機 `npm run dev` 由 Vite proxy 轉送。若改用其他部署網域，也需提供這三條資料路徑的轉送。
+
+這次程式修改需建置、部署一次；後續只修改 API 資料時不需重新建置。建置時仍抓取資料，作為首屏與連線失敗時的備援。
+
+驗證：`node --test tests/*.test.js`、`npm run build`。
+
 # Astro Starter Kit: Minimal
 
 ```sh

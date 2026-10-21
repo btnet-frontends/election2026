@@ -1,6 +1,5 @@
-import parties from '../json/parties.json';
-
-const HISTORY_API_URL = 'https://doqvf81n9htmm.cloudfront.net/files/2026election/getParliamentaryHistory';
+import { fetchStatisticsJson } from './statisticsApi.js';
+import parties from '../json/parties.json' with { type: 'json' };
 
 // API 的政黨名稱與色票表（parties.json）名稱不一致時的對照
 const COLOR_NAME_ALIASES = {
@@ -46,18 +45,15 @@ const normalizeHistory = (historyJson) => {
 
 /**
  * 抓取各縣市議員席次歷史（中選會資料）並套上政黨代表色。
- * 於 Astro build 階段呼叫；失敗時回傳 null。
+ * 供 Astro build 與瀏覽器自動更新共用；失敗時回傳 null。
  */
-export async function fetchSeatHistory() {
+export async function fetchSeatHistory(signal) {
   try {
-    const response = await fetch(`${HISTORY_API_URL}?v=${Date.now()}`);
-    if (!response.ok) {
-      throw new Error(`議員席次 API 回應 ${response.status}`);
-    }
+    const json = await fetchStatisticsJson('getParliamentaryHistory', signal);
 
-    return normalizeHistory(await response.json());
+    return normalizeHistory(json);
   } catch (error) {
-    console.error('Astro 靜態抓取議員席次資料發生異常:', error);
+    if (!signal?.aborted) console.error('抓取議員席次資料發生異常:', error);
     return null;
   }
 }

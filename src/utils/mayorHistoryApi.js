@@ -1,4 +1,4 @@
-const MAYOR_HISTORY_URL = 'https://doqvf81n9htmm.cloudfront.net/files/2026election/getMayorHistory';
+import { fetchStatisticsJson } from './statisticsApi.js';
 
 // API 縣市名稱（用「臺」）→ 地圖元件的 data-name slug
 const CITY_SLUGS = {
@@ -69,18 +69,15 @@ const normalizeMayorHistory = (historyJson) => {
 
 /**
  * 抓取歷屆縣市首長選舉結果（直轄市長 + 縣市長，中選會資料）。
- * 於 Astro build 階段呼叫；失敗時回傳 null，元件會退回 data.json 的內建資料。
+ * 供 Astro build 與瀏覽器自動更新共用；失敗時回傳 null，元件會退回 data.json 的內建資料。
  */
-export async function fetchMayorHistory() {
+export async function fetchMayorHistory(signal) {
   try {
-    const response = await fetch(`${MAYOR_HISTORY_URL}?v=${Date.now()}`);
-    if (!response.ok) {
-      throw new Error(`縣市首長歷史 API 回應 ${response.status}`);
-    }
+    const json = await fetchStatisticsJson('getMayorHistory', signal);
 
-    return normalizeMayorHistory(await response.json());
+    return normalizeMayorHistory(json);
   } catch (error) {
-    console.error('Astro 靜態抓取縣市首長歷史資料發生異常:', error);
+    if (!signal?.aborted) console.error('抓取縣市首長歷史資料發生異常:', error);
     return null;
   }
 }

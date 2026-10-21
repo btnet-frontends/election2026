@@ -50,7 +50,9 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { useLiveStatistics } from '../composables/useLiveStatistics.js';
+import { fetchMayorHistory } from '../utils/mayorHistoryApi.js';
 import config from '../json/data.json';
 import TaiwanPartyHistoryLocation from './taiwanPartyHistoryLocation.vue';
 import { usePhase } from '../composables/usePhase.js';
@@ -68,33 +70,40 @@ const partyHistory = config.partyHistory;
 const { phase } = usePhase();
 
 // API 有的年份以 API 為準（視為已定案），data.json 中未被覆蓋的年份（如 2026 尚未開票）保留
-const apiYears = props.history?.years ?? [];
-const allYearOptions = [
-  ...apiYears.map((year) => ({ year, status: 'final' })),
-  ...partyHistory.years.filter((item) => !apiYears.includes(item.year))
-].sort((a, b) => a.year - b.year);
+const history = useLiveStatistics(props.history, fetchMayorHistory);
+const apiYears = computed(() => history.value?.years ?? []);
+const allYearOptions = computed(() => [
+  ...apiYears.value.map((year) => ({ year, status: 'final' })),
+  ...partyHistory.years.filter((item) => !apiYears.value.includes(item.year))
+].sort((a, b) => a.year - b.year));
 
 // SCHEDULE_START 前隱藏 2026 按鈕
 const yearOptions = computed(() => (
   phase.value === 'default'
-    ? allYearOptions.filter((item) => item.year < ELECTION_YEAR)
-    : allYearOptions
+    ? allYearOptions.value.filter((item) => item.year < ELECTION_YEAR)
+    : allYearOptions.value
 ));
 
-const resultsByYear = {
+const resultsByYear = computed(() => ({
   ...partyHistory.results,
-  ...(props.history?.results ?? {})
-};
+  ...(history.value?.results ?? {})
+}));
 
 // 預設顯示可見選項中最後（最新）的年份
 const selectedYear = ref(yearOptions.value[yearOptions.value.length - 1]?.year);
+
+watch(yearOptions, (options) => {
+  if (!options.some((item) => item.year === selectedYear.value)) {
+    selectedYear.value = options[options.length - 1]?.year;
+  }
+});
 
 const selectedYearOption = computed(() => (
   yearOptions.value.find((item) => item.year === selectedYear.value)
 ));
 
 const currentResults = computed(() => (
-  resultsByYear[String(selectedYear.value)] ?? {}
+  resultsByYear.value[String(selectedYear.value)] ?? {}
 ));
 
 const locationColors = computed(() => Object.fromEntries(

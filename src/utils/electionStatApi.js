@@ -1,4 +1,4 @@
-const ELECTION_STAT_URL = 'https://doqvf81n9htmm.cloudfront.net/files/2026election/getElectionStat';
+import { fetchStatisticsJson } from './statisticsApi.js';
 
 const PARTY_TREND_KEY = '國、民兩黨20年來重要選舉得票率';
 const TURNOUT_KEY = '2008年以來台灣重要選舉投票率';
@@ -58,16 +58,11 @@ const normalizeMunicipalityYears = (statJson) => {
 
 /**
  * 抓取投票分析統計（兩黨得票率趨勢、歷年投票率、直轄市長得票率）。
- * 於 Astro build 階段呼叫；失敗時回傳 null，元件會退回 data.json 的內建資料。
+ * 供 Astro build 與瀏覽器自動更新共用；失敗時回傳 null，元件會退回 data.json 的內建資料。
  */
-export async function fetchElectionStat() {
+export async function fetchElectionStat(signal) {
   try {
-    const response = await fetch(`${ELECTION_STAT_URL}?v=${Date.now()}`);
-    if (!response.ok) {
-      throw new Error(`投票分析 API 回應 ${response.status}`);
-    }
-
-    const statJson = await response.json();
+    const statJson = await fetchStatisticsJson('getElectionStat', signal);
 
     return {
       partyTrend: normalizePartyTrend(statJson[PARTY_TREND_KEY]),
@@ -75,7 +70,7 @@ export async function fetchElectionStat() {
       municipalityYears: normalizeMunicipalityYears(statJson)
     };
   } catch (error) {
-    console.error('Astro 靜態抓取投票分析資料發生異常:', error);
+    if (!signal?.aborted) console.error('抓取投票分析資料發生異常:', error);
     return null;
   }
 }

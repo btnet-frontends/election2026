@@ -17,7 +17,7 @@
           target="_blank"
           class="slide-media"
         >
-          <img :src="item.image_url" :alt="item.title" class="slide-image" />
+          <img :src="resolveImageUrl(item.image_url)" :alt="item.title" class="slide-image" />
           <div class="slide-overlay-color"></div>
           <div class="slide-overlay-dark"></div>
           <div class="slide-content-desktop">
@@ -55,6 +55,11 @@ const props = defineProps({
 defineEmits(['slide-change']);
 
 const modules = [Pagination, Autoplay];
+
+const resolveImageUrl = (url) => {
+  if (!url || /^(?:[a-z][a-z\d+.-]*:|\/)/i.test(url)) return url;
+  return `${import.meta.env.BASE_URL.replace(/\/$/, '')}/${url}`;
+};
 
 const canLoop = computed(() => props.items.length > 1);
 </script>

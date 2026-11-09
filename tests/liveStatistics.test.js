@@ -88,18 +88,18 @@ test('avoids overlapping requests and discards a timed-out response', async (t) 
   assert.equal(data.value.seats, 23);
 });
 
-test('browser uses same-origin JSON with cache disabled; build uses CDN', async (t) => {
+test('browser uses same-origin UAT JSON with cache disabled; build uses UAT CDN', async (t) => {
   const calls = [];
   t.mock.method(globalThis, 'fetch', async (url, options) => {
     calls.push({ url, options });
     return Response.json({ ok: true });
   });
   await fetchStatisticsJson('getParliamentaryHistory');
-  assert.match(calls[0].url, /^https:\/\/doqvf81n9htmm.cloudfront.net\/files\//);
+  assert.match(calls[0].url, /^https:\/\/doqvf81n9htmm\.cloudfront\.net\/files\/2026election\/uat\/getParliamentaryHistory\?v=\d+$/);
   globalThis.window = {};
   t.after(() => { delete globalThis.window; });
   await fetchStatisticsJson('getParliamentaryHistory');
-  assert.match(calls[1].url, /^\/files\/2026election\/getParliamentaryHistory\?v=\d+$/);
+  assert.match(calls[1].url, /^\/files\/2026election\/uat\/getParliamentaryHistory\?v=\d+$/);
   assert.equal(calls[1].options.cache, 'no-store');
   assert.ok(calls[1].options.signal instanceof AbortSignal);
 });

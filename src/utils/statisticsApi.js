@@ -4,7 +4,7 @@ const DATA_ORIGIN = 'https://doqvf81n9htmm.cloudfront.net';
 // 本機開發由 Vite proxy 轉送；Astro build 則直接讀取 CDN。
 export async function fetchStatisticsJson(endpoint, signal = AbortSignal.timeout(10000)) {
   const origin = typeof window === 'undefined' ? DATA_ORIGIN : '';
-  const response = await fetch(`${origin}/files/2026election/${endpoint}?v=${Date.now()}`, {
+  const response = await fetch(`${origin}/files/2026election/uat/${endpoint}?v=${Date.now()}`, {
     cache: 'no-store',
     signal
   });

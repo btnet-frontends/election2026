@@ -1,4 +1,4 @@
-export const REFERENDUM_URL = 'https://doqvf81n9htmm.cloudfront.net/files/2026election/getReferendum';
+export const REFERENDUM_URL = 'https://doqvf81n9htmm.cloudfront.net/files/2026election/uat/getReferendum';
 
 export function normalizeReferendum(data) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) {

@@ -11,19 +11,19 @@ export default defineConfig({
   vite: {
     server: {
       proxy: {
-        '/files/2026election/': {
+        '/files/2026election/uat/': {
           target: 'https://doqvf81n9htmm.cloudfront.net',
           changeOrigin: true
         },
         '/api/referendum': {
           target: 'https://doqvf81n9htmm.cloudfront.net',
           changeOrigin: true,
-          rewrite: () => '/files/2026election/getReferendum'
+          rewrite: () => '/files/2026election/uat/getReferendum'
         },
         '/api/invoicing-result': {
           target: 'https://doqvf81n9htmm.cloudfront.net',
           changeOrigin: true,
-          rewrite: () => '/files/2026election/getInvoicingResult'
+          rewrite: () => '/files/2026election/uat/getInvoicingResult'
         }
       }
     }

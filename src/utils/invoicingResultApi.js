@@ -1,6 +1,6 @@
 import parties from '../json/parties.json' with { type: 'json' };
 
-export const INVOICING_RESULT_URL = 'https://doqvf81n9htmm.cloudfront.net/files/2026election/getInvoicingResult';
+export const INVOICING_RESULT_URL = 'https://doqvf81n9htmm.cloudfront.net/files/2026election/uat/getInvoicingResult';
 const partyById = new Map(parties.map((party) => [String(party.id), party]));
 const badges = { 中國國民黨: '國', 民主進步黨: '民', 台灣民眾黨: '眾', 無黨籍及未經政黨推薦: '無' };
 const normalizeCity = (name) => String(name ?? '').trim().replaceAll('臺', '台');

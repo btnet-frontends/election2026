@@ -109,7 +109,7 @@
   "electedSearch": {
     "year": 2026,
     "dataStatus": "demo",
-    "dataNotice": "示意資料，非正式選舉結果",
+    "dataNotice": "資料來源：中央選舉委員會",
     "defaultTab": "office",
     "tabs": [
       { "id": "office", "label": "公職人員類型" },

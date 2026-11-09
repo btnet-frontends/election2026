@@ -766,6 +766,13 @@ watch(() => props.locationColors, updateSelectedLocation, { deep: true });
 
     text{
         cursor: pointer;
+        fill: #222 !important;
+        font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif !important;
+        font-weight: 700;
+        stroke: #fff;
+        stroke-width: 3px;
+        stroke-linejoin: round;
+        paint-order: stroke fill;
     }
 
     @media (hover: hover) {

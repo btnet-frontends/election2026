@@ -13,11 +13,12 @@
         <div class="taiwan_location_box">
           <taiwanLocation
             v-model:selected-location="selectedLocation"
+            :location-colors="result?.winnerColors ?? {}"
             @location-selected="scrollToVotePanel"
           />
         </div>
         <div ref="votePanelElement" class="vote_panel_box">
-          <votePanel v-model:selected-location="selectedLocation" :initial-result="initialResult" />
+          <votePanel v-model:selected-location="selectedLocation" :result="result" :refresh-failed="refreshFailed" />
         </div>
       </div>
     </div>
@@ -25,14 +26,50 @@
 </template>
 
 <script setup>
-import { nextTick, ref } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref } from 'vue';
+import { fetchInvoicingResult, INVOICING_RESULT_URL } from '../utils/invoicingResultApi.js';
 import voteIcon from '../assets/images/election_vote_icon.svg?url';
 import pollsBg from '../assets/images/polls_bg.png?url';
 import taiwanLocation from './taiwanLocation.vue';
 import votePanel from './votePanel.vue';
 import { usePhase } from '../composables/usePhase.js';
 
-defineProps({ initialResult: { type: Object, default: null } });
+const props = defineProps({ initialResult: { type: Object, default: null } });
+// 地圖與面板共用同一份開票資料及更新排程。
+const result = ref(props.initialResult);
+const refreshFailed = ref(false);
+
+let refreshTimer;
+let controller;
+let stopped = false;
+
+const refresh = async () => {
+  controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const url = import.meta.env.DEV ? '/api/invoicing-result' : INVOICING_RESULT_URL;
+    const nextResult = await fetchInvoicingResult(url, controller.signal);
+    if (!stopped) {
+      result.value = nextResult;
+      refreshFailed.value = false;
+    }
+  } catch (error) {
+    if (!stopped) {
+      refreshFailed.value = true;
+      console.error('更新開票資料失敗:', error);
+    }
+  } finally {
+    clearTimeout(timeout);
+    if (!stopped) refreshTimer = setTimeout(refresh, 30000);
+  }
+};
+
+onMounted(refresh);
+onUnmounted(() => {
+  stopped = true;
+  clearTimeout(refreshTimer);
+  controller?.abort();
+});
 
 const { isComponentVisible } = usePhase();
 const selectedLocation = ref('台北市');

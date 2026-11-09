@@ -2,6 +2,7 @@
     <svg
         id="taiwan_location"
         ref="mapElement"
+        :style="mapStyle"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 1920 1080"
         @click="selectLocation"
@@ -676,7 +677,14 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+
+const props = defineProps({
+    locationColors: { type: Object, default: () => ({}) }
+});
+const mapStyle = computed(() => ({
+    '--taitung-island-fill': props.locationColors['台東縣'] ?? '#b8b8b8'
+}));
 
 const selectedLocation = defineModel('selectedLocation', {
     type: String,
@@ -714,7 +722,9 @@ const selectLocationByKeyboard = (event) => {
 const updateSelectedLocation = () => {
     mapElement.value?.querySelectorAll('.location_index').forEach((locationElement) => {
         const isSelected = locationElement.dataset.chname === selectedLocation.value;
+        const color = props.locationColors[locationElement.dataset.chname] ?? '#b8b8b8';
 
+        locationElement.style.setProperty('--location-fill', color);
         locationElement.classList.toggle('is-selected', isSelected);
         locationElement.setAttribute('role', 'button');
         locationElement.setAttribute('tabindex', '0');
@@ -725,6 +735,7 @@ const updateSelectedLocation = () => {
 
 onMounted(updateSelectedLocation);
 watch(selectedLocation, updateSelectedLocation);
+watch(() => props.locationColors, updateSelectedLocation, { deep: true });
 </script>
 
 <style scoped>
@@ -734,11 +745,17 @@ watch(selectedLocation, updateSelectedLocation);
 
     .taiwan_location path[style*="#b8b8b8"] {
         cursor: pointer;
-        transition: fill-opacity 0.2s ease;
+        fill: var(--location-fill, #b8b8b8) !important;
+        transition: fill 0.2s ease, fill-opacity 0.2s ease;
     }
 
     .taiwan_location.is-selected path[style*="#b8b8b8"] {
-        fill: #858585 !important;
+        stroke: #505050;
+        stroke-width: 2px;
+    }
+
+    .taitung_island path[style*="#b8b8b8"] {
+        fill: var(--taitung-island-fill, #b8b8b8) !important;
     }
 
     .taiwan_location:focus,

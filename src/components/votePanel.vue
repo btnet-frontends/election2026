@@ -77,8 +77,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { fetchInvoicingResult, INVOICING_RESULT_URL } from '../utils/invoicingResultApi.js';
+import { computed } from 'vue';
 import { ELECTION_YEAR } from '../utils/schedule.js';
 import elected_icon from '../assets/images/elected.png?url';
 
@@ -119,45 +118,15 @@ const locations = [
   '連江縣'
 ];
 
-const props = defineProps({ initialResult: { type: Object, default: null } });
-const result = ref(props.initialResult);
-const refreshFailed = ref(false);
-const updateTime = computed(() => result.value?.updateTime || '開票中');
+const props = defineProps({
+  result: { type: Object, default: null },
+  refreshFailed: { type: Boolean, default: false }
+});
+const updateTime = computed(() => props.result?.updateTime || '開票中');
 const selectedElections = computed(() => [{
   year: ELECTION_YEAR,
-  candidates: result.value?.cities[selectedLocation.value] ?? []
+  candidates: props.result?.cities[selectedLocation.value] ?? []
 }]);
-let refreshTimer;
-let controller;
-let stopped = false;
-
-const refresh = async () => {
-  controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
-  try {
-    const url = import.meta.env.DEV ? '/api/invoicing-result' : INVOICING_RESULT_URL;
-    const nextResult = await fetchInvoicingResult(url, controller.signal);
-    if (!stopped) {
-      result.value = nextResult;
-      refreshFailed.value = false;
-    }
-  } catch (error) {
-    if (!stopped) {
-      refreshFailed.value = true;
-      console.error('更新開票資料失敗:', error);
-    }
-  } finally {
-    clearTimeout(timeout);
-    if (!stopped) refreshTimer = setTimeout(refresh, 30000);
-  }
-};
-
-onMounted(refresh);
-onUnmounted(() => {
-  stopped = true;
-  clearTimeout(refreshTimer);
-  controller?.abort();
-});
 
 const formatVotes = (votes) => new Intl.NumberFormat('zh-TW').format(votes);
 const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;

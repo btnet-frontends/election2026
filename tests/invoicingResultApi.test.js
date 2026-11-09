@@ -35,6 +35,29 @@ test('party image filenames come from the catalog, not from the political party 
   ]);
 });
 
+test('map colors use elected candidates and party IDs, including parties outside the major three', () => {
+  for (const [partyId, color] of [[1, '#000099'], [16, '#1B9431'], [350, '#28C8C8'], [240, '#801f1f'], [382, '#549dbe'], [0, '#888888'], ['unknown', '#888888']]) {
+    const result = normalizeInvoicingResult(payload([
+      { Name: '票數較多但未當選', Political_party_id: 16, Votes: 9999, Elected: false },
+      { Name: '當選人', Political_party_id: partyId, Votes: 100, Elected: 'true', Is_show_main_page: false }
+    ]));
+    assert.equal(result.winnerColors['台北市'], color);
+    assert.equal(result.cities['台北市'].length, 1);
+  }
+});
+
+test('map leaves cities without declared winners uncolored and clears previous winners on new data', () => {
+  const first = normalizeInvoicingResult(payload([
+    { Name: '當選人', Political_party_id: 1, Elected: 1 }
+  ]));
+  assert.equal(first.winnerColors['台北市'], '#000099');
+  const next = normalizeInvoicingResult(payload([
+    { Name: '開票中', Political_party_id: 1, Votes: 9999, Elected: 'false' }
+  ]));
+  assert.deepEqual(next.winnerColors, {});
+  assert.deepEqual(normalizeInvoicingResult(payload(null)).winnerColors, {});
+});
+
 test('missing city/candidates stay empty; missing values are not fabricated as zero', () => {
   assert.deepEqual(normalizeInvoicingResult({ aInvoicingResult: [] }).cities, {});
   assert.deepEqual(normalizeInvoicingResult(payload(null)).cities['台北市'], []);

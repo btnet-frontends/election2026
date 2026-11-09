@@ -1,14 +1,13 @@
 <template>
   <article class="candidate-card">
     <div class="candidate-heading" :class="{ 'has-elected-mark': isElected }">
-      <span
-        class="party-badge"
-        :style="{ backgroundColor: party.color }"
-        :aria-label="party.fullLabel || party.label"
-        :title="party.fullLabel || party.label"
-      >
-        {{ party.badge }}
-      </span>
+      <img
+        v-if="partyImage"
+        class="party-icon"
+        :src="partyImage"
+        :alt="candidate.party"
+        :title="candidate.party"
+      />
       <h4 class="candidate-name">{{ candidate.name }}</h4>
     </div>
 
@@ -28,16 +27,16 @@
             <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z" />
           </svg>
         </dt>
-        <dd>{{ locationText }}</dd>
+        <dd>{{ candidate.locationText }}</dd>
       </div>
-      <div v-if="administrativeAreas.length" class="meta-row">
+      <div v-if="candidate.areaDeptsText" class="meta-row">
         <dt class="meta-icon">
           <span class="sr-only">行政區</span>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 21v-9h5V3h10v18h2v2H2v-2h2Zm3-2h2v-2H7v2Zm0-4h2v-2H7v2Zm5 4h2v-2h-2v2Zm0-5h2v-2h-2v2Zm0-5h2V7h-2v2Zm4 10h2v-2h-2v2Zm0-5h2v-2h-2v2Zm0-5h2V7h-2v2Z" />
           </svg>
         </dt>
-        <dd>{{ administrativeAreas.join('、 ') }}</dd>
+        <dd>{{ candidate.areaDeptsText }}</dd>
       </div>
     </dl>
   </article>
@@ -45,26 +44,23 @@
 
 <script setup>
 import { computed } from 'vue';
+import parties from '../json/parties.json';
+
+const partyImages = import.meta.glob('../assets/images/party_icon/*.png', {
+  eager: true,
+  query: '?url',
+  import: 'default'
+});
+
+
+const partyImageById = new Map(
+  parties.map((party) => [party.id, partyImages[`../assets/images/party_icon/${party.image}`]])
+);
+
 
 const props = defineProps({
   candidate: {
     type: Object,
-    required: true
-  },
-  party: {
-    type: Object,
-    required: true
-  },
-  cityLabel: {
-    type: String,
-    required: true
-  },
-  constituencyLabel: {
-    type: String,
-    default: ''
-  },
-  administrativeAreas: {
-    type: Array,
     required: true
   },
   electedIcon: {
@@ -73,12 +69,9 @@ const props = defineProps({
   }
 });
 
-const isElected = computed(() => props.candidate.resultStatus === 'elected');
-const locationText = computed(() => (
-  props.constituencyLabel
-    ? `${props.cityLabel}・${props.constituencyLabel}`
-    : props.cityLabel
-));
+const isElected = computed(() => props.candidate.elected === true);
+const partyImage = computed(() => partyImageById.get(props.candidate.partyId));
+
 </script>
 
 <style scoped>
@@ -102,6 +95,13 @@ const locationText = computed(() => (
 
 .candidate-heading.has-elected-mark {
   padding-right: 2.8rem;
+}
+
+.party-icon {
+  flex: 0 0 auto;
+  width: 2.4rem;
+  height: 2.4rem;
+  object-fit: contain;
 }
 
 .party-badge {
@@ -191,6 +191,11 @@ const locationText = computed(() => (
 
   .candidate-heading.has-elected-mark {
     padding-right: 2.65rem;
+  }
+
+  .party-icon {
+    width: 2.45rem;
+    height: 2.45rem;
   }
 
   .party-badge {

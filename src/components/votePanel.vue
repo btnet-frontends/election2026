@@ -307,7 +307,8 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
 }
 
 .elected-mark {
-  position: relative;
+  position: absolute;
+  left: 0;
   flex: 0 0 auto;
   width: 2.4rem;
   height: 2.4rem;
@@ -396,6 +397,7 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
     width: 2.15rem;
     height: 2.15rem;
     font-size: 0.95rem;
+    margin-left: 2rem;
   }
 
   .numbers {

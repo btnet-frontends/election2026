@@ -1,6 +1,6 @@
 import { onMounted, onUnmounted, shallowRef } from 'vue';
 
-// 保留 build 時的資料作為首屏；載入、每分鐘及回到分頁時取得最新資料。
+// 保留 build 時的資料作為首屏；載入、每 30 秒及回到分頁時取得最新資料。
 export function useLiveStatistics(initialData, fetchData) {
   const data = shallowRef(initialData);
   let timer;
@@ -25,7 +25,7 @@ export function useLiveStatistics(initialData, fetchData) {
 
   onMounted(() => {
     refresh();
-    timer = setInterval(refresh, 60000);
+    timer = setInterval(refresh, 30000);
     document.addEventListener('visibilitychange', refresh);
   });
 

@@ -161,7 +161,7 @@
         "id": "referendum-1",
         "number": 1,
         "title": "廢除非核家園公投",
-        "question": "您是否同意政府廢除『非核家園』的能源政策，以確保國民健康、穩定供電、便宜電價，提升國防韌性及支持人工智慧（AI）產業發展？",
+        "question": "你是否支持政府使用『核電』振興經濟，以廢除『非核家園』的能源政策？",
         "status": "pending",
         "statusOptions": [
           { "id": "failed", "label": "不通過" },

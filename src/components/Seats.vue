@@ -73,7 +73,6 @@
 
         <ul
           class="seat-legend"
-          :style="{ '--legend-columns': Math.min(currentParties.length, 3) }"
           aria-label="政黨得票率"
         >
           <li
@@ -86,7 +85,7 @@
               :style="{ backgroundColor: party.dotColor }"
               aria-hidden="true"
             ></span>
-            <span>{{ party.label }}：{{ party.voteRate }}%</span>
+            <span class="legend-label">{{ party.label }}：<span class="legend-rate">{{ party.voteRate }}%</span></span>
           </li>
         </ul>
 
@@ -505,12 +504,13 @@ watch([selectedYear, selectedCity], () => {
 }
 
 .seat-legend {
-  display: grid;
-  grid-template-columns: repeat(var(--legend-columns), minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
   width: 100%;
   margin-top: clamp(0.75rem, 2vw, 1.5rem);
-  row-gap: 1.25rem;
+  gap: 1.25rem clamp(1.5rem, 4vw, 3rem);
 }
 
 .seat-legend li {
@@ -518,10 +518,19 @@ watch([selectedYear, selectedCity], () => {
   align-items: center;
   justify-content: center;
   min-width: 0;
+  max-width: 100%;
   gap: clamp(0.4rem, 1vw, 0.75rem);
   font-size: clamp(0.95rem, 2.45vw, 1.75rem);
   font-weight: 400;
-  line-height: 1.2;
+  line-height: 1.5;
+}
+
+.legend-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.legend-rate {
   white-space: nowrap;
 }
 
@@ -573,9 +582,6 @@ watch([selectedYear, selectedCity], () => {
     right: 0.95rem;
   }
 
-  .seat-legend {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 </style>

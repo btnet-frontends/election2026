@@ -148,7 +148,7 @@ for (const scenario of [
     ] }] }),
     read: (data) => data.results[2026].taipei_city,
     values: ['中國國民黨', '民主進步黨'],
-    expected: ['kmt', 'dpp']
+    expected: ['中國國民黨', '民主進步黨']
   }
 ]) {
   test(`${scenario.endpoint} replaces build data on load and polls new data after build`, async (t) => {

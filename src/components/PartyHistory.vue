@@ -52,7 +52,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { useLiveStatistics } from '../composables/useLiveStatistics.js';
-import { fetchMayorHistory } from '../utils/mayorHistoryApi.js';
+import { fetchMayorHistory, getMayorHistoryParty } from '../utils/mayorHistoryApi.js';
 import config from '../json/data.json';
 import TaiwanPartyHistoryLocation from './taiwanPartyHistoryLocation.vue';
 import { usePhase } from '../composables/usePhase.js';
@@ -102,21 +102,25 @@ const selectedYearOption = computed(() => (
   yearOptions.value.find((item) => item.year === selectedYear.value)
 ));
 
-const currentResults = computed(() => (
-  resultsByYear.value[String(selectedYear.value)] ?? {}
+const resolveParty = (key) => key === 'pending'
+  ? { key, ...partyHistory.parties.pending }
+  : getMayorHistoryParty(key);
+const currentResults = computed(() => Object.fromEntries(
+  Object.entries(resultsByYear.value[String(selectedYear.value)] ?? {})
+    .map(([location, key]) => [location, resolveParty(key).key])
 ));
 
 const locationColors = computed(() => Object.fromEntries(
   Object.entries(currentResults.value).map(([location, partyKey]) => [
     location,
-    partyHistory.parties[partyKey]?.color ?? partyHistory.parties.pending.color
+    resolveParty(partyKey).color
   ])
 ));
 
 const locationDescriptions = computed(() => Object.fromEntries(
   Object.entries(currentResults.value).map(([location, partyKey]) => [
     location,
-    partyHistory.parties[partyKey]?.label ?? partyHistory.parties.pending.label
+    resolveParty(partyKey).label
   ])
 ));
 
@@ -126,12 +130,10 @@ const visibleParties = computed(() => {
     return result;
   }, {});
 
-  return Object.entries(partyHistory.parties)
-    .filter(([key]) => counts[key])
-    .map(([key, party]) => ({
-      key,
-      ...party,
-      count: counts[key]
+  return Object.entries(counts)
+    .map(([key, count]) => ({
+      ...resolveParty(key),
+      count
     }));
 });
 

@@ -1,4 +1,5 @@
 import { fetchStatisticsJson } from './statisticsApi.js';
+import parties from '../json/parties.json' with { type: 'json' };
 
 // API 縣市名稱（用「臺」）→ 地圖元件的 data-name slug
 const CITY_SLUGS = {
@@ -26,17 +27,25 @@ const CITY_SLUGS = {
   連江縣: 'lianjiang_county'
 };
 
-// 當選人政黨 → partyHistory.parties 的 key；有當選人但政黨未列出者歸為無黨籍
-const PARTY_KEYS = {
-  中國國民黨: 'kmt',
-  民主進步黨: 'dpp',
-  台灣民眾黨: 'tpp',
-  無黨籍及未經政黨推薦: 'independent'
-};
+const normalizePartyName = (name) => String(name ?? '').trim().replaceAll('臺', '台');
+const partyByName = new Map(parties.map((party) => [normalizePartyName(party.name), party]));
+const partyById = new Map(parties.map((party) => [party.id, party]));
+// 僅供 data.json 舊年份資料的 key 相容使用；顏色及名稱仍從 parties.json 取得。
+const legacyPartyIds = { kmt: 1, dpp: 16, tpp: 350, independent: 0 };
+
+export function getMayorHistoryParty(value) {
+  const name = String(value ?? '').trim();
+  const party = partyByName.get(normalizePartyName(name)) ?? partyById.get(legacyPartyIds[name]);
+  return {
+    key: party?.name ?? name,
+    label: party?.name ?? name,
+    color: party?.color || '#888888'
+  };
+}
 
 const toSlug = (cityName) => CITY_SLUGS[String(cityName).replace(/^台/, '臺')] ?? null;
 
-const normalizeMayorHistory = (historyJson) => {
+export const normalizeMayorHistory = (historyJson) => {
   if (!Array.isArray(historyJson?.elections)) return null;
 
   const results = {};
@@ -55,7 +64,7 @@ const normalizeMayorHistory = (historyJson) => {
       const winnerParty = result.winner?.party;
       if (!winnerParty) return;
 
-      yearResults[slug] = PARTY_KEYS[winnerParty] ?? 'independent';
+      yearResults[slug] = getMayorHistoryParty(winnerParty).key;
     });
 
     if (Object.keys(yearResults).length > 0) {

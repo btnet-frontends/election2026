@@ -15,7 +15,7 @@
           <taiwanLocation
             v-model:selected-location="selectedLocation"
             :location-colors="(phase === 'start' ? result?.leadingColors : result?.winnerColors) ?? {}"
-            :elected-locations="phase === 'start' ? Object.keys(result?.winnerColors ?? {}) : []"
+            :elected-locations="Object.keys(result?.winnerColors ?? {})"
             @location-selected="scrollToVotePanel"
           />
         </div>

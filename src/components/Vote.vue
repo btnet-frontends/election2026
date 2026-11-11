@@ -1,9 +1,4 @@
 <template>
-  <section v-if="isComponentVisible('Vote')" class="vote-ticker-section" aria-label="開票跑馬燈" :style="{ backgroundImage: `url(${pollsBg})` }">
-    <div class="container">
-      <VoteTicker :result="result" :refresh-failed="refreshFailed" />
-    </div>
-  </section>
   <section v-show="isComponentVisible('Vote')" id="vote" class="vote-section" :style="{ backgroundImage: `url(${pollsBg})`}">
     <div class="container vote-container">
       <div class="section-header">
@@ -31,59 +26,16 @@
 </template>
 
 <script setup>
-import { nextTick, onMounted, onUnmounted, ref } from 'vue';
-import { fetchInvoicingResult, INVOICING_RESULT_URL } from '../utils/invoicingResultApi.js';
+import { nextTick, ref } from 'vue';
+import { useLiveVoteResult } from '../composables/useLiveVoteResult.js';
 import voteIcon from '../assets/images/election_vote_icon.svg?url';
 import pollsBg from '../assets/images/polls_bg.png?url';
 import taiwanLocation from './taiwanLocation.vue';
 import votePanel from './votePanel.vue';
-import VoteTicker from './VoteTicker.vue';
 import { usePhase } from '../composables/usePhase.js';
 
 const props = defineProps({ initialResult: { type: Object, default: null } });
-// 地圖與面板共用同一份開票資料及更新排程。
-const result = ref(props.initialResult);
-const refreshFailed = ref(false);
-
-let refreshTimer;
-let controller;
-let stopped = false;
-
-const refresh = async () => {
-  if (stopped || controller || document.hidden) return;
-  clearTimeout(refreshTimer);
-  const request = new AbortController();
-  controller = request;
-  const timeout = setTimeout(() => request.abort(), 10000);
-  try {
-    const url = import.meta.env.DEV ? '/api/invoicing-result' : INVOICING_RESULT_URL;
-    const nextResult = await fetchInvoicingResult(url, request.signal);
-    if (!stopped && !request.signal.aborted) {
-      result.value = nextResult;
-      refreshFailed.value = false;
-    }
-  } catch (error) {
-    if (!stopped) {
-      refreshFailed.value = true;
-      console.error('更新開票資料失敗:', error);
-    }
-  } finally {
-    clearTimeout(timeout);
-    controller = null;
-    if (!stopped) refreshTimer = setTimeout(refresh, 30000);
-  }
-};
-
-onMounted(() => {
-  refresh();
-  document.addEventListener('visibilitychange', refresh);
-});
-onUnmounted(() => {
-  stopped = true;
-  clearTimeout(refreshTimer);
-  document.removeEventListener('visibilitychange', refresh);
-  controller?.abort();
-});
+const { result, refreshFailed } = useLiveVoteResult(props.initialResult);
 
 const { isComponentVisible } = usePhase();
 const selectedLocation = ref('台北市');
@@ -101,16 +53,11 @@ const scrollToVotePanel = async () => {
 </script>
 
 <style scoped>
-.vote-ticker-section {
-  padding: 2rem 0;
-}
-
 .vote-section {
   padding: 6rem 0 6rem 0;
   overflow: hidden;
 }
 
-.vote-ticker-section,
 .vote-section {
   background-color: var(--color-coffee-50); 
   background-attachment: fixed;

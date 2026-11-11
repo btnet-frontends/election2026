@@ -1,5 +1,5 @@
 <template>
-  <section ref="kvSection" id="kv" class="kv-section">
+  <section ref="kvSection" id="kv" class="kv-section" :class="{ 'has-vote-ticker': reserveTicker && phase !== 'default' }">
     <h1 class="visually-hidden">2026縣市長選舉《今周戰情室》- 今周刊</h1>
     <Teleport to="body" v-if="isMounted">
       <div ref="parallaxRight" class="parallax-bg parallax-right">
@@ -80,6 +80,7 @@ import { SCHEDULE_START } from '../utils/schedule.js';
 import { usePhase } from '../composables/usePhase.js';
 
 const { phase } = usePhase();
+defineProps({ reserveTicker: { type: Boolean, default: false } });
 
 const electionDate = new Date(SCHEDULE_START).getTime();
 const t = ref({ days: '--', hours: '--', minutes: '--', seconds: '--' });
@@ -370,6 +371,7 @@ onUnmounted(() => {
 
 .kv-people {
   display: block;
+  margin-bottom: -2rem;
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -584,6 +586,85 @@ onUnmounted(() => {
   .kv-curve-reveal {
     animation: none;
     stroke-dashoffset: 0;
+  }
+}
+.kv-section.has-vote-ticker {
+  height: calc(100svh - 170px);
+  min-height: 360px;
+}
+
+@media (max-width: 1280px) {
+  .kv-section.has-vote-ticker {
+    min-height: 0;
+    padding-bottom: 1rem;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 768px), (min-width: 769px) and (max-width: 1280px) and (min-height: 900px) {
+  .kv-section.has-vote-ticker .kv-left-wrapper {
+    flex: 0 1 auto;
+    min-height: 0;
+    width: min(75%, 400px);
+  }
+  .kv-section.has-vote-ticker .kv-right {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  .kv-section.has-vote-ticker .kv-people {
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+@media (max-width: 768px) {
+  .kv-section.has-vote-ticker {
+    min-height: 440px;
+    justify-content: flex-start;
+    padding-bottom: 0;
+  }
+
+  .kv-section.has-vote-ticker .kv-left-wrapper {
+    flex: 0 0 auto;
+    width: 92%;
+    max-width: 480px;
+  }
+
+  .kv-section.has-vote-ticker .kv-title {
+    width: min(54vw, 210px);
+    margin-bottom: 0.4rem;
+  }
+
+  .kv-section.has-vote-ticker .kv-subtitle1 {
+    max-width: 55%;
+    max-height: 2.5rem;
+    margin-bottom: 0.4rem;
+    object-fit: contain;
+  }
+
+  .kv-section.has-vote-ticker .kv-subtitle2 {
+    max-width: 30ch;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+  }
+
+  .kv-section.has-vote-ticker .cd-status {
+    font-size: clamp(1.4rem, 5vw, 1.75rem);
+  }
+
+  .kv-section.has-vote-ticker .kv-right {
+    width: 94%;
+    max-width: 480px;
+    min-height: 140px;
+    margin-top: 0.25rem;
+  }
+
+  .kv-section.has-vote-ticker .kv-people {
+    margin-bottom: 0;
+    object-position: bottom center;
   }
 }
 </style>

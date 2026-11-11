@@ -8,6 +8,7 @@ import PollsChart from '../components/PollsChart.vue';
 import LiveStreaming from '../components/LiveStreaming.vue';
 import Referendum from '../components/Referendum.vue';
 import Vote from '../components/Vote.vue';
+import LiveVoteTicker from '../components/LiveVoteTicker.vue';
 import { fetchInvoicingResult } from '../utils/invoicingResultApi.js';
 import ElectedSearch from '../components/ElectedSearch.vue';
 
@@ -223,7 +224,9 @@ const structuredData = {
   <Header client:load />
 
   <main>
-    {componentVisibility.KV && <KV client:load />}
+    {componentVisibility.KV && <KV reserveTicker={componentVisibility.Vote} client:load />}
+
+    {componentVisibility.Vote && <LiveVoteTicker initialResult={initialVoteResult} client:load />}
 
     {componentVisibility.FlashNews && (
       <div data-phase-component="FlashNews">

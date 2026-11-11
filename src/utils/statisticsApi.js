@@ -1,4 +1,4 @@
-const DATA_ORIGIN = 'https://doqvf81n9htmm.cloudfront.net';
+const DATA_ORIGIN = 'https://download.businesstoday.com.tw';
 
 // CDN 已提供 Access-Control-Allow-Origin: *，靜態 build 可直接跨網域更新。
 // 僅開發模式的瀏覽器走 Vite proxy；build、preview 及部署後均使用 CDN。

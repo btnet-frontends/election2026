@@ -12,16 +12,16 @@ export default defineConfig({
     server: {
       proxy: {
         '/files/2026election/uat/': {
-          target: 'https://doqvf81n9htmm.cloudfront.net',
+          target: 'https://download.businesstoday.com.tw',
           changeOrigin: true
         },
         '/api/referendum': {
-          target: 'https://doqvf81n9htmm.cloudfront.net',
+          target: 'https://download.businesstoday.com.tw',
           changeOrigin: true,
           rewrite: () => '/files/2026election/uat/getReferendum'
         },
         '/api/invoicing-result': {
-          target: 'https://doqvf81n9htmm.cloudfront.net',
+          target: 'https://download.businesstoday.com.tw',
           changeOrigin: true,
           rewrite: (path) => path.replace('/api/invoicing-result', '/files/2026election/uat/getInvoicingResult')
         }

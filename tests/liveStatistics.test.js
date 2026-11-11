@@ -172,7 +172,7 @@ for (const scenario of [
     assert.equal(scenario.read(data.value), (scenario.expected ?? scenario.values)[0]);
     assert.equal(urls.length, 3);
     for (const url of urls) {
-      assert.ok(url.startsWith(`https://doqvf81n9htmm.cloudfront.net/files/2026election/uat/${scenario.endpoint}?v=`));
+      assert.ok(url.startsWith(`https://download.businesstoday.com.tw/files/2026election/uat/${scenario.endpoint}?v=`));
     }
   });
 }

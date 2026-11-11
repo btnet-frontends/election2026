@@ -1,5 +1,5 @@
 <template>
-  <section v-if="phase === 'start'" class="vote-ticker-section" aria-label="開票跑馬燈" :style="{ backgroundImage: `url(${pollsBg})` }">
+  <section v-if="isComponentVisible('Vote')" class="vote-ticker-section" aria-label="開票跑馬燈" :style="{ backgroundImage: `url(${pollsBg})` }">
     <div class="container">
       <VoteTicker :result="result" :refresh-failed="refreshFailed" />
     </div>
@@ -85,7 +85,7 @@ onUnmounted(() => {
   controller?.abort();
 });
 
-const { phase, isComponentVisible } = usePhase();
+const { isComponentVisible } = usePhase();
 const selectedLocation = ref('台北市');
 const votePanelElement = ref(null);
 

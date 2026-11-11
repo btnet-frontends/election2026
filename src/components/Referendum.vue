@@ -361,19 +361,21 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
 
 .result-scale-inner {
   grid-column: 2;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: end;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
   color: #8b8b8b;
   font-size: clamp(0.85rem, 1.4vw, 1rem);
   line-height: 1.35;
 }
 
-.result-scale-inner > :last-child {
-  justify-self: end;
-}
-
 .threshold-label {
+  position: absolute;
+  left: 25%;
+  bottom: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
   color: var(--color-coffee-900);
   font-weight: 500;
   text-align: center;

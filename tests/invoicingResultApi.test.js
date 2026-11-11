@@ -78,6 +78,43 @@ test('HTTP failures reject so the caller can retain its last successful result',
   await assert.rejects(fetchInvoicingResult(), /503/);
 });
 
+test('counting map uses highest votes including hidden candidates without changing elected flags', () => {
+  const result = normalizeInvoicingResult(payload([
+    { Name: '已標記當選', Political_party_id: 1, Votes: 100, Elected: true },
+    { Name: '目前領先', Political_party_id: 16, Votes: '1,234', Elected: false, Is_show_main_page: false }
+  ]));
+  assert.equal(result.leadingColors['台北市'], '#1B9431');
+  assert.equal(result.winnerColors['台北市'], '#000099');
+  assert.equal(result.cities['台北市'].length, 1);
+});
+
+test('ties retain all leading party colors, including zero and same-party ties', () => {
+  for (const votes of [0, 100]) {
+    const result = normalizeInvoicingResult(payload([
+      { Name: '甲', Political_party_id: 1, Votes: votes },
+      { Name: '乙', Political_party_id: 16, Votes: votes },
+      { Name: '丙', Political_party_id: 350, Votes: null }
+    ]));
+    assert.deepEqual(result.leadingColors['台北市'], ['#000099', '#1B9431']);
+    assert.deepEqual(result.winnerColors, {});
+  }
+  const sameParty = normalizeInvoicingResult(payload([
+    { Name: '甲', Political_party_id: 1, Votes: 100 },
+    { Name: '乙', Political_party_id: 1, Votes: 100 }
+  ]));
+  assert.deepEqual(sameParty.leadingColors['台北市'], ['#000099', '#000099']);
+});
+
+test('missing votes remain uncolored and a resolved tie becomes a solid leader color', () => {
+  assert.deepEqual(normalizeInvoicingResult(payload([{ Name: '甲', Votes: '' }])).leadingColors, {});
+  assert.deepEqual(normalizeInvoicingResult(payload(null)).leadingColors, {});
+  const result = normalizeInvoicingResult(payload([
+    { Name: '甲', Political_party_id: 1, Votes: 101 },
+    { Name: '乙', Political_party_id: 16, Votes: 100 }
+  ]));
+  assert.equal(result.leadingColors['台北市'], '#000099');
+});
+
 test('requests fresh results after build and receives changed votes and elected flags', async (t) => {
   const calls = [];
   let votes = 100;

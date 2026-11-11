@@ -7,13 +7,14 @@
           開票速報
         </span>
         <div class="vote-divider"></div>
+        <p v-if="phase === 'start'" class="map-note">地圖顏色依目前最高票候選人政黨呈現，最高票平手以網格顯示；領先不代表當選。</p>
       </div>
 
       <div class="vote_area">
         <div class="taiwan_location_box">
           <taiwanLocation
             v-model:selected-location="selectedLocation"
-            :location-colors="result?.winnerColors ?? {}"
+            :location-colors="(phase === 'start' ? result?.leadingColors : result?.winnerColors) ?? {}"
             @location-selected="scrollToVotePanel"
           />
         </div>
@@ -23,6 +24,13 @@
       </div>
     </div>
   </section>
+  <button
+    v-if="phase === 'start'"
+    type="button"
+    class="watch-vote-button"
+    aria-controls="vote"
+    @click="scrollToVote"
+  >觀看開票</button>
 </template>
 
 <script setup>
@@ -37,9 +45,16 @@ import { usePhase } from '../composables/usePhase.js';
 const props = defineProps({ initialResult: { type: Object, default: null } });
 const { result, refreshFailed } = useLiveVoteResult(props.initialResult);
 
-const { isComponentVisible } = usePhase();
+const { phase, isComponentVisible } = usePhase();
 const selectedLocation = ref('台北市');
 const votePanelElement = ref(null);
+
+const scrollToVote = () => {
+  document.getElementById('vote')?.scrollIntoView({
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+    block: 'start'
+  });
+};
 
 const scrollToVotePanel = async () => {
   if (!window.matchMedia('(max-width: 1024px)').matches) return;
@@ -53,6 +68,54 @@ const scrollToVotePanel = async () => {
 </script>
 
 <style scoped>
+.watch-vote-button {
+  position: fixed;
+  right: 20px;
+  bottom: calc(2rem + 72px + env(safe-area-inset-bottom, 0px));
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  padding: 1rem 0.65rem;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: var(--color-coffee-accent);
+  color: #fff;
+  box-shadow: 0 4px 16px #332a2133;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+}
+
+.watch-vote-button:hover {
+  background: var(--color-coffee-600);
+}
+
+.watch-vote-button:focus-visible {
+  outline: 3px solid #d99538;
+  outline-offset: 3px;
+}
+
+@media (min-width: 640px) {
+  .watch-vote-button {
+    right: 30px;
+    width: 56px;
+    font-size: 1.125rem;
+  }
+}
+
+.map-note {
+  margin: 1rem 0 0;
+  color: var(--color-coffee-900);
+  font-size: 0.875rem;
+}
+
 .vote-section {
   padding: 6rem 0 6rem 0;
   overflow: hidden;

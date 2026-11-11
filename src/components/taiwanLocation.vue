@@ -8,6 +8,11 @@
         @click="selectLocation"
         @keydown="selectLocationByKeyboard"
     >
+        <defs>
+            <pattern v-for="pattern in tiePatterns" :id="pattern.id" :key="pattern.city" patternUnits="userSpaceOnUse" :width="pattern.size" :height="pattern.size">
+                <rect v-for="(cell, index) in pattern.cells" :key="index" :x="cell.x" :y="cell.y" width="16" height="16" :fill="cell.color" />
+            </pattern>
+        </defs>
         <g class="taitung_island">
             <path
                 d="M1121.52,1044.71c-.67,0-1.35-.84-2.2-1.89-1.19-1.48-2.82-3.5-5.59-4.7-1.52-.66-2.62-.75-3.59-.75-.22,0-.43,0-.65,0-.2,0-.4,0-.6,0-.93,0-1.76-.12-2.79-.68-2.29-1.26-4.32-4.01-5.06-6.86-.4-1.53-.6-3.78,.69-5.82,1.68-2.67,5.06-3.62,7.67-3.62,2.19,0,4.07,.66,4.79,1.68,.52,.74,.35,1.53,.12,2.63-.27,1.26-.6,2.83,.03,4.95,.72,2.45,2.32,4.19,3.6,5.59,1.24,1.35,2.31,2.16,3.16,2.81,1.17,.89,1.87,1.42,2.12,2.6,.34,1.66-.41,3.73-1.46,4.03-.09,.02-.17,.04-.25,.04h0Z"
@@ -677,13 +682,32 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, useId, watch } from 'vue';
 
 const props = defineProps({
     locationColors: { type: Object, default: () => ({}) }
 });
+const patternPrefix = `vote-tie-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+const tiePatterns = computed(() => Object.entries(props.locationColors)
+    .filter(([, colors]) => Array.isArray(colors))
+    .map(([city, tiedColors], index) => {
+        const colors = [...new Set(tiedColors)];
+        if (colors.length < 2) colors.push('#ffffff');
+        return {
+            city,
+            id: `${patternPrefix}-${index}`,
+            size: colors.length * 16,
+            cells: colors.flatMap((_, row) => colors.map((_, column) => ({
+                x: column * 16, y: row * 16, color: colors[(row + column) % colors.length]
+            })))
+        };
+    }));
+const locationFill = (city) => {
+    const pattern = tiePatterns.value.find((item) => item.city === city);
+    return pattern ? `url(#${pattern.id})` : props.locationColors[city] ?? '#b8b8b8';
+};
 const mapStyle = computed(() => ({
-    '--taitung-island-fill': props.locationColors['台東縣'] ?? '#b8b8b8'
+    '--taitung-island-fill': locationFill('台東縣')
 }));
 
 const selectedLocation = defineModel('selectedLocation', {
@@ -722,13 +746,14 @@ const selectLocationByKeyboard = (event) => {
 const updateSelectedLocation = () => {
     mapElement.value?.querySelectorAll('.location_index').forEach((locationElement) => {
         const isSelected = locationElement.dataset.chname === selectedLocation.value;
-        const color = props.locationColors[locationElement.dataset.chname] ?? '#b8b8b8';
+        const color = locationFill(locationElement.dataset.chname);
 
         locationElement.style.setProperty('--location-fill', color);
         locationElement.classList.toggle('is-selected', isSelected);
         locationElement.setAttribute('role', 'button');
         locationElement.setAttribute('tabindex', '0');
-        locationElement.setAttribute('aria-label', `選擇${locationElement.dataset.chname}`);
+        const tied = Array.isArray(props.locationColors[locationElement.dataset.chname]);
+        locationElement.setAttribute('aria-label', `選擇${locationElement.dataset.chname}${tied ? '，最高票平手' : ''}`);
         locationElement.setAttribute('aria-pressed', String(isSelected));
     });
 };

@@ -97,11 +97,11 @@ test('build and production browser use UAT CDN with cache disabled', async (t) =
     return Response.json({ ok: true });
   });
   await fetchStatisticsJson('getParliamentaryHistory');
-  assert.match(calls[0].url, /^https:\/\/doqvf81n9htmm\.cloudfront\.net\/files\/2026election\/uat\/getParliamentaryHistory\?v=\d+$/);
+  assert.match(calls[0].url, /^https:\/\/download\.businesstoday\.com\.tw\/files\/2026election\/uat\/getParliamentaryHistory\?v=\d+$/);
   globalThis.window = {};
   t.after(() => { delete globalThis.window; });
   await fetchStatisticsJson('getParliamentaryHistory');
-  assert.match(calls[1].url, /^https:\/\/doqvf81n9htmm\.cloudfront\.net\/files\/2026election\/uat\/getParliamentaryHistory\?v=\d+$/);
+  assert.match(calls[1].url, /^https:\/\/download\.businesstoday\.com\.tw\/files\/2026election\/uat\/getParliamentaryHistory\?v=\d+$/);
   assert.equal(calls[1].options.cache, 'no-store');
   assert.ok(calls[1].options.signal instanceof AbortSignal);
 });

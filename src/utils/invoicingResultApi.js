@@ -17,10 +17,21 @@ export function normalizeInvoicingResult(data) {
   if (!Array.isArray(data?.aInvoicingResult)) throw new Error('開票資料格式不正確');
   const cities = {};
   const winnerColors = {};
+  const leadingColors = {};
   for (const city of data.aInvoicingResult) {
     if (!city?.City) continue;
-    // 地圖依全部候選人的當選標記取色，不受面板顯示名單影響，也不以票數推算當選。
+    // 地圖包含全部候選人，不受首頁面板顯示名單影響。
     const candidates = Array.isArray(city.Candidate) ? city.Candidate : [];
+    const countedCandidates = candidates
+      .map((candidate) => ({ votes: toNumber(candidate?.Votes), color: partyById.get(String(candidate?.Political_party_id))?.color || '#888888' }))
+      .filter((candidate) => candidate.votes !== null);
+    if (countedCandidates.length) {
+      const highestVotes = Math.max(...countedCandidates.map((candidate) => candidate.votes));
+      const leaders = countedCandidates.filter((candidate) => candidate.votes === highestVotes);
+      leadingColors[normalizeCity(city.City)] = leaders.length === 1
+        ? leaders[0].color
+        : leaders.map((candidate) => candidate.color);
+    }
     const winner = candidates.find((candidate) => isTrue(candidate?.Elected));
     if (winner) {
       winnerColors[normalizeCity(city.City)] = partyById.get(String(winner.Political_party_id))?.color || '#888888';
@@ -43,7 +54,7 @@ export function normalizeInvoicingResult(data) {
         };
       });
   }
-  return { cities, winnerColors, updateTime: data.dDataTime || data.dBTUpdateDataTime || '' };
+  return { cities, winnerColors, leadingColors, updateTime: data.dDataTime || data.dBTUpdateDataTime || '' };
 }
 
 export async function fetchInvoicingResult(url = INVOICING_RESULT_URL, signal = AbortSignal.timeout(10000)) {

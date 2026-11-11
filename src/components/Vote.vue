@@ -26,7 +26,7 @@
     </div>
   </section>
   <button
-    v-if="phase === 'start'"
+    v-if="isComponentVisible('Vote')"
     type="button"
     class="watch-vote-button"
     aria-controls="vote"

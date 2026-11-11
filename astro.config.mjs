@@ -23,7 +23,7 @@ export default defineConfig({
         '/api/invoicing-result': {
           target: 'https://doqvf81n9htmm.cloudfront.net',
           changeOrigin: true,
-          rewrite: () => '/files/2026election/uat/getInvoicingResult'
+          rewrite: (path) => path.replace('/api/invoicing-result', '/files/2026election/uat/getInvoicingResult')
         }
       }
     }

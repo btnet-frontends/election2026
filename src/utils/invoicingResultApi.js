@@ -47,7 +47,8 @@ export function normalizeInvoicingResult(data) {
 }
 
 export async function fetchInvoicingResult(url = INVOICING_RESULT_URL, signal = AbortSignal.timeout(10000)) {
-  const response = await fetch(url, { signal, cache: 'no-cache' });
+  const separator = url.includes('?') ? '&' : '?';
+  const response = await fetch(`${url}${separator}v=${Date.now()}`, { signal, cache: 'no-store' });
   if (!response.ok) throw new Error(`開票 API 回應 ${response.status}`);
   return normalizeInvoicingResult(await response.json());
 }

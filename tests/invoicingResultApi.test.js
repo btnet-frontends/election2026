@@ -77,3 +77,30 @@ test('HTTP failures reject so the caller can retain its last successful result',
   t.mock.method(globalThis, 'fetch', async () => new Response('', { status: 503 }));
   await assert.rejects(fetchInvoicingResult(), /503/);
 });
+
+test('requests fresh results after build and receives changed votes and elected flags', async (t) => {
+  const calls = [];
+  let votes = 100;
+  let elected = false;
+  t.mock.method(Date, 'now', () => 1234567890 + calls.length);
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    calls.push({ url, options });
+    return Response.json(payload([{ Name: '候選人', Votes: votes, Elected: elected }]));
+  });
+  const first = await fetchInvoicingResult();
+  votes = 1234;
+  elected = true;
+  const latest = await fetchInvoicingResult();
+  assert.equal(first.cities['台北市'][0].votes, 100);
+  assert.equal(first.cities['台北市'][0].elected, false);
+  assert.equal(latest.cities['台北市'][0].votes, 1234);
+  assert.equal(latest.cities['台北市'][0].elected, true);
+  assert.notEqual(calls[0].url, calls[1].url);
+  for (const { url, options } of calls) {
+    assert.match(url, /getInvoicingResult\?v=\d+$/);
+    assert.equal(options.cache, 'no-store');
+    assert.ok(options.signal instanceof AbortSignal);
+  }
+  await fetchInvoicingResult('/api/invoicing-result?source=test');
+  assert.match(calls[2].url, /^\/api\/invoicing-result\?source=test&v=\d+$/);
+});

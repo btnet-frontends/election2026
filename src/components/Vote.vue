@@ -1,4 +1,9 @@
 <template>
+  <section v-if="phase === 'start'" class="vote-ticker-section" aria-label="開票跑馬燈" :style="{ backgroundImage: `url(${pollsBg})` }">
+    <div class="container">
+      <VoteTicker :result="result" :refresh-failed="refreshFailed" />
+    </div>
+  </section>
   <section v-show="isComponentVisible('Vote')" id="vote" class="vote-section" :style="{ backgroundImage: `url(${pollsBg})`}">
     <div class="container vote-container">
       <div class="section-header">
@@ -32,6 +37,7 @@ import voteIcon from '../assets/images/election_vote_icon.svg?url';
 import pollsBg from '../assets/images/polls_bg.png?url';
 import taiwanLocation from './taiwanLocation.vue';
 import votePanel from './votePanel.vue';
+import VoteTicker from './VoteTicker.vue';
 import { usePhase } from '../composables/usePhase.js';
 
 const props = defineProps({ initialResult: { type: Object, default: null } });
@@ -44,12 +50,15 @@ let controller;
 let stopped = false;
 
 const refresh = async () => {
-  controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
+  if (stopped || controller || document.hidden) return;
+  clearTimeout(refreshTimer);
+  const request = new AbortController();
+  controller = request;
+  const timeout = setTimeout(() => request.abort(), 10000);
   try {
     const url = import.meta.env.DEV ? '/api/invoicing-result' : INVOICING_RESULT_URL;
-    const nextResult = await fetchInvoicingResult(url, controller.signal);
-    if (!stopped) {
+    const nextResult = await fetchInvoicingResult(url, request.signal);
+    if (!stopped && !request.signal.aborted) {
       result.value = nextResult;
       refreshFailed.value = false;
     }
@@ -60,18 +69,23 @@ const refresh = async () => {
     }
   } finally {
     clearTimeout(timeout);
+    controller = null;
     if (!stopped) refreshTimer = setTimeout(refresh, 30000);
   }
 };
 
-onMounted(refresh);
+onMounted(() => {
+  refresh();
+  document.addEventListener('visibilitychange', refresh);
+});
 onUnmounted(() => {
   stopped = true;
   clearTimeout(refreshTimer);
+  document.removeEventListener('visibilitychange', refresh);
   controller?.abort();
 });
 
-const { isComponentVisible } = usePhase();
+const { phase, isComponentVisible } = usePhase();
 const selectedLocation = ref('台北市');
 const votePanelElement = ref(null);
 
@@ -87,9 +101,17 @@ const scrollToVotePanel = async () => {
 </script>
 
 <style scoped>
+.vote-ticker-section {
+  padding: 2rem 0;
+}
+
 .vote-section {
   padding: 6rem 0 6rem 0;
   overflow: hidden;
+}
+
+.vote-ticker-section,
+.vote-section {
   background-color: var(--color-coffee-50); 
   background-attachment: fixed;
   background-position: bottom center;

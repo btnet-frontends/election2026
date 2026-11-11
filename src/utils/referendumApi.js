@@ -6,20 +6,23 @@ export function normalizeReferendum(data) {
   }
   if (data.sError) throw new Error(String(data.sError));
 
-  for (const field of ['fAgreeRate', 'fDisagreeRate', 'iAgreeTks', 'iDisagreeTks']) {
+  for (const field of ['iAgreeTks', 'iDisagreeTks']) {
     const value = data[field];
-    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0
-      || (field.startsWith('f') ? value > 100 : !Number.isSafeInteger(value))) {
+    if (!Number.isSafeInteger(value) || value < 0) {
       throw new Error(`公投資料格式不正確：${field}`);
     }
   }
   if (typeof data.bIsPass !== 'boolean') throw new Error('公投資料格式不正確：bIsPass');
+  const totalElectors = Number.isSafeInteger(data.iGmeb) && data.iGmeb > 0 ? data.iGmeb : null;
+  const percentageOfElectors = (votes) => totalElectors === null ? null : votes / totalElectors * 100;
 
   return {
     status: data.bIsPass ? 'passed' : 'failed',
+    totalElectors,
+    thresholdVotes: totalElectors === null ? null : Math.ceil(totalElectors / 4),
     results: {
-      agree: { percentage: data.fAgreeRate, votes: data.iAgreeTks },
-      disagree: { percentage: data.fDisagreeRate, votes: data.iDisagreeTks }
+      agree: { percentage: percentageOfElectors(data.iAgreeTks), votes: data.iAgreeTks },
+      disagree: { percentage: percentageOfElectors(data.iDisagreeTks), votes: data.iDisagreeTks }
     },
     updateTime: data.dDataTime || data.dBTUpdateDataTime || ''
   };

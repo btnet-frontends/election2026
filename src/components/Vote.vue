@@ -15,6 +15,7 @@
           <taiwanLocation
             v-model:selected-location="selectedLocation"
             :location-colors="(phase === 'start' ? result?.leadingColors : result?.winnerColors) ?? {}"
+            :elected-locations="phase === 'start' ? Object.keys(result?.winnerColors ?? {}) : []"
             @location-selected="scrollToVotePanel"
           />
         </div>
@@ -30,7 +31,7 @@
     class="watch-vote-button"
     aria-controls="vote"
     @click="scrollToVote"
-  >觀看開票</button>
+  ><span class="watch-vote-label">觀看開票</span></button>
 </template>
 
 <script setup>
@@ -77,7 +78,7 @@ const scrollToVotePanel = async () => {
   align-items: center;
   justify-content: center;
   width: 44px;
-  padding: 1rem 0.65rem;
+  padding: 1rem 0;
   border: 2px solid #fff;
   border-radius: 999px;
   background: var(--color-coffee-accent);
@@ -86,11 +87,16 @@ const scrollToVotePanel = async () => {
   font: inherit;
   font-size: 1rem;
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.watch-vote-label {
+  display: block;
   writing-mode: vertical-rl;
   text-orientation: upright;
   letter-spacing: 0.15em;
-  cursor: pointer;
+  padding-right: 0.12rem;
 }
 
 .watch-vote-button:hover {

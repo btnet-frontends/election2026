@@ -50,46 +50,65 @@
           <div v-if="item.results?.length" class="results-block">
             <div v-if="item.scale" class="result-scale" aria-hidden="true">
               <div class="result-scale-inner">
-                <span>{{ item.scale.minimum }}</span>
-                <span class="threshold-label">{{ item.scale.threshold }}</span>
-                <span>{{ item.scale.maximum }}</span>
+                <span class="threshold-label">
+                  {{ item.scale.threshold }}
+                  <strong>{{ item.scale.thresholdVotes == null ? '待更新' : formatVotes(item.scale.thresholdVotes) }}</strong>
+                </span>
+                <span class="electorate-label">
+                  總選舉人數
+                  <strong>{{ item.scale.totalElectors == null ? '待更新' : formatVotes(item.scale.totalElectors) }}</strong>
+                </span>
               </div>
             </div>
 
             <div class="result-list">
               <div
-                v-for="result in item.results"
+                v-for="(result, resultIndex) in item.results"
                 :key="result.id"
-                class="result-row"
+                :class="['result-row', getToneClass(result), { 'votes-below': clampPercentage(result.percentage) > 55 }]"
+                :style="{ '--result-percentage': `${clampPercentage(result.percentage)}%` }"
               >
                 <span class="result-label">{{ result.label }}</span>
 
-                <div
-                  class="result-track"
-                  role="meter"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  :aria-valuenow="result.percentage == null ? undefined : clampPercentage(result.percentage)"
-                  :aria-valuetext="getResultAriaText(result)"
-                >
-                  <span
-                    :class="['result-fill', getToneClass(result)]"
-                    :style="{ width: `${clampPercentage(result.percentage)}%` }"
-                    aria-hidden="true"
-                  ></span>
-                  <span
-                    :class="[
-                      'result-percentage',
-                      { 'is-small': clampPercentage(result.percentage) < 12 }
-                    ]"
+                <div class="result-chart">
+                  <div
+                    class="result-track"
+                    role="meter"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    :aria-valuenow="result.percentage == null ? undefined : clampPercentage(result.percentage)"
+                    :aria-valuetext="getResultAriaText(result)"
                   >
-                    {{ formatPercentage(result.percentage) }}
+                    <span
+                      :class="['result-fill', getToneClass(result)]"
+                      :style="{ width: `${clampPercentage(result.percentage)}%` }"
+                      aria-hidden="true"
+                    ></span>
+                    <span
+                      :class="[
+                        'result-percentage',
+                        { 'is-small': clampPercentage(result.percentage) < 12 }
+                      ]"
+                    >
+                      {{ formatPercentage(result.percentage) }}
+                    </span>
+                  </div>
+
+                  <template v-if="item.scale && resultIndex === 0">
+                    <span class="reference-line threshold-line" aria-hidden="true"></span>
+                    <span class="reference-line electorate-line" aria-hidden="true"></span>
+                  </template>
+
+                  <span class="result-votes" :aria-label="`${formatVotes(result.votes)} 票`">
+                    {{ formatVotes(result.votes) }}
                   </span>
                 </div>
-
-                <span class="result-votes" :aria-label="`${formatVotes(result.votes)} 票`">
-                  {{ formatVotes(result.votes) }}
-                </span>
+              </div>
+            </div>
+            <div v-if="item.scale" class="result-scale result-scale-bottom" aria-hidden="true">
+              <div class="result-scale-inner">
+                <span>{{ item.scale.minimum }}</span>
+                <span>{{ item.scale.maximum }}</span>
               </div>
             </div>
           </div>
@@ -124,6 +143,17 @@ const referendumItems = computed(() => (
   Array.isArray(referendumConfig.items) ? referendumConfig.items.map((item, index) => ({
     ...item,
     status: index === 0 ? referendumResult.value?.status ?? 'pending' : 'pending',
+    scale: item.scale ? {
+      ...item.scale,
+      totalElectors: index === 0 ? referendumResult.value?.totalElectors ?? null : null,
+      thresholdVotes: index === 0 ? referendumResult.value?.thresholdVotes ?? null : null
+    } : null,
+    notes: (item.notes ?? []).map((note) => ({
+      ...note,
+      text: note.source === 'totalElectors'
+        ? `${note.text}${index === 0 && referendumResult.value?.totalElectors != null ? `${formatVotes(referendumResult.value.totalElectors)} 人。` : '待更新'}`
+        : note.text
+    })),
     results: (item.results ?? []).map((result) => ({
       ...result,
       percentage: null,
@@ -252,12 +282,15 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
 
 .referendum-list {
   display: grid;
-  width: min(100%, 56.25rem);
+  width: min(100%, 80rem);
   margin: 0 auto;
   gap: clamp(4rem, 8vw, 6rem);
 }
 
 .referendum-case {
+  --result-label-column: var(--result-votes-column);
+  --result-votes-column: 10rem;
+  --result-column-gap: 1rem;
   min-width: 0;
 }
 
@@ -346,10 +379,8 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
 }
 
 .results-block {
-  --result-label-column: 4.5rem;
-  --result-votes-column: 4.5rem;
-  --result-column-gap: 1rem;
-  margin-top: clamp(2.75rem, 5vw, 3.75rem);
+  max-width: 1280px;
+  margin: clamp(2.75rem, 5vw, 3.75rem) auto 0;
 }
 
 .result-scale {
@@ -368,6 +399,7 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
   color: #8b8b8b;
   font-size: clamp(0.85rem, 1.4vw, 1rem);
   line-height: 1.35;
+  min-height: 3rem;
 }
 
 .threshold-label {
@@ -381,6 +413,41 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
   text-align: center;
 }
 
+.electorate-label {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  color: var(--color-coffee-900);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.threshold-label strong, .electorate-label strong {
+  display: block;
+  font-size: 1.15em;
+  font-variant-numeric: tabular-nums;
+}
+
+.reference-line {
+  position: absolute;
+  top: -1.25rem;
+  bottom: 0;
+  z-index: 2;
+  width: 2px;
+  background: #111;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.threshold-line { left: 25%; }
+.electorate-line { left: 100%; }
+
+.result-scale-bottom {
+  margin: 0.65rem 0 0;
+}
+
+.result-scale-bottom .result-scale-inner { min-height: 0; }
+
 .result-list {
   display: grid;
   gap: 1.7rem;
@@ -389,9 +456,20 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
 .result-row {
   display: grid;
   grid-template-columns: var(--result-label-column) minmax(0, 1fr) var(--result-votes-column);
-  grid-template-areas: "label bar votes";
+  grid-template-areas: "label bar reserve";
   align-items: center;
   column-gap: var(--result-column-gap);
+}
+
+.result-row.tone-agree { --result-color: #8e3a52; }
+.result-row.tone-disagree { --result-color: #604781; }
+.result-row.tone-neutral { --result-color: var(--color-coffee-600); }
+
+.result-chart {
+  position: relative;
+  grid-area: bar;
+  min-width: 0;
+  --percentage-space: 6rem;
 }
 
 .result-label {
@@ -420,15 +498,15 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
 }
 
 .result-fill.tone-agree {
-  background: #8e3a52;
+  background: var(--result-color);
 }
 
 .result-fill.tone-disagree {
-  background: #604781;
+  background: var(--result-color);
 }
 
 .result-fill.tone-neutral {
-  background: var(--color-coffee-600);
+  background: var(--result-color);
 }
 
 .result-percentage {
@@ -449,29 +527,40 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
 }
 
 .result-votes {
-  grid-area: votes;
-  color: var(--color-coffee-900);
+  position: absolute;
+  left: calc(max(var(--result-percentage), var(--percentage-space)) + 0.75rem);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--result-color);
   font-family: 'Outfit', 'Noto Sans TC', sans-serif;
-  font-size: 1rem;
+  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
   line-height: 1.25;
-  text-align: right;
+  text-align: left;
   white-space: nowrap;
+  transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .case-notes {
   display: grid;
   gap: 0.35rem;
-  margin: clamp(2.5rem, 5vw, 3.25rem) 0 0 calc(var(--result-label-column) + var(--result-column-gap));
-  margin-top: 3rem;
+  margin: 3rem calc(var(--result-votes-column) + var(--result-column-gap)) 0 calc(var(--result-label-column) + var(--result-column-gap));
   color: #9b8977;
   font-size: clamp(0.85rem, 1.35vw, 0.95rem);
   line-height: 1.6;
+  text-align: left;
 }
 
 .case-notes li {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .container { max-width: 1440px; }
+  .case-notes { margin-right: 0; }
 }
 
 .note-label {
@@ -514,6 +603,7 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
   }
 
   .results-block {
+    --result-votes-column: 8rem;
     margin-top: 2.5rem;
   }
 
@@ -532,10 +622,10 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
   }
 
   .result-row {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "label votes"
-      "bar bar";
+      "label"
+      "bar";
     gap: 0.55rem 1rem;
   }
 
@@ -555,16 +645,28 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
   }
 
   .result-percentage {
-    left: 0.85rem;
+    left: 0.5rem;
+    font-size: 1.3rem;
   }
 
+  .result-chart { --percentage-space: 4.25rem; }
+
   .result-votes {
-    font-size: 0.95rem;
+    font-size: 1.25rem;
+  }
+
+  .result-row.votes-below { padding-bottom: 2rem; }
+
+  .votes-below .result-votes {
+    top: calc(100% + 0.4rem);
+    left: auto;
+    right: 0;
+    transform: none;
   }
 
   .case-notes {
     margin-top: 2.25rem;
-    margin-left: 0;
+    margin-inline: 0;
   }
 }
 
@@ -594,7 +696,7 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .result-fill {
+  .result-fill, .result-votes {
     transition: none;
   }
 }

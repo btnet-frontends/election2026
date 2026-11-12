@@ -16,6 +16,7 @@
             v-model:selected-location="selectedLocation"
             :location-colors="(phase === 'start' ? result?.leadingColors : result?.winnerColors) ?? {}"
             :elected-locations="Object.keys(result?.winnerColors ?? {})"
+            :show-elected-icons="phase !== 'end'"
             @location-selected="scrollToVotePanel"
           />
         </div>

@@ -56,7 +56,7 @@
             <span class="cd-num">{{ t.seconds }}</span><span class="cd-unit">秒</span>
           </template>
           <span v-else-if="phase === 'start'" class="cd-status">開票中</span>
-          <span v-else class="cd-status cd-status-end">開票完</span>
+          <span v-else class="cd-status cd-status-end">開票結束</span>
         </div>
       </div>
     </div>

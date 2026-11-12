@@ -7,6 +7,9 @@
         viewBox="0 0 1920 1080"
         @click="selectLocation"
         @keydown="selectLocationByKeyboard"
+        @pointerover="updateHoveredLocation($event.target)"
+        @pointerout="updateHoveredLocation($event.relatedTarget)"
+        @pointerleave="updateHoveredLocation(null)"
     >
         <defs>
             <filter :id="`${patternPrefix}-elected-transparent`" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
@@ -438,7 +441,7 @@
                     <tspan x="0" y="0">{{ label.city }}</tspan>
                 </text>
                 <image
-                    v-if="electedLocations.includes(label.city)"
+                    v-if="showElectedIcons && electedLocations.includes(label.city)"
                     :href="electedIcon"
                     :x="label.iconX ?? label.x + 58" :y="label.y - 18" width="22" height="22"
                     :filter="`url(#${patternPrefix}-elected-transparent)`"
@@ -455,7 +458,8 @@ import electedIcon from '../assets/images/elected.png?url';
 
 const props = defineProps({
     locationColors: { type: Object, default: () => ({}) },
-    electedLocations: { type: Array, default: () => [] }
+    electedLocations: { type: Array, default: () => [] },
+    showElectedIcons: { type: Boolean, default: true }
 });
 const patternPrefix = `vote-tie-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 const tiePatterns = computed(() => Object.entries(props.locationColors)
@@ -514,6 +518,14 @@ const emit = defineEmits(['location-selected']);
 const mapElement = ref(null);
 
 const getLocationElement = (target) => target?.closest?.('.location_index, .map-label');
+
+const updateHoveredLocation = (target) => {
+    const locationElement = getLocationElement(target);
+    const location = mapElement.value?.contains(locationElement) ? locationElement.dataset.chname : null;
+    mapElement.value?.querySelectorAll('.location_index').forEach((region) => {
+        region.classList.toggle('is-hovered', region.dataset.chname === location);
+    });
+};
 
 const selectLocation = (event) => {
     const locationElement = getLocationElement(event.target);
@@ -598,7 +610,8 @@ watch(() => props.electedLocations, updateSelectedLocation, { deep: true });
     }
 
     @media (hover: hover) {
-        .taiwan_location:hover path[style*="#b8b8b8"] {
+        .taiwan_location:hover path[style*="#b8b8b8"],
+        .taiwan_location.is-hovered path[style*="#b8b8b8"] {
             fill-opacity: 0.6;
         }
     }

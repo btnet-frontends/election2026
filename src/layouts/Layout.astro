@@ -1,5 +1,6 @@
 ---
 import Gototop from '../components/Gototop.vue';
+import BattleReportLink from '../components/BattleReportLink.vue';
 
 interface Props {
   title: string;
@@ -90,6 +91,8 @@ const structuredDataJson = structuredData
 <body>
 
     <slot />
+
+    <BattleReportLink showBeforeCounting={/\/page2\/?$/.test(Astro.url.pathname)} client:load />
 
     <div class="site-footer-wrapper" style={`background-color: ${footerBgColor};`}>
       <footer class="site-footer">

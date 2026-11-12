@@ -475,14 +475,14 @@ const turnoutOption = computed(() => {
 const getPieData = (city) => {
   const partyLabels = voteAnalysis.municipality.partyLabels;
   return [
-    { key: 'kmt', name: `${partyLabels.kmt}(%)`, value: city.kmt },
-    { key: 'dpp', name: `${partyLabels.dpp}(%)`, value: city.dpp },
-    { key: 'other', name: `${partyLabels.other}(%)`, value: city.other }
+    { key: 'kmt', name: `${partyLabels.kmt}`, value: city.kmt },
+    { key: 'dpp', name: `${partyLabels.dpp}`, value: city.dpp },
+    { key: 'other', name: `${partyLabels.other}`, value: city.other }
   ];
 };
 
 const compactPieLabel = ({ data: item }) => (
-  item.key === 'other' ? '其他候選人(%)' : item.name
+  item.key === 'other' ? '其他候選人' : item.name
 );
 
 const buildPieSeries = (cities, positions, radius, compact = false) => (

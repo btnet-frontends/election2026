@@ -9,8 +9,7 @@
         <div class="referendum-divider"></div>
       </div>
 
-      <div class="referendum-update" role="status">
-        <p v-if="referendumResult?.updateTime">資料更新時間：{{ referendumResult.updateTime }}</p>
+      <div v-if="refreshFailed || !referendumResult" class="referendum-update" role="status">
         <p v-if="refreshFailed">{{ referendumResult ? '資料更新失敗，顯示上次成功取得的資料，稍後自動重試。' : '公投資料暫時無法載入，稍後自動重試。' }}</p>
         <p v-else-if="!referendumResult">公投資料載入中…</p>
       </div>
@@ -28,21 +27,16 @@
             </h3>
             <p v-if="item.question" class="case-question">{{ item.question }}</p>
 
-            <div
-              v-if="item.statusOptions?.length"
-              class="status-options"
-              aria-label="公投結果狀態"
-            >
-              <span
-                v-for="statusOption in item.statusOptions"
-                :key="statusOption.id"
-                :class="[
-                  'status-badge',
-                  `status-${statusOption.id}`,
-                  { 'is-active': item.status === statusOption.id }
-                ]"
-              >
-                {{ statusOption.label }}
+            <div :class="['case-status', `status-${getCaseStatus(item).id}`]" role="status" aria-atomic="true">
+              <svg class="status-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path v-if="item.status === 'passed'" d="m7 12 3 3 7-7" />
+                <path v-else-if="item.status === 'failed'" d="m8 8 8 8m0-8-8 8" />
+                <path v-else d="M12 6v6l4 2" />
+              </svg>
+              <span class="status-copy">
+                <span class="status-caption">公投結果</span>
+                <strong class="status-label">{{ getCaseStatus(item).label }}</strong>
               </span>
             </div>
           </header>
@@ -121,6 +115,9 @@
           </ol>
         </article>
       </div>
+      <p v-if="referendumResult?.updateTime" class="referendum-timestamp">
+        資料更新時間：{{ referendumResult.updateTime }}
+      </p>
     </div>
   </section>
 </template>
@@ -138,6 +135,12 @@ const referendumResult = ref(null);
 const refreshFailed = ref(false);
 
 const sectionTitle = computed(() => referendumConfig.sectionTitle || '公民投票');
+const caseStatuses = {
+  passed: { id: 'passed', label: '通過' },
+  failed: { id: 'failed', label: '不通過' },
+  pending: { id: 'pending', label: '等待結果' }
+};
+const getCaseStatus = (item) => caseStatuses[item.status] ?? caseStatuses.pending;
 const referendumItems = computed(() => (
   // The endpoint returns one referendum without a case ID; bind it to the first configured case.
   Array.isArray(referendumConfig.items) ? referendumConfig.items.map((item, index) => ({
@@ -305,6 +308,14 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
   margin: 0.35rem 0;
 }
 
+.referendum-timestamp {
+  width: min(100%, 80rem);
+  margin: 1.5rem auto 0;
+  color: var(--color-coffee-600);
+  font-size: 0.9rem;
+  text-align: right;
+}
+
 .referendum-case + .referendum-case {
   padding-top: clamp(4rem, 8vw, 6rem);
   border-top: 1px solid var(--color-coffee-200);
@@ -338,44 +349,54 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
   text-wrap: pretty;
 }
 
-.status-options {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.65rem;
-  margin-top: 1.4rem;
-}
-
-.status-badge {
+.case-status {
+  --status-color: #5b5249;
+  --status-background: #f3eeea;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-height: 2.7rem;
-  padding: 0.4rem 0.8rem;
-  border: 1.5px solid currentColor;
-  border-radius: 999px;
-  background: var(--color-coffee-0);
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1;
+  gap: 1rem;
+  min-width: 15rem;
+  margin-top: 1.4rem;
+  padding: 1rem 1.75rem;
+  border: 2px solid var(--status-color);
+  border-radius: 1rem;
+  background: var(--status-background);
+  color: var(--status-color);
+  text-align: left;
 }
 
 .status-failed {
-  color: var(--color-primary);
+  --status-color: #b51c25;
+  --status-background: #fff0f1;
 }
 
 .status-passed {
-  color: #527400;
+  --status-color: #246839;
+  --status-background: #edf8ef;
 }
 
-.status-failed.is-active {
-  background: var(--color-primary);
-  color: #fff;
+.status-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 auto;
 }
 
-.status-passed.is-active {
-  background: #527400;
-  color: #fff;
+.status-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.status-caption {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-label {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0.08em;
 }
 
 .results-block {
@@ -593,13 +614,11 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
     margin-top: 1rem;
   }
 
-  .status-options {
+  .case-status {
     margin-top: 1.15rem;
-  }
-
-  .status-badge {
-    min-height: 2.4rem;
-    font-size: 0.9375rem;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0.85rem 1.25rem;
   }
 
   .results-block {

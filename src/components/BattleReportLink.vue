@@ -1,13 +1,13 @@
 <template>
-  <section class="battle-report-section" aria-label="即時戰報">
-    <div class="container">
-      <a :href="battleReportHref" class="battle-report-button">
-        即時戰報
+  <section v-if="phase !== 'default' || showBeforeCounting" class="battle-report-section" aria-label="頁尾導覽">
+    <nav class="container page-links" aria-label="選舉專題頁面">
+      <a v-for="item in pageLinks" :key="item.id" :href="item.href" class="battle-report-button">
+        {{ item.label }}
         <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M5 12h14M12 5l7 7-7 7" />
         </svg>
       </a>
-    </div>
+    </nav>
   </section>
 </template>
 
@@ -16,14 +16,21 @@ import { computed } from 'vue';
 import config from '../json/data.json';
 import { usePhase } from '../composables/usePhase.js';
 
-const { navNo } = usePhase();
+defineProps({ showBeforeCounting: { type: Boolean, default: false } });
+
+const { phase, navNo } = usePhase();
 const localBaseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-const battleReportHref = computed(() => {
-  // 即時戰報在開票前位於首頁，開票中與結束後移至 page3；沿用導覽設定。
+const pageLinks = computed(() => {
   const navItems = config.header.find((entry) => entry.navNo === navNo.value)?.navItems ?? [];
-  const href = navItems.find((item) => item.children?.some((child) => child.id === 'tags'))?.href ?? '#kv';
-  return `${localBaseUrl}/${href.replace(/^\/+/, '')}`;
+  const items = phase.value === 'default'
+    ? navItems.filter((item) => item.children?.some((child) => child.id === 'tags'))
+    : navItems;
+  return items.map((item) => ({
+    id: item.id,
+    label: item.label.replace(/\s*▼$/, ''),
+    href: `${localBaseUrl}/${item.href.replace(/^\/+/, '')}`
+  }));
 });
 </script>
 
@@ -49,6 +56,13 @@ const battleReportHref = computed(() => {
   letter-spacing: 0.05em;
 }
 
+.page-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
 .battle-report-button:hover {
   background: var(--color-coffee-900);
 }
@@ -61,6 +75,12 @@ const battleReportHref = computed(() => {
 @media (max-width: 768px) {
   .battle-report-section {
     padding: 3rem 0 4rem;
+  }
+
+  .page-links {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
   }
 
   .battle-report-button {

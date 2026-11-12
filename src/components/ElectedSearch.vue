@@ -2,7 +2,7 @@
   <section v-show="isComponentVisible('ElectedSearch')" id="elected-search" class="elected-search-section">
     <div class="container elected-search-container">
       <div class="section-header">
-        <h2 class="elected-search-title">
+        <h2 ref="searchTitle" class="elected-search-title">
           <img :src="searchIcon" alt="" class="search-icon" />
           當選快搜
         </h2>
@@ -95,6 +95,29 @@
                 </select>
               </div>
 
+              <div class="form-field">
+                <label class="field-label" for="elected-party-office-type">公職人員類型</label>
+                <select id="elected-party-office-type" v-model="draft.party.officeTypeId">
+                  <option value="all">全部公職類型</option>
+                  <option v-for="office in officeTypes" :key="office.id" :value="office.id">{{ office.label }}</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label" for="elected-party-city">縣、市</label>
+                <select id="elected-party-city" v-model="draft.party.cityId">
+                  <option v-for="city in cities" :key="city.id" :value="city.id">{{ city.label }}</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label" for="elected-party-district">鄉鎮市區</label>
+                <select id="elected-party-district" v-model="draft.party.districtId">
+                  <option value="all">全部行政區</option>
+                  <option v-for="district in partyCityDistricts" :key="district.id" :value="district.id">{{ district.label }}</option>
+                </select>
+              </div>
+
               <label class="checkbox-control" for="elected-party-only">
                 <input id="elected-party-only" v-model="draft.party.onlyElected" type="checkbox" />
                 <span>只看當選</span>
@@ -142,23 +165,13 @@
             </div>
 
             <template v-else-if="total > 0">
-              <div class="candidate-grid candidate-grid--desktop">
-                <ElectedCandidateCard
-                  v-for="candidate in desktopCandidates"
-                  :key="candidate.key"
-                  :candidate="candidate"
-                  :elected-icon="electedIcon"
-                />
-              </div>
-
-              <div class="candidate-grid candidate-grid--mobile">
-                <ElectedCandidateCard
-                  v-for="candidate in mobileCandidates"
-                  :key="candidate.key"
-                  :candidate="candidate"
-                  :elected-icon="electedIcon"
-                />
-              </div>
+              <p class="results-count">共 {{ total }} 筆，第 {{ currentPage }} / {{ totalPages }} 頁</p>
+              <p class="comparison-note">本頁票數比較：以本頁最高票數為滿格，翻頁後重新計算比例。</p>
+              <ol class="candidate-list" :start="(currentPage - 1) * pageSize + 1" :aria-busy="isLoading">
+                <li v-for="candidate in currentCandidates" :key="candidate.key">
+                  <ElectedCandidateCard :candidate="candidate" :elected-icon="electedIcon" :page-max-votes="pageMaxVotes" />
+                </li>
+              </ol>
 
               <nav
                 v-if="totalPages > 1"
@@ -169,7 +182,7 @@
                 <button
                   type="button"
                   class="page-button page-arrow"
-                  :disabled="currentPage === 1"
+                  :disabled="isLoading || currentPage === 1"
                   aria-label="上一頁"
                   @click="goToPage(currentPage - 1)"
                 >
@@ -190,6 +203,7 @@
                     :class="{ 'is-current': currentPage === pageItem }"
                     :aria-current="currentPage === pageItem ? 'page' : undefined"
                     :aria-label="`第 ${pageItem} 頁`"
+                    :disabled="isLoading"
                     @click="goToPage(pageItem)"
                   >
                     {{ pageItem }}
@@ -198,27 +212,13 @@
                 <button
                   type="button"
                   class="page-button page-arrow"
-                  :disabled="currentPage === totalPages"
+                  :disabled="isLoading || currentPage === totalPages"
                   aria-label="下一頁"
                   @click="goToPage(currentPage + 1)"
                 >
                   ›
                 </button>
               </nav>
-
-              <button
-                v-if="mobileVisibleCount < total"
-                type="button"
-                class="load-more-button"
-                :class="{ 'is-loading': isLoading }"
-                :aria-disabled="isLoading"
-                @click="loadMore"
-              >
-                <span>{{ isLoading ? '載入中…' : '展開更多' }}</span>
-                <svg v-if="!isLoading" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="m6.5 9 5.5 5.5L17.5 9" />
-                </svg>
-              </button>
 
               <p v-if="hasPageError" class="page-error">
                 {{ errorState.title }}，{{ errorState.description }}
@@ -255,7 +255,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import config from '../json/data.json';
 import electionAreas from '../json/electionAreas.json';
 import electedIcon from '../assets/images/elected.png?url';
@@ -263,8 +263,10 @@ import searchIcon from '../assets/images/search_icon.svg?url';
 import ElectedCandidateCard from './ElectedCandidateCard.vue';
 import { usePhase } from '../composables/usePhase.js';
 import { SEARCH_MODE, fetchElectionSearch } from '../utils/electionSearchApi.js';
+import { getPageVoteMaximum } from '../utils/voteComparison.js';
 
 const { isComponentVisible } = usePhase();
+const searchTitle = ref(null);
 const searchData = config.electedSearch;
 const supportedTabIds = new Set(['office', 'party', 'name']);
 const tabs = searchData.tabs.filter((tab) => supportedTabIds.has(tab.id));
@@ -288,8 +290,7 @@ const toPositiveInteger = (value, fallback) => {
   const parsedValue = Number(value);
   return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : fallback;
 };
-const desktopPageSize = toPositiveInteger(searchData.pagination?.desktopPageSize, 6);
-const mobileBatchSize = toPositiveInteger(searchData.pagination?.mobileBatchSize, 3);
+const pageSize = toPositiveInteger(searchData.pagination?.pageSize, 10);
 
 const initialTab = tabs.some((tab) => tab.id === searchData.defaultTab)
   ? searchData.defaultTab
@@ -302,7 +303,6 @@ const isLoading = ref(false);
 const hasError = ref(false);
 const hasPageError = ref(false);
 const currentPage = ref(1);
-const mobileVisibleCount = ref(mobileBatchSize);
 
 const draft = reactive({
   office: {
@@ -312,7 +312,10 @@ const draft = reactive({
     onlyElected: false
   },
   party: {
+    officeTypeId: 'all',
     partyId: searchData.defaults.partyId,
+    cityId: searchData.defaults.cityId,
+    districtId: searchData.defaults.districtId || 'all',
     onlyElected: false
   },
   name: ''
@@ -325,21 +328,22 @@ const districtCodeMap = new Map(
 );
 
 const cityDistricts = computed(() => cityMap.get(draft.office.cityId)?.districts ?? []);
+const partyCityDistricts = computed(() => cityMap.get(draft.party.cityId)?.districts ?? []);
 
-watch(() => draft.office.cityId, () => {
-  if (
-    draft.office.districtId !== 'all'
-    && !cityDistricts.value.some((district) => district.id === draft.office.districtId)
-  ) {
-    draft.office.districtId = 'all';
-  }
-});
+for (const mode of ['office', 'party']) {
+  watch(() => draft[mode].cityId, () => {
+    const districts = cityMap.get(draft[mode].cityId)?.districts ?? [];
+    if (!districts.some((district) => district.id === draft[mode].districtId)) {
+      draft[mode].districtId = 'all';
+    }
+  });
+}
 
 const hasSearched = computed(() => appliedQuery.value !== null);
 
 const totalPages = computed(() => Math.max(
   1,
-  Math.ceil(total.value / desktopPageSize)
+  Math.ceil(total.value / pageSize)
 ));
 
 const pageItems = computed(() => {
@@ -364,30 +368,15 @@ const pageItems = computed(() => {
   return items;
 });
 
-const desktopCandidates = computed(() => pages.value.get(currentPage.value) ?? []);
-
-// 小螢幕「展開更多」由第 1 頁起連續累加，桌機跳頁載入的不連續頁不計入
-const loadedPageCount = computed(() => {
-  let count = 0;
-  while (pages.value.has(count + 1)) count += 1;
-  return count;
-});
-
-const loadedCandidates = computed(() => Array.from(
-  { length: loadedPageCount.value },
-  (_, index) => pages.value.get(index + 1)
-).flat());
-
-const mobileCandidates = computed(() => (
-  loadedCandidates.value.slice(0, mobileVisibleCount.value)
-));
+const currentCandidates = computed(() => pages.value.get(currentPage.value) ?? []);
+const pageMaxVotes = computed(() => getPageVoteMaximum(currentCandidates.value));
 
 const resultAnnouncement = computed(() => {
   if (!hasSearched.value) return '';
   if (hasError.value || hasPageError.value) return `${errorState.title}，${errorState.description}`;
   if (total.value) {
     if (isLoading.value) return '載入中';
-    return `共找到 ${total.value} 位人員，桌機目前為第 ${currentPage.value} 頁，小螢幕目前顯示 ${mobileCandidates.value.length} 位`;
+    return `共找到 ${total.value} 位人員，目前為第 ${currentPage.value} 頁，顯示 ${currentCandidates.value.length} 位`;
   }
   return isLoading.value ? '查詢中' : `${emptyState.title}，${emptyState.description}`;
 });
@@ -398,7 +387,6 @@ const resetResults = () => {
   hasError.value = false;
   hasPageError.value = false;
   currentPage.value = 1;
-  mobileVisibleCount.value = mobileBatchSize;
 };
 
 const fetchPage = async (page) => {
@@ -411,7 +399,7 @@ const fetchPage = async (page) => {
     const result = await fetchElectionSearch({
       ...appliedQuery.value,
       page,
-      pageSize: desktopPageSize
+      pageSize: pageSize
     });
     pages.value.set(page, result.candidates.map((candidate, index) => ({
       ...candidate,
@@ -421,7 +409,7 @@ const fetchPage = async (page) => {
     return true;
   } catch (error) {
     console.error('當選快搜查詢失敗', error);
-    // 換頁或展開更多失敗時保留已載入的結果，只有首次查詢失敗才顯示錯誤版面
+    // 換頁失敗時保留已載入的結果，只有首次查詢失敗才顯示錯誤版面
     if (total.value) hasPageError.value = true;
     else hasError.value = true;
     return false;
@@ -442,7 +430,10 @@ const setActiveTab = (tabId) => {
     draft.office.districtId = searchData.defaults.districtId || 'all';
     draft.office.onlyElected = false;
   } else if (tabId === 'party') {
+    draft.party.officeTypeId = 'all';
     draft.party.partyId = searchData.defaults.partyId;
+    draft.party.cityId = searchData.defaults.cityId;
+    draft.party.districtId = searchData.defaults.districtId || 'all';
     draft.party.onlyElected = false;
   } else {
     draft.name = '';
@@ -480,6 +471,9 @@ const applySearch = async () => {
       searchMode: SEARCH_MODE.party,
 
       party: partyMap.get(draft.party.partyId)?.fullLabel,
+      candidateType: draft.party.officeTypeId === 'all' ? undefined : draft.party.officeTypeId,
+      prvCityCode: draft.party.cityId,
+      deptCode: districtCodeMap.get(draft.party.districtId),
       onlyElected: draft.party.onlyElected
     };
   } else {
@@ -496,17 +490,16 @@ const applySearch = async () => {
 const goToPage = async (page) => {
   if (isLoading.value) return;
   const targetPage = Math.min(Math.max(page, 1), totalPages.value);
-  if (await fetchPage(targetPage)) currentPage.value = targetPage;
+  if (await fetchPage(targetPage)) {
+    currentPage.value = targetPage;
+    await nextTick();
+    searchTitle.value?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+      block: 'start'
+    });
+  }
 };
 
-const loadMore = async () => {
-  if (isLoading.value) return;
-  const nextCount = Math.min(mobileVisibleCount.value + mobileBatchSize, total.value);
-  if (nextCount > loadedCandidates.value.length && !(await fetchPage(loadedPageCount.value + 1))) {
-    return;
-  }
-  mobileVisibleCount.value = nextCount;
-};
 </script>
 
 <style scoped>
@@ -537,6 +530,7 @@ const loadMore = async () => {
 }
 
 .elected-search-title {
+  scroll-margin-top: 104px;
   display: flex;
   align-items: center;
   flex-shrink: 0;
@@ -614,11 +608,6 @@ const loadMore = async () => {
   outline-offset: 3px;
 }
 
-.load-more-button:focus-visible {
-  outline: 3px solid var(--color-primary);
-  outline-offset: 3px;
-}
-
 .search-form-area {
   padding: 2.25rem 3rem 2.5rem;
 }
@@ -631,16 +620,26 @@ const loadMore = async () => {
 }
 
 .office-form {
-  grid-template-columns: repeat(3, 13.5rem) auto minmax(0, 1fr) auto;
-}
-
-.office-form .query-button {
-  grid-column: 6;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto auto;
 }
 
 .party-form {
-  grid-template-columns: minmax(13rem, 14rem) auto auto;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
+
+.party-form .checkbox-control {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.party-form .query-button {
+  grid-column: 4;
+  justify-self: end;
+}
+
+
+
+
 
 .name-form {
   grid-template-columns: minmax(18rem, 19rem) auto;
@@ -786,14 +785,28 @@ const loadMore = async () => {
   text-align: center;
 }
 
-.candidate-grid {
+.candidate-list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.5rem 1.6rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  list-style: none;
 }
 
-.candidate-grid--mobile {
-  display: none;
+.candidate-list li + li {
+  border-top: 1px solid var(--color-coffee-200);
+}
+
+.results-count {
+  margin-bottom: 1rem;
+  color: var(--color-coffee-600);
+  font-size: 0.9rem;
+}
+
+.comparison-note {
+  margin-bottom: 0.5rem;
+  color: var(--color-coffee-600);
+  font-size: 0.85rem;
+  line-height: 1.5;
 }
 
 .desktop-pagination {
@@ -850,14 +863,9 @@ const loadMore = async () => {
   font-weight: 400;
 }
 
-.desktop-pagination.is-loading .page-button,
-.load-more-button.is-loading {
+.desktop-pagination.is-loading .page-button {
   cursor: progress;
   opacity: 0.6;
-}
-
-.load-more-button {
-  display: none;
 }
 
 .page-error {
@@ -913,23 +921,23 @@ const loadMore = async () => {
     padding-left: 2rem;
   }
 
-  .office-form {
+  .office-form,
+  .party-form {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .office-form .checkbox-control {
+  .office-form .checkbox-control,
+  .party-form .checkbox-control {
     grid-column: 2;
     justify-self: end;
   }
 
-  .office-form .query-button {
+  .office-form .query-button,
+  .party-form .query-button {
     grid-column: 3;
     justify-self: start;
   }
 
-  .candidate-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 768px) {
@@ -1014,12 +1022,15 @@ const loadMore = async () => {
 
   .office-form .checkbox-control,
   .party-form .checkbox-control {
+    grid-column: auto;
+    justify-self: center;
     min-height: 1.5rem;
   }
 
   .office-form .query-button,
   .party-form .query-button {
     grid-column: auto;
+    justify-self: center;
     height: 2.125rem;
   }
 
@@ -1067,47 +1078,14 @@ const loadMore = async () => {
     font-size: 0.72rem;
   }
 
-  .candidate-grid--desktop,
   .desktop-pagination {
-    display: none;
+    gap: 0.25rem;
+    flex-wrap: wrap;
   }
 
-  .candidate-grid--mobile {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1.5rem;
-  }
-
-  .load-more-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    min-width: 9.7rem;
-    height: 3rem;
-    margin: 2.2rem auto 0;
-    padding: 0 1rem;
-    border: 1.5px solid var(--color-primary);
-    border-radius: 999px;
-    background: var(--color-coffee-0);
-    color: var(--color-primary);
-    font-size: 1.18rem;
-    line-height: 1;
-  }
-
-  .load-more-button svg {
-    width: 1.25rem;
-    height: 1.25rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 1.8;
-  }
-
-  .load-more-button:active {
-    background: var(--color-primary);
-    color: var(--color-coffee-0);
+  .page-button {
+    min-width: 2rem;
+    height: 2.5rem;
   }
 
   .empty-state {

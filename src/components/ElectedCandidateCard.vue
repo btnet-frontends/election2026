@@ -1,170 +1,182 @@
 <template>
   <article class="candidate-card">
-    <div class="candidate-heading" :class="{ 'has-elected-mark': isElected }">
-      <img
-        v-if="partyImage"
-        class="party-icon"
-        :src="partyImage"
-        :alt="candidate.party"
-        :title="candidate.party"
-      />
+    <div class="candidate-heading">
+      <img v-if="partyImage" class="party-icon" :src="partyImage" :alt="candidate.party" :title="candidate.party" />
+      <span v-else class="party-fallback" :title="candidate.party">{{ candidate.party || '未提供政黨' }}</span>
+      <span class="candidate-number">{{ candidate.number == null ? '號次待更新' : `${candidate.number} 號` }}</span>
       <h4 class="candidate-name">{{ candidate.name }}</h4>
+      <img v-if="isElected" :src="electedIcon" class="elected-mark" alt="當選" title="當選" />
     </div>
 
-    <img
-      v-if="isElected"
-      :src="electedIcon"
-      class="elected-mark"
-      alt="當選"
-      title="當選"
-    />
+    <div class="vote-comparison">
+      <div class="vote-track" aria-hidden="true">
+        <span class="vote-fill" :style="{ width: `${voteBarWidth}%` }"></span>
+      </div>
+      <dl class="candidate-votes">
+        <div><dt>得票數</dt><dd>{{ formatVotes(candidate.votes) }}</dd></div>
+        <div><dt>得票率</dt><dd>{{ formatPercent(candidate.percent) }}</dd></div>
+      </dl>
+    </div>
 
-    <dl class="candidate-meta">
-      <div class="meta-row">
-        <dt class="meta-icon">
-          <span class="sr-only">參選地區</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z" />
-          </svg>
-        </dt>
-        <dd>{{ candidate.locationText }}</dd>
+    <div class="candidate-location">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z" />
+      </svg>
+      <div>
+        <p><span class="sr-only">參選地區：</span>{{ candidate.locationText }}</p>
+        <p v-if="candidate.areaDeptsText" class="candidate-districts"><span class="sr-only">行政區：</span>{{ candidate.areaDeptsText }}</p>
       </div>
-      <div v-if="candidate.areaDeptsText" class="meta-row">
-        <dt class="meta-icon">
-          <span class="sr-only">行政區</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 21v-9h5V3h10v18h2v2H2v-2h2Zm3-2h2v-2H7v2Zm0-4h2v-2H7v2Zm5 4h2v-2h-2v2Zm0-5h2v-2h-2v2Zm0-5h2V7h-2v2Zm4 10h2v-2h-2v2Zm0-5h2v-2h-2v2Zm0-5h2V7h-2v2Z" />
-          </svg>
-        </dt>
-        <dd>{{ candidate.areaDeptsText }}</dd>
-      </div>
-    </dl>
+    </div>
   </article>
 </template>
 
 <script setup>
 import { computed } from 'vue';
-import parties from '../json/parties.json';
+import parties from '../json/parties.json' with { type: 'json' };
+import { getVoteBarWidth } from '../utils/voteComparison.js';
 
 const partyImages = import.meta.glob('../assets/images/party_icon/*.png', {
   eager: true,
   query: '?url',
   import: 'default'
 });
-
-
 const partyImageById = new Map(
   parties.map((party) => [party.id, partyImages[`../assets/images/party_icon/${party.image}`]])
 );
-
-
 const props = defineProps({
-  candidate: {
-    type: Object,
-    required: true
-  },
-  electedIcon: {
-    type: String,
-    required: true
-  }
+  candidate: { type: Object, required: true },
+  electedIcon: { type: String, required: true },
+  pageMaxVotes: { type: Number, default: 0 }
 });
-
 const isElected = computed(() => props.candidate.elected === true);
 const partyImage = computed(() => partyImageById.get(props.candidate.partyId));
-
+const voteBarWidth = computed(() => getVoteBarWidth(props.candidate.votes, props.pageMaxVotes));
+const voteFormatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 });
+const percentFormatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 2 });
+const formatVotes = (value) => value == null ? '待更新' : `${voteFormatter.format(value)} 票`;
+const formatPercent = (value) => value == null ? '待更新' : `${percentFormatter.format(value)}%`;
 </script>
 
 <style scoped>
 .candidate-card {
-  position: relative;
   min-width: 0;
-  min-height: 9.8rem;
-  padding: 1.15rem 1rem 1rem;
-  border: 1px solid var(--color-coffee-200);
-  border-radius: 0.65rem;
-  background: var(--color-coffee-0);
+  padding: 1.4rem 0.5rem;
 }
 
 .candidate-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  min-width: 0;
-  gap: 0.75rem;
-  margin-bottom: 0.65rem;
-}
-
-.candidate-heading.has-elected-mark {
-  padding-right: 2.8rem;
+  gap: 0.65rem;
 }
 
 .party-icon {
   flex: 0 0 auto;
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 2rem;
+  height: 2rem;
   object-fit: contain;
 }
 
-.party-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 2.4rem;
-  height: 2.4rem;
-  border-radius: 50%;
-  color: #ffffff;
-  font-size: 1rem;
+.party-fallback {
+  color: var(--color-coffee-600);
+  font-size: 0.9rem;
+}
+
+.candidate-number {
+  padding: 0.15rem 0.55rem;
+  border-radius: 0.35rem;
+  background: var(--color-coffee-150);
+  color: var(--color-coffee-600);
+  font-size: 0.95rem;
   font-weight: 700;
-  line-height: 1;
 }
 
 .candidate-name {
   min-width: 0;
-  color: #111111;
-  font-size: clamp(1.08rem, 1.8vw, 1.35rem);
+  color: var(--color-coffee-900);
+  font-size: 1.35rem;
   font-weight: 700;
-  line-height: 1.22;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
 .elected-mark {
-  position: absolute;
-  top: 1.15rem;
-  right: 1rem;
-  width: 2.35rem;
-  height: 2.35rem;
+  flex: 0 0 auto;
+  width: 1.65rem;
+  height: 1.65rem;
   object-fit: contain;
 }
 
-.candidate-meta {
+.vote-comparison {
   display: grid;
-  gap: 0.5rem;
-  color: var(--color-coffee-600);
-  font-size: clamp(1rem, 1.55vw, 1.15rem);
-  line-height: 1.4;
+  grid-template-columns: minmax(0, 1fr) 17rem;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 0.7rem;
 }
 
-.meta-row {
+.vote-track {
+  height: 0.85rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-coffee-200);
+}
+
+.vote-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-coffee-accent);
+  transition: width 0.3s ease;
+}
+
+.candidate-votes {
   display: grid;
-  grid-template-columns: 1.8rem minmax(0, 1fr);
-  align-items: start;
-  gap: 0.45rem;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 1rem;
 }
 
-.meta-row dt,
-.meta-row dd {
-  margin: 0;
-}
-
-.meta-icon {
+.candidate-votes > div {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
 }
 
-.meta-icon svg {
-  width: 1.45rem;
-  height: 1.45rem;
+.candidate-votes dt {
+  color: var(--color-coffee-600);
+  font-size: 0.875rem;
+}
+
+.candidate-votes dd {
+  margin: 0;
+  color: var(--color-coffee-900);
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.candidate-location {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+  color: var(--color-coffee-600);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.candidate-location svg {
+  flex: 0 0 auto;
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-top: 0.1rem;
   fill: currentColor;
+}
+
+.candidate-districts {
+  margin-top: 0.15rem;
+  font-size: 0.875rem;
 }
 
 .sr-only {
@@ -180,43 +192,14 @@ const partyImage = computed(() => partyImageById.get(props.candidate.partyId));
 }
 
 @media (max-width: 768px) {
-  .candidate-card {
-    min-height: 9.9rem;
-    padding: 1.15rem 0.8rem 1rem;
-  }
-
-  .candidate-heading {
-    gap: 0.75rem;
-  }
-
-  .candidate-heading.has-elected-mark {
-    padding-right: 2.65rem;
-  }
-
-  .party-icon {
-    width: 2.45rem;
-    height: 2.45rem;
-  }
-
-  .party-badge {
-    width: 2.45rem;
-    height: 2.45rem;
-    font-size: 1rem;
-  }
-
-  .candidate-name {
-    font-size: 1.32rem;
-  }
-
-  .candidate-meta {
-    font-size: 1.15rem;
-  }
-
-  .elected-mark {
-    right: 0.9rem;
-    width: 2.4rem;
-    height: 2.4rem;
-  }
+  .candidate-card { padding: 1.25rem 0; }
+  .candidate-heading { gap: 0.5rem; }
+  .candidate-name { font-size: 1.2rem; }
+  .vote-comparison { grid-template-columns: minmax(0, 1fr); gap: 0.5rem; }
+  .candidate-votes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .vote-fill { transition: none; }
+}
 </style>

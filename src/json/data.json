@@ -126,8 +126,7 @@
       "partyId": "kmt"
     },
     "pagination": {
-      "desktopPageSize": 6,
-      "mobileBatchSize": 3
+      "pageSize": 10
     },
     "officeTypes": [
       { "id": 1, "label": "區域縣市議員" },

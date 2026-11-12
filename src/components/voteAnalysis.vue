@@ -478,7 +478,18 @@ const getPieData = (city) => {
     { key: 'kmt', name: `${partyLabels.kmt}`, value: city.kmt },
     { key: 'dpp', name: `${partyLabels.dpp}`, value: city.dpp },
     { key: 'other', name: `${partyLabels.other}`, value: city.other }
-  ];
+  ].map((item) => {
+    const showLabel = Number(item.value) > 0;
+    return {
+      ...item,
+      label: { show: showLabel },
+      labelLine: { show: showLabel },
+      emphasis: {
+        label: { show: showLabel },
+        labelLine: { show: showLabel }
+      }
+    };
+  });
 };
 
 const compactPieLabel = ({ data: item }) => (

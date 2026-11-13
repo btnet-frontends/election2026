@@ -42,54 +42,58 @@
               aria-labelledby="elected-tab-office"
               @submit.prevent="applySearch"
             >
-              <div class="form-field">
-                <label class="field-label" for="elected-office-type">公職人員類型</label>
-                <select id="elected-office-type" v-model="draft.office.officeTypeId">
-                  <option v-for="office in officeTypes" :key="office.id" :value="office.id">
-                    {{ office.label }}
-                  </option>
-                </select>
+              <div class="search-selects">
+                <div class="form-field form-field--office-type">
+                  <label class="field-label" for="elected-office-type">公職人員類型</label>
+                  <select id="elected-office-type" v-model="draft.office.officeTypeId">
+                    <option v-for="office in officeTypes" :key="office.id" :value="office.id">
+                      {{ office.label }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label class="field-label" for="elected-city">縣、市</label>
+                  <select id="elected-city" v-model="draft.office.cityId">
+                    <option v-for="city in cities" :key="city.id" :value="city.id">
+                      {{ city.label }}
+                    </option>
+                  </select>
+                </div>
+
+                <div v-if="officeAreaOptions.areas.length" class="form-field form-field--area">
+                  <label class="field-label" for="elected-area">選區</label>
+                  <select id="elected-area" v-model="draft.office.areaId">
+                    <option v-for="area in officeAreaOptions.areas" :key="area.id" :value="area.id">{{ area.label }}</option>
+                  </select>
+                </div>
+
+                <div v-if="officeAreaOptions.districts.length" class="form-field">
+                  <label class="field-label" for="elected-district">鄉鎮市區</label>
+                  <select id="elected-district" v-model="draft.office.districtId">
+                    <option v-for="district in cityDistricts" :key="district.id" :value="district.id">
+                      {{ district.label }}
+                    </option>
+                  </select>
+                </div>
+
+                <div v-if="String(draft.office.officeTypeId) === '4'" class="form-field">
+                  <label class="field-label" for="elected-village">村里</label>
+                  <select id="elected-village" v-model="draft.office.villageId" :disabled="!officeAreaOptions.villages.length">
+                    <option v-if="!officeAreaOptions.villages.length" value="all">無村里資料</option>
+                    <option v-for="village in officeAreaOptions.villages" :key="village.code" :value="village.code">{{ village.name }}</option>
+                  </select>
+                </div>
               </div>
 
-              <div class="form-field">
-                <label class="field-label" for="elected-city">縣、市</label>
-                <select id="elected-city" v-model="draft.office.cityId">
-                  <option v-for="city in cities" :key="city.id" :value="city.id">
-                    {{ city.label }}
-                  </option>
-                </select>
+              <div class="search-actions">
+                <label class="checkbox-control" for="elected-office-only">
+                  <input id="elected-office-only" v-model="draft.office.onlyElected" type="checkbox" />
+                  <span>只看當選</span>
+                </label>
+
+                <button class="query-button" type="submit" :disabled="isLoading">查詢</button>
               </div>
-
-              <div v-if="officeAreaOptions.areas.length" class="form-field">
-                <label class="field-label" for="elected-area">選區</label>
-                <select id="elected-area" v-model="draft.office.areaId">
-                  <option v-for="area in officeAreaOptions.areas" :key="area.id" :value="area.id">{{ area.label }}</option>
-                </select>
-              </div>
-
-              <div v-if="officeAreaOptions.districts.length" class="form-field">
-                <label class="field-label" for="elected-district">鄉鎮市區</label>
-                <select id="elected-district" v-model="draft.office.districtId">
-                  <option v-for="district in cityDistricts" :key="district.id" :value="district.id">
-                    {{ district.label }}
-                  </option>
-                </select>
-              </div>
-
-              <div v-if="String(draft.office.officeTypeId) === '4'" class="form-field">
-                <label class="field-label" for="elected-village">村里</label>
-                <select id="elected-village" v-model="draft.office.villageId" :disabled="!officeAreaOptions.villages.length">
-                  <option v-if="!officeAreaOptions.villages.length" value="all">無村里資料</option>
-                  <option v-for="village in officeAreaOptions.villages" :key="village.code" :value="village.code">{{ village.name }}</option>
-                </select>
-              </div>
-
-              <label class="checkbox-control" for="elected-office-only">
-                <input id="elected-office-only" v-model="draft.office.onlyElected" type="checkbox" />
-                <span>只看當選</span>
-              </label>
-
-              <button class="query-button" type="submit" :disabled="isLoading">查詢</button>
             </form>
 
             <form
@@ -100,57 +104,61 @@
               aria-labelledby="elected-tab-party"
               @submit.prevent="applySearch"
             >
-              <div class="form-field">
-                <label class="field-label" for="elected-party">政黨</label>
-                <select id="elected-party" v-model="draft.party.partyId">
-                  <option v-for="party in parties" :key="party.id" :value="party.id">
-                    {{ party.label }}
-                  </option>
-                </select>
+              <div class="search-selects">
+                <div class="form-field">
+                  <label class="field-label" for="elected-party">政黨</label>
+                  <select id="elected-party" v-model="draft.party.partyId">
+                    <option v-for="party in parties" :key="party.id" :value="party.id">
+                      {{ party.label }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-field form-field--office-type">
+                  <label class="field-label" for="elected-party-office-type">公職人員類型</label>
+                  <select id="elected-party-office-type" v-model="draft.party.officeTypeId">
+                    <option v-for="office in officeTypes" :key="office.id" :value="office.id">{{ office.label }}</option>
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label class="field-label" for="elected-party-city">縣、市</label>
+                  <select id="elected-party-city" v-model="draft.party.cityId">
+                    <option v-for="city in cities" :key="city.id" :value="city.id">{{ city.label }}</option>
+                  </select>
+                </div>
+
+                <div v-if="partyAreaOptions.areas.length" class="form-field form-field--area">
+                  <label class="field-label" for="elected-party-area">選區</label>
+                  <select id="elected-party-area" v-model="draft.party.areaId">
+                    <option v-for="area in partyAreaOptions.areas" :key="area.id" :value="area.id">{{ area.label }}</option>
+                  </select>
+                </div>
+
+                <div v-if="partyAreaOptions.districts.length" class="form-field">
+                  <label class="field-label" for="elected-party-district">鄉鎮市區</label>
+                  <select id="elected-party-district" v-model="draft.party.districtId">
+                    <option v-for="district in partyCityDistricts" :key="district.id" :value="district.id">{{ district.label }}</option>
+                  </select>
+                </div>
+
+                <div v-if="String(draft.party.officeTypeId) === '4'" class="form-field">
+                  <label class="field-label" for="elected-party-village">村里</label>
+                  <select id="elected-party-village" v-model="draft.party.villageId" :disabled="!partyAreaOptions.villages.length">
+                    <option v-if="!partyAreaOptions.villages.length" value="all">無村里資料</option>
+                    <option v-for="village in partyAreaOptions.villages" :key="village.code" :value="village.code">{{ village.name }}</option>
+                  </select>
+                </div>
               </div>
 
-              <div class="form-field">
-                <label class="field-label" for="elected-party-office-type">公職人員類型</label>
-                <select id="elected-party-office-type" v-model="draft.party.officeTypeId">
-                  <option v-for="office in officeTypes" :key="office.id" :value="office.id">{{ office.label }}</option>
-                </select>
+              <div class="search-actions">
+                <label class="checkbox-control" for="elected-party-only">
+                  <input id="elected-party-only" v-model="draft.party.onlyElected" type="checkbox" />
+                  <span>只看當選</span>
+                </label>
+
+                <button class="query-button" type="submit" :disabled="isLoading">查詢</button>
               </div>
-
-              <div class="form-field">
-                <label class="field-label" for="elected-party-city">縣、市</label>
-                <select id="elected-party-city" v-model="draft.party.cityId">
-                  <option v-for="city in cities" :key="city.id" :value="city.id">{{ city.label }}</option>
-                </select>
-              </div>
-
-              <div v-if="partyAreaOptions.areas.length" class="form-field">
-                <label class="field-label" for="elected-party-area">選區</label>
-                <select id="elected-party-area" v-model="draft.party.areaId">
-                  <option v-for="area in partyAreaOptions.areas" :key="area.id" :value="area.id">{{ area.label }}</option>
-                </select>
-              </div>
-
-              <div v-if="partyAreaOptions.districts.length" class="form-field">
-                <label class="field-label" for="elected-party-district">鄉鎮市區</label>
-                <select id="elected-party-district" v-model="draft.party.districtId">
-                  <option v-for="district in partyCityDistricts" :key="district.id" :value="district.id">{{ district.label }}</option>
-                </select>
-              </div>
-
-              <div v-if="String(draft.party.officeTypeId) === '4'" class="form-field">
-                <label class="field-label" for="elected-party-village">村里</label>
-                <select id="elected-party-village" v-model="draft.party.villageId" :disabled="!partyAreaOptions.villages.length">
-                  <option v-if="!partyAreaOptions.villages.length" value="all">無村里資料</option>
-                  <option v-for="village in partyAreaOptions.villages" :key="village.code" :value="village.code">{{ village.name }}</option>
-                </select>
-              </div>
-
-              <label class="checkbox-control" for="elected-party-only">
-                <input id="elected-party-only" v-model="draft.party.onlyElected" type="checkbox" />
-                <span>只看當選</span>
-              </label>
-
-              <button class="query-button" type="submit" :disabled="isLoading">查詢</button>
             </form>
 
             <form
@@ -683,24 +691,34 @@ const goToPage = async (page) => {
 
 .office-form,
 .party-form {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
-.office-form .checkbox-control,
-.party-form .checkbox-control {
-  grid-column: 3;
-  justify-self: end;
+.search-selects {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  min-width: 0;
 }
 
-.office-form .query-button,
-.party-form .query-button {
-  grid-column: 4;
-  justify-self: end;
+.search-selects .form-field {
+  flex: 1 1 0;
 }
 
+.search-selects .form-field--office-type {
+  flex-grow: 1.5;
+}
 
+.search-selects .form-field--area {
+  flex-grow: 1.3;
+}
 
-
+.search-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.25rem;
+}
 
 .name-form {
   grid-template-columns: minmax(18rem, 19rem) auto;
@@ -1038,21 +1056,8 @@ const goToPage = async (page) => {
     padding-left: 2rem;
   }
 
-  .office-form,
-  .party-form {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .office-form .checkbox-control,
-  .party-form .checkbox-control {
-    grid-column: 2;
-    justify-self: end;
-  }
-
-  .office-form .query-button,
-  .party-form .query-button {
-    grid-column: 3;
-    justify-self: start;
+  .search-selects {
+    gap: 0.65rem;
   }
 
 }
@@ -1140,17 +1145,22 @@ const goToPage = async (page) => {
     height: 2rem;
   }
 
-  .office-form .checkbox-control,
-  .party-form .checkbox-control {
-    grid-column: auto;
-    justify-self: center;
-    min-height: 1.5rem;
+  .search-selects {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
   }
 
-  .office-form .query-button,
-  .party-form .query-button {
-    grid-column: auto;
-    justify-self: center;
+  .search-selects .form-field {
+    flex: none;
+  }
+
+  .search-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .search-actions .query-button {
     height: 2.125rem;
   }
 

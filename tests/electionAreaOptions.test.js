@@ -9,11 +9,12 @@ const taipei = cities.find((city) => city.code === '63-000');
 test('council constituency restricts districts to the covered administrative areas', () => {
   const options = getElectionAreaOptions(taipei, 1, '01');
   assert.equal(options.areas.length, 6);
+  assert.equal(options.selectedArea.label, '第1選舉區（士林區、北投區）');
   assert.deepEqual(options.districts.map((district) => district.name), ['士林區', '北投區']);
   assert.equal(options.villages.length, 0);
   assert.deepEqual(getElectionAreaFilters(taipei, {
     officeTypeId: 1, areaId: '01', districtId: '63-000-110', villageId: '002'
-  }), { areaCode: '01', deptCode: '110', liCode: undefined });
+  }), { areaCode: '01', deptCode: undefined, liCode: undefined });
 });
 
 test('village chief lists villages only after selecting a district and preserves leading zeroes', () => {
@@ -36,6 +37,7 @@ test('representative constituency IDs distinguish the same constituency code acr
   const selected = getElectionAreaOptions(city, 6, area.id);
   assert.deepEqual(selected.districts.map((district) => district.code), [area.deptCode]);
   assert.ok(area.label.includes(selected.districts[0].name));
+  assert.equal(area.label, `${area.name}（${selected.districts[0].name}）`);
   assert.deepEqual(getElectionAreaFilters(city, {
     officeTypeId: 6, areaId: area.id, districtId: 'all'
   }), { areaCode: area.code, deptCode: area.deptCode, liCode: undefined });
@@ -63,4 +65,18 @@ test('all office types keeps city districts and omits constituency and village f
 test('unsupported council and representative types have no selectable districts', () => {
   assert.equal(getElectionAreaOptions(taipei, 6).districts.length, 0);
   assert.deepEqual(getElectionAreaOptions(undefined, 1).areas, []);
+});
+
+test('plains indigenous representative areas sort by constituency number before township code', () => {
+  const city = cities.find((city) => city.name === '臺東縣');
+  const before = JSON.stringify(city);
+  const areas = getElectionAreaOptions(city, 7).areas;
+  assert.deepEqual(areas.map((area) => Number(area.code)), [2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5]);
+  for (let i = 1; i < areas.length; i++) {
+    if (areas[i].code === areas[i - 1].code) {
+      assert.ok(Number(areas[i - 1].deptCode) <= Number(areas[i].deptCode));
+    }
+  }
+  assert.equal(new Set(areas.map((area) => area.id)).size, areas.length);
+  assert.equal(JSON.stringify(city), before);
 });

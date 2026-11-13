@@ -63,12 +63,12 @@
 
                 <div v-if="officeAreaOptions.areas.length" class="form-field form-field--area">
                   <label class="field-label" for="elected-area">選區</label>
-                  <select id="elected-area" v-model="draft.office.areaId">
+                  <select id="elected-area" v-model="draft.office.areaId" :title="officeAreaOptions.selectedArea?.label">
                     <option v-for="area in officeAreaOptions.areas" :key="area.id" :value="area.id">{{ area.label }}</option>
                   </select>
                 </div>
 
-                <div v-if="officeAreaOptions.districts.length" class="form-field">
+                <div v-if="!officeAreaOptions.areas.length && officeAreaOptions.districts.length" class="form-field">
                   <label class="field-label" for="elected-district">鄉鎮市區</label>
                   <select id="elected-district" v-model="draft.office.districtId">
                     <option v-for="district in cityDistricts" :key="district.id" :value="district.id">
@@ -130,12 +130,12 @@
 
                 <div v-if="partyAreaOptions.areas.length" class="form-field form-field--area">
                   <label class="field-label" for="elected-party-area">選區</label>
-                  <select id="elected-party-area" v-model="draft.party.areaId">
+                  <select id="elected-party-area" v-model="draft.party.areaId" :title="partyAreaOptions.selectedArea?.label">
                     <option v-for="area in partyAreaOptions.areas" :key="area.id" :value="area.id">{{ area.label }}</option>
                   </select>
                 </div>
 
-                <div v-if="partyAreaOptions.districts.length" class="form-field">
+                <div v-if="!partyAreaOptions.areas.length && partyAreaOptions.districts.length" class="form-field">
                   <label class="field-label" for="elected-party-district">鄉鎮市區</label>
                   <select id="elected-party-district" v-model="draft.party.districtId">
                     <option v-for="district in partyCityDistricts" :key="district.id" :value="district.id">{{ district.label }}</option>
@@ -380,7 +380,8 @@ const resetVillage = (mode) => {
   draft[mode].villageId = areaOptions(mode).villages[0]?.code ?? 'all';
 };
 const resetDistrict = (mode) => {
-  draft[mode].districtId = areaOptions(mode).districts[0]?.id ?? 'all';
+  const options = areaOptions(mode);
+  draft[mode].districtId = options.areas.length ? 'all' : (options.districts[0]?.id ?? 'all');
   resetVillage(mode);
 };
 const resetLocation = (mode) => {
@@ -710,7 +711,7 @@ const goToPage = async (page) => {
 }
 
 .search-selects .form-field--area {
-  flex-grow: 1.3;
+  flex-grow: 2.2;
 }
 
 .search-actions {

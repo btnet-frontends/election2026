@@ -8,19 +8,26 @@ export function getElectionAreaOptions(city, officeTypeId, areaId = 'all', distr
   const cityDistricts = city?.districts ?? [];
   let areas = [];
   if (councilTypes.has(type)) {
-    areas = (city?.councilConstituencies?.[type] ?? []).map((area) => ({
-      ...area, id: area.code, label: area.name
-    }));
+    areas = (city?.councilConstituencies?.[type] ?? []).map((area) => {
+      const districtNames = [...new Set((area.districts ?? []).map((district) => district.name).filter(Boolean))];
+      return {
+        ...area, id: area.code,
+        label: districtNames.length ? `${area.name}（${districtNames.join('、')}）` : area.name
+      };
+    });
   } else if (representativeTypes.has(type)) {
     areas = cityDistricts.flatMap((district) =>
       (district.representativeConstituencies?.[type] ?? []).map((area) => ({
         ...area,
         id: `${district.code}-${area.code}`,
-        label: `${district.name}・${area.name}`,
+        label: `${area.name}（${district.name}）`,
         deptCode: district.code
       }))
     );
   }
+
+  areas.sort((a, b) => Number(a.code) - Number(b.code)
+    || Number(a.deptCode ?? 0) - Number(b.deptCode ?? 0));
 
   const selectedArea = areas.find((area) => area.id === areaId);
   let districts = cityDistricts;
@@ -45,7 +52,9 @@ export function getElectionAreaFilters(city, selection) {
   const options = getElectionAreaOptions(city, selection.officeTypeId, selection.areaId, selection.districtId);
   return {
     areaCode: options.selectedArea?.code,
-    deptCode: options.selectedDistrict?.code ?? options.selectedArea?.deptCode,
+    // Council constituencies span districts; representatives still require the
+    // owning township code, which is carried by their constituency option.
+    deptCode: options.selectedArea ? options.selectedArea.deptCode : options.selectedDistrict?.code,
     liCode: options.villages.find((village) => village.code === selection.villageId)?.code
   };
 }

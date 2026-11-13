@@ -60,13 +60,27 @@
                 </select>
               </div>
 
-              <div class="form-field">
+              <div v-if="officeAreaOptions.areas.length" class="form-field">
+                <label class="field-label" for="elected-area">選區</label>
+                <select id="elected-area" v-model="draft.office.areaId">
+                  <option v-for="area in officeAreaOptions.areas" :key="area.id" :value="area.id">{{ area.label }}</option>
+                </select>
+              </div>
+
+              <div v-if="officeAreaOptions.districts.length" class="form-field">
                 <label class="field-label" for="elected-district">鄉鎮市區</label>
                 <select id="elected-district" v-model="draft.office.districtId">
-                  <option value="all">全部行政區</option>
                   <option v-for="district in cityDistricts" :key="district.id" :value="district.id">
                     {{ district.label }}
                   </option>
+                </select>
+              </div>
+
+              <div v-if="String(draft.office.officeTypeId) === '4'" class="form-field">
+                <label class="field-label" for="elected-village">村里</label>
+                <select id="elected-village" v-model="draft.office.villageId" :disabled="!officeAreaOptions.villages.length">
+                  <option v-if="!officeAreaOptions.villages.length" value="all">無村里資料</option>
+                  <option v-for="village in officeAreaOptions.villages" :key="village.code" :value="village.code">{{ village.name }}</option>
                 </select>
               </div>
 
@@ -98,7 +112,6 @@
               <div class="form-field">
                 <label class="field-label" for="elected-party-office-type">公職人員類型</label>
                 <select id="elected-party-office-type" v-model="draft.party.officeTypeId">
-                  <option value="all">全部公職類型</option>
                   <option v-for="office in officeTypes" :key="office.id" :value="office.id">{{ office.label }}</option>
                 </select>
               </div>
@@ -110,11 +123,25 @@
                 </select>
               </div>
 
-              <div class="form-field">
+              <div v-if="partyAreaOptions.areas.length" class="form-field">
+                <label class="field-label" for="elected-party-area">選區</label>
+                <select id="elected-party-area" v-model="draft.party.areaId">
+                  <option v-for="area in partyAreaOptions.areas" :key="area.id" :value="area.id">{{ area.label }}</option>
+                </select>
+              </div>
+
+              <div v-if="partyAreaOptions.districts.length" class="form-field">
                 <label class="field-label" for="elected-party-district">鄉鎮市區</label>
                 <select id="elected-party-district" v-model="draft.party.districtId">
-                  <option value="all">全部行政區</option>
                   <option v-for="district in partyCityDistricts" :key="district.id" :value="district.id">{{ district.label }}</option>
+                </select>
+              </div>
+
+              <div v-if="String(draft.party.officeTypeId) === '4'" class="form-field">
+                <label class="field-label" for="elected-party-village">村里</label>
+                <select id="elected-party-village" v-model="draft.party.villageId" :disabled="!partyAreaOptions.villages.length">
+                  <option v-if="!partyAreaOptions.villages.length" value="all">無村里資料</option>
+                  <option v-for="village in partyAreaOptions.villages" :key="village.code" :value="village.code">{{ village.name }}</option>
                 </select>
               </div>
 
@@ -166,12 +193,25 @@
 
             <template v-else-if="total > 0">
               <p class="results-count">共 {{ total }} 筆，第 {{ currentPage }} / {{ totalPages }} 頁</p>
-              <p class="comparison-note">本頁票數比較：以本頁最高票數為滿格，翻頁後重新計算比例。</p>
-              <ol class="candidate-list" :start="(currentPage - 1) * pageSize + 1" :aria-busy="isLoading">
-                <li v-for="candidate in currentCandidates" :key="candidate.key">
-                  <ElectedCandidateCard :candidate="candidate" :elected-icon="electedIcon" :page-max-votes="pageMaxVotes" />
-                </li>
-              </ol>
+              <p v-if="comparisonUnavailable" class="comparison-note" role="status">部分選區比較資料暫時無法載入，請重新查詢；得票數仍正常顯示。</p>
+              <div class="candidate-groups" :aria-busy="isLoading">
+                <section v-for="(group, index) in currentCandidateGroups" :key="group.key" class="candidate-group" :aria-labelledby="`elected-group-${index}`">
+                  <header class="candidate-location">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z" />
+                    </svg>
+                    <div class="candidate-location-text">
+                      <h4 :id="`elected-group-${index}`" class="candidate-region">{{ group.locationText }}<span v-if="group.candidateTypeName" class="candidate-office">{{ group.candidateTypeName }}</span></h4>
+                      <p v-if="group.areaDeptsText" class="candidate-districts"><span class="sr-only">行政區：</span>{{ group.areaDeptsText }}</p>
+                    </div>
+                  </header>
+                  <ol class="candidate-list">
+                    <li v-for="candidate in group.candidates" :key="candidate.key">
+                      <ElectedCandidateCard :candidate="candidate" :elected-icon="electedIcon" :constituency-max-votes="constituencyMaxima.get(getVoteComparisonKey(candidate)) ?? 0" />
+                    </li>
+                  </ol>
+                </section>
+              </div>
 
               <nav
                 v-if="totalPages > 1"
@@ -263,7 +303,9 @@ import searchIcon from '../assets/images/search_icon.svg?url';
 import ElectedCandidateCard from './ElectedCandidateCard.vue';
 import { usePhase } from '../composables/usePhase.js';
 import { SEARCH_MODE, fetchElectionSearch } from '../utils/electionSearchApi.js';
-import { getPageVoteMaximum } from '../utils/voteComparison.js';
+import { getElectionAreaOptions, getElectionAreaFilters } from '../utils/electionAreaOptions.js';
+import { getVoteComparisonKey, groupCandidatesByConstituency } from '../utils/voteComparison.js';
+import { createVoteComparisonLoader } from '../utils/constituencyVoteComparison.js';
 
 const { isComponentVisible } = usePhase();
 const searchTitle = ref(null);
@@ -272,17 +314,8 @@ const supportedTabIds = new Set(['office', 'party', 'name']);
 const tabs = searchData.tabs.filter((tab) => supportedTabIds.has(tab.id));
 const officeTypes = searchData.officeTypes;
 const parties = searchData.parties;
-// 區代碼在各縣市都從 010 起編，id 需加上縣市代碼才不會重複
-// code 為後端的 deptCode, 來源為final.json整理
-const cities = electionAreas.map((city) => ({
-  id: city.code,
-  label: city.name,
-  districts: city.districts.map((district) => ({
-    id: `${city.code}-${district.code}`,
-    code: district.code,
-    label: district.name
-  }))
-}));
+const cities = electionAreas.map((city) => ({ id: city.code, label: city.name }));
+const areaCityMap = new Map(electionAreas.map((city) => [city.code, city]));
 const emptyState = searchData.emptyState;
 const errorState = searchData.errorState;
 const dataNotice = searchData.dataStatus === 'demo' ? searchData.dataNotice : '';
@@ -308,35 +341,56 @@ const draft = reactive({
   office: {
     officeTypeId: searchData.defaults.officeTypeId,
     cityId: searchData.defaults.cityId,
+    areaId: 'all',
     districtId: searchData.defaults.districtId || 'all',
+    villageId: 'all',
     onlyElected: false
   },
   party: {
-    officeTypeId: 'all',
+    officeTypeId: searchData.defaults.officeTypeId,
     partyId: searchData.defaults.partyId,
     cityId: searchData.defaults.cityId,
+    areaId: 'all',
     districtId: searchData.defaults.districtId || 'all',
+    villageId: 'all',
     onlyElected: false
   },
   name: ''
 });
 
 const partyMap = new Map(parties.map((party) => [party.id, party]));
-const cityMap = new Map(cities.map((city) => [city.id, city]));
-const districtCodeMap = new Map(
-  cities.flatMap((city) => city.districts.map((district) => [district.id, district.code]))
+const areaOptions = (mode) => getElectionAreaOptions(
+  areaCityMap.get(draft[mode].cityId), draft[mode].officeTypeId,
+  draft[mode].areaId, draft[mode].districtId
 );
+const officeAreaOptions = computed(() => areaOptions('office'));
+const partyAreaOptions = computed(() => areaOptions('party'));
+const cityDistricts = computed(() => officeAreaOptions.value.districts);
+const partyCityDistricts = computed(() => partyAreaOptions.value.districts);
 
-const cityDistricts = computed(() => cityMap.get(draft.office.cityId)?.districts ?? []);
-const partyCityDistricts = computed(() => cityMap.get(draft.party.cityId)?.districts ?? []);
+const resetVillage = (mode) => {
+  draft[mode].villageId = areaOptions(mode).villages[0]?.code ?? 'all';
+};
+const resetDistrict = (mode) => {
+  draft[mode].districtId = areaOptions(mode).districts[0]?.id ?? 'all';
+  resetVillage(mode);
+};
+const resetLocation = (mode) => {
+  draft[mode].areaId = areaOptions(mode).areas[0]?.id ?? 'all';
+  resetDistrict(mode);
+};
 
 for (const mode of ['office', 'party']) {
-  watch(() => draft[mode].cityId, () => {
-    const districts = cityMap.get(draft[mode].cityId)?.districts ?? [];
-    if (!districts.some((district) => district.id === draft[mode].districtId)) {
-      draft[mode].districtId = 'all';
-    }
-  });
+  // Select the first available area/district/village whenever an ancestor changes.
+  watch(() => [draft[mode].cityId, draft[mode].officeTypeId], () => {
+    resetLocation(mode);
+  }, { flush: 'sync', immediate: true });
+  watch(() => draft[mode].areaId, () => {
+    resetDistrict(mode);
+  }, { flush: 'sync' });
+  watch(() => draft[mode].districtId, () => {
+    resetVillage(mode);
+  }, { flush: 'sync' });
 }
 
 const hasSearched = computed(() => appliedQuery.value !== null);
@@ -369,7 +423,12 @@ const pageItems = computed(() => {
 });
 
 const currentCandidates = computed(() => pages.value.get(currentPage.value) ?? []);
-const pageMaxVotes = computed(() => getPageVoteMaximum(currentCandidates.value));
+const currentCandidateGroups = computed(() => groupCandidatesByConstituency(currentCandidates.value));
+const constituencyMaxima = ref(new Map());
+let loadVoteComparisons = createVoteComparisonLoader();
+const comparisonUnavailable = computed(() => currentCandidates.value.some(
+  (candidate) => !constituencyMaxima.value.has(getVoteComparisonKey(candidate))
+));
 
 const resultAnnouncement = computed(() => {
   if (!hasSearched.value) return '';
@@ -383,6 +442,8 @@ const resultAnnouncement = computed(() => {
 
 const resetResults = () => {
   pages.value = new Map();
+  constituencyMaxima.value = new Map();
+  loadVoteComparisons = createVoteComparisonLoader();
   total.value = 0;
   hasError.value = false;
   hasPageError.value = false;
@@ -401,6 +462,8 @@ const fetchPage = async (page) => {
       page,
       pageSize: pageSize
     });
+    const maxima = await loadVoteComparisons(result.candidates);
+    constituencyMaxima.value = new Map([...constituencyMaxima.value, ...maxima]);
     pages.value.set(page, result.candidates.map((candidate, index) => ({
       ...candidate,
       key: `${page}-${index}`
@@ -427,13 +490,13 @@ const setActiveTab = (tabId) => {
   if (tabId === 'office') {
     draft.office.officeTypeId = searchData.defaults.officeTypeId;
     draft.office.cityId = searchData.defaults.cityId;
-    draft.office.districtId = searchData.defaults.districtId || 'all';
+    resetLocation('office');
     draft.office.onlyElected = false;
   } else if (tabId === 'party') {
-    draft.party.officeTypeId = 'all';
+    draft.party.officeTypeId = searchData.defaults.officeTypeId;
     draft.party.partyId = searchData.defaults.partyId;
     draft.party.cityId = searchData.defaults.cityId;
-    draft.party.districtId = searchData.defaults.districtId || 'all';
+    resetLocation('party');
     draft.party.onlyElected = false;
   } else {
     draft.name = '';
@@ -462,8 +525,7 @@ const applySearch = async () => {
       searchMode: SEARCH_MODE.office,
       candidateType: draft.office.officeTypeId,
       prvCityCode: draft.office.cityId,
-      // 「全部行政區」不送 deptCode
-      deptCode: districtCodeMap.get(draft.office.districtId),
+      ...getElectionAreaFilters(areaCityMap.get(draft.office.cityId), draft.office),
       onlyElected: draft.office.onlyElected
     };
   } else if (activeTab.value === 'party') {
@@ -471,9 +533,9 @@ const applySearch = async () => {
       searchMode: SEARCH_MODE.party,
 
       party: partyMap.get(draft.party.partyId)?.fullLabel,
-      candidateType: draft.party.officeTypeId === 'all' ? undefined : draft.party.officeTypeId,
+      candidateType: draft.party.officeTypeId,
       prvCityCode: draft.party.cityId,
-      deptCode: districtCodeMap.get(draft.party.districtId),
+      ...getElectionAreaFilters(areaCityMap.get(draft.party.cityId), draft.party),
       onlyElected: draft.party.onlyElected
     };
   } else {
@@ -619,19 +681,18 @@ const goToPage = async (page) => {
   gap: 1rem;
 }
 
-.office-form {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto auto;
-}
-
+.office-form,
 .party-form {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.office-form .checkbox-control,
 .party-form .checkbox-control {
   grid-column: 3;
   justify-self: end;
 }
 
+.office-form .query-button,
 .party-form .query-button {
   grid-column: 4;
   justify-self: end;
@@ -683,6 +744,12 @@ const goToPage = async (page) => {
 
 .form-field input::placeholder {
   color: #756c65;
+}
+
+.form-field select:disabled {
+  background: var(--color-coffee-50);
+  color: var(--color-coffee-600);
+  cursor: not-allowed;
 }
 
 .form-field select:focus-visible,
@@ -783,6 +850,56 @@ const goToPage = async (page) => {
   color: var(--color-coffee-600);
   font-size: 1.15rem;
   text-align: center;
+}
+
+.candidate-groups {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.candidate-location {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-bottom: 0.25rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--color-coffee-100);
+  border-left: 3px solid var(--color-coffee-accent);
+  border-radius: 0.5rem;
+  background: var(--color-coffee-50);
+  color: var(--color-coffee-600);
+  line-height: 1.5;
+}
+
+.candidate-location svg {
+  flex: 0 0 auto;
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-top: 0.15rem;
+  fill: currentColor;
+}
+
+.candidate-location-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.candidate-region {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.candidate-districts {
+  margin: 0.2rem 0 0;
+  font-size: 0.875rem;
+}
+
+.candidate-office {
+  display: inline-block;
+  margin-left: 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .candidate-list {
@@ -941,6 +1058,9 @@ const goToPage = async (page) => {
 }
 
 @media (max-width: 768px) {
+  .candidate-location { padding: 0.65rem 0.75rem; gap: 0.5rem; }
+  .candidate-region { font-size: 0.95rem; }
+
   .elected-search-section {
     padding: 4.5rem 0 5rem;
   }

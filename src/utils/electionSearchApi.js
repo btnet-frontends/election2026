@@ -14,7 +14,9 @@ const toNumber = (value) => {
  * @param {1|2|3} query.searchMode 1 公職類型+縣市+鄉鎮市區、2 姓名、3 政黨
  * @param {number|string} [query.candidateType] searchMode 1、3：1~8
  * @param {string} [query.prvCityCode] searchMode 1、3：例 63-000
+ * @param {string} [query.areaCode] searchMode 1、3：選區代碼，例 01
  * @param {string} [query.deptCode] searchMode 1、3：例 010；省略 = 整個縣市
+ * @param {string} [query.liCode] searchMode 1、3：村里代碼，須搭配 deptCode
  * @param {string} [query.name] searchMode 2：姓名（模糊比對）
  * @param {string} [query.party] searchMode 3：政黨名稱
  * @param {boolean} [query.onlyElected] 只看當選
@@ -27,14 +29,18 @@ export function buildElectionSearchPayload(query) {
   if (query.searchMode === SEARCH_MODE.office) {
     payload.candidateType = query.candidateType;
     payload.prvCityCode = query.prvCityCode;
+    if (query.areaCode) payload.areaCode = query.areaCode;
     if (query.deptCode) payload.deptCode = query.deptCode;
+    if (query.deptCode && query.liCode) payload.liCode = query.liCode;
   } else if (query.searchMode === SEARCH_MODE.name) {
     payload.name = String(query.name ?? '').trim();
   } else if (query.searchMode === SEARCH_MODE.party) {
     payload.party = query.party;
     if (query.candidateType != null) payload.candidateType = query.candidateType;
     if (query.prvCityCode) payload.prvCityCode = query.prvCityCode;
+    if (query.areaCode) payload.areaCode = query.areaCode;
     if (query.deptCode) payload.deptCode = query.deptCode;
+    if (query.deptCode && query.liCode) payload.liCode = query.liCode;
   }
 
   if (query.onlyElected) payload.onlyElected = 1;

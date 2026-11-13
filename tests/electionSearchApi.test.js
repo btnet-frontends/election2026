@@ -70,3 +70,41 @@ test('party search with all office types omits candidateType', () => {
   assert.equal(Object.hasOwn(payload, 'candidateType'), false);
   assert.equal(payload.party, '中國國民黨');
 });
+
+test('office and party searches send constituency and village filters through pagination', () => {
+  for (const searchMode of [SEARCH_MODE.office, SEARCH_MODE.party]) {
+    const payload = buildElectionSearchPayload({
+      searchMode, candidateType: 4, party: '中國國民黨', prvCityCode: '63-000',
+      areaCode: '01', deptCode: '010', liCode: '002', page: 2, pageSize: 10
+    });
+    assert.equal(payload.areaCode, '01');
+    assert.equal(payload.deptCode, '010');
+    assert.equal(payload.liCode, '002');
+    assert.equal(payload.page, 2);
+  }
+});
+
+test('village filters require a district and name searches omit geographic filters', () => {
+  assert.equal(Object.hasOwn(buildElectionSearchPayload({
+    searchMode: 1, candidateType: 4, prvCityCode: '63-000', liCode: '002'
+  }), 'liCode'), false);
+  assert.deepEqual(buildElectionSearchPayload({
+    searchMode: 2, name: ' 王小明 ', areaCode: '01', deptCode: '010', liCode: '002'
+  }), { searchMode: 2, name: '王小明' });
+});
+
+test('village selection is included in the actual POST body on later pages', async (t) => {
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    assert.deepEqual(JSON.parse(options.body), {
+      searchMode: 1, candidateType: 4, prvCityCode: '63-000',
+      deptCode: '010', liCode: '003', page: 2, pageSize: 1
+    });
+    return new Response(JSON.stringify({
+      bIsSuccess: true, searchResult: [], iTotal: 1, iPage: 2, iPageSize: 1
+    }));
+  });
+  await fetchElectionSearch({
+    searchMode: 1, candidateType: 4, prvCityCode: '63-000',
+    deptCode: '010', liCode: '003', page: 2, pageSize: 1
+  });
+});

@@ -55,9 +55,9 @@
                 <div class="form-field">
                   <label class="field-label" for="elected-city">縣、市</label>
                   <select id="elected-city" v-model="draft.office.cityId">
-                    <option v-for="city in cities" :key="city.id" :value="city.id">
-                      {{ city.label }}
-                    </option>
+                    <optgroup v-for="group in officeCityGroups" :key="group.label" :label="group.label">
+                      <option v-for="city in group.cities" :key="city.id" :value="city.id">{{ city.label }}</option>
+                    </optgroup>
                   </select>
                 </div>
 
@@ -124,7 +124,9 @@
                 <div class="form-field">
                   <label class="field-label" for="elected-party-city">縣、市</label>
                   <select id="elected-party-city" v-model="draft.party.cityId">
-                    <option v-for="city in cities" :key="city.id" :value="city.id">{{ city.label }}</option>
+                    <optgroup v-for="group in partyCityGroups" :key="group.label" :label="group.label">
+                      <option v-for="city in group.cities" :key="city.id" :value="city.id">{{ city.label }}</option>
+                    </optgroup>
                   </select>
                 </div>
 
@@ -311,7 +313,7 @@ import searchIcon from '../assets/images/search_icon.svg?url';
 import ElectedCandidateCard from './ElectedCandidateCard.vue';
 import { usePhase } from '../composables/usePhase.js';
 import { SEARCH_MODE, fetchElectionSearch } from '../utils/electionSearchApi.js';
-import { getElectionAreaOptions, getElectionAreaFilters } from '../utils/electionAreaOptions.js';
+import { getElectionCityGroups, getElectionAreaOptions, getElectionAreaFilters } from '../utils/electionAreaOptions.js';
 import { getVoteComparisonKey, groupCandidatesByConstituency } from '../utils/voteComparison.js';
 import { createVoteComparisonLoader } from '../utils/constituencyVoteComparison.js';
 
@@ -322,7 +324,6 @@ const supportedTabIds = new Set(['office', 'party', 'name']);
 const tabs = searchData.tabs.filter((tab) => supportedTabIds.has(tab.id));
 const officeTypes = searchData.officeTypes;
 const parties = searchData.parties;
-const cities = electionAreas.map((city) => ({ id: city.code, label: city.name }));
 const areaCityMap = new Map(electionAreas.map((city) => [city.code, city]));
 const emptyState = searchData.emptyState;
 const errorState = searchData.errorState;
@@ -367,6 +368,9 @@ const draft = reactive({
 });
 
 const partyMap = new Map(parties.map((party) => [party.id, party]));
+const cityGroups = (mode) => getElectionCityGroups(electionAreas, draft[mode].officeTypeId);
+const officeCityGroups = computed(() => cityGroups('office'));
+const partyCityGroups = computed(() => cityGroups('party'));
 const areaOptions = (mode) => getElectionAreaOptions(
   areaCityMap.get(draft[mode].cityId), draft[mode].officeTypeId,
   draft[mode].areaId, draft[mode].districtId
@@ -392,6 +396,10 @@ const resetLocation = (mode) => {
 for (const mode of ['office', 'party']) {
   // Select the first available area/district/village whenever an ancestor changes.
   watch(() => [draft[mode].cityId, draft[mode].officeTypeId], () => {
+    const availableCities = cityGroups(mode).flatMap((group) => group.cities);
+    if (!availableCities.some((city) => city.id === draft[mode].cityId)) {
+      draft[mode].cityId = availableCities[0]?.id ?? 'all';
+    }
     resetLocation(mode);
   }, { flush: 'sync', immediate: true });
   watch(() => draft[mode].areaId, () => {

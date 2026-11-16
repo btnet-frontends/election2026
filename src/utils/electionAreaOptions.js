@@ -1,14 +1,33 @@
+import { electionRegions, officeCityNames, officeDistrictNames } from './electionMenuRules.js';
+
 const councilTypes = new Set(['1', '2', '3']);
 const representativeTypes = new Set(['6', '7', '8']);
+
+export function getElectionCityGroups(cities, officeTypeId) {
+  const allowedNames = officeCityNames[String(officeTypeId)];
+  return electionRegions.map((region) => ({
+    label: region.label,
+    cities: region.cities.flatMap((name) => {
+      const city = cities.find((item) => item.name === name);
+      return city && (!allowedNames || allowedNames.includes(name))
+        ? [{ id: city.code, label: city.name }] : [];
+    })
+  })).filter((region) => region.cities.length);
+}
 
 // Representative constituency codes repeat in different townships, so their
 // select values must include the township code as well as the constituency code.
 export function getElectionAreaOptions(city, officeTypeId, areaId = 'all', districtId = 'all') {
   const type = String(officeTypeId);
-  const cityDistricts = city?.districts ?? [];
+  const allowedCities = officeCityNames[type];
+  const allowedDistricts = officeDistrictNames[type]?.[city?.name];
+  const cityAllowed = !allowedCities || allowedCities.includes(city?.name);
+  const cityDistricts = cityAllowed ? (city?.districts ?? []).filter(
+    (district) => !allowedDistricts || allowedDistricts.includes(district.name)
+  ) : [];
   let areas = [];
   if (councilTypes.has(type)) {
-    areas = (city?.councilConstituencies?.[type] ?? []).map((area) => {
+    areas = (cityAllowed ? city?.councilConstituencies?.[type] ?? [] : []).map((area) => {
       const districtNames = [...new Set((area.districts ?? []).map((district) => district.name).filter(Boolean))];
       return {
         ...area, id: area.code,

@@ -49,7 +49,8 @@ const normalizeMunicipalityYears = (statJson) => {
       city,
       kmt: round2(parties['國民黨'] ?? 0),
       dpp: round2(parties['民進黨'] ?? 0),
-      other: round2(parties['無黨籍及未經政黨推薦'] ?? 0)
+      // 新版 API 已將其他政黨合併至此欄位，舊欄位僅供相容。
+      other: round2(parties['無黨籍及其他政黨'] ?? parties['無黨籍及未經政黨推薦'] ?? 0)
     }));
   });
 

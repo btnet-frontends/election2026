@@ -35,7 +35,7 @@
                 <path v-else d="M12 6v6l4 2" />
               </svg>
               <span class="status-copy">
-                <span class="status-caption">公投結果</span>
+                <span v-if="phase === 'end'" class="status-caption">公投結果</span>
                 <strong class="status-label">{{ getCaseStatus(item).label }}</strong>
               </span>
             </div>
@@ -129,7 +129,7 @@ import config from '../json/data.json';
 import { usePhase } from '../composables/usePhase.js';
 import { fetchReferendum, REFERENDUM_URL } from '../utils/referendumApi.js';
 
-const { isComponentVisible } = usePhase();
+const { phase, isComponentVisible } = usePhase();
 const referendumConfig = config.referendum ?? {};
 const referendumResult = ref(null);
 const refreshFailed = ref(false);
@@ -138,14 +138,14 @@ const sectionTitle = computed(() => referendumConfig.sectionTitle || '公民投�
 const caseStatuses = {
   passed: { id: 'passed', label: '通過' },
   failed: { id: 'failed', label: '不通過' },
-  pending: { id: 'pending', label: '等待結果' }
+  pending: { id: 'pending', label: '開票中' }
 };
 const getCaseStatus = (item) => caseStatuses[item.status] ?? caseStatuses.pending;
 const referendumItems = computed(() => (
   // The endpoint returns one referendum without a case ID; bind it to the first configured case.
   Array.isArray(referendumConfig.items) ? referendumConfig.items.map((item, index) => ({
     ...item,
-    status: index === 0 ? referendumResult.value?.status ?? 'pending' : 'pending',
+    status: phase.value === 'end' && index === 0 ? referendumResult.value?.status ?? 'pending' : 'pending',
     scale: item.scale ? {
       ...item.scale,
       totalElectors: index === 0 ? referendumResult.value?.totalElectors ?? null : null,
@@ -671,6 +671,7 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
   .result-chart { --percentage-space: 4.25rem; }
 
   .result-votes {
+    left: calc(max(var(--result-percentage), var(--percentage-space), 25%) + 0.75rem);
     font-size: 1.25rem;
   }
 

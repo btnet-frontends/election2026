@@ -88,8 +88,21 @@ test('counting map uses highest votes including hidden candidates without changi
   assert.equal(result.cities['台北市'].length, 1);
 });
 
-test('ties retain all leading party colors, including zero and same-party ties', () => {
-  for (const votes of [0, 100]) {
+test('zero votes stay uncolored before counting, including a single candidate', () => {
+  for (const candidates of [
+    [{ Name: '甲', Political_party_id: 1, Votes: 0 }],
+    [
+      { Name: '甲', Political_party_id: 1, Votes: 0 },
+      { Name: '乙', Political_party_id: 16, Votes: '0' },
+      { Name: '丙', Political_party_id: 350, Votes: null }
+    ]
+  ]) {
+    assert.deepEqual(normalizeInvoicingResult(payload(candidates)).leadingColors, {});
+  }
+});
+
+test('positive ties retain all leading party colors, including same-party ties', () => {
+  for (const votes of [1, 100]) {
     const result = normalizeInvoicingResult(payload([
       { Name: '甲', Political_party_id: 1, Votes: votes },
       { Name: '乙', Political_party_id: 16, Votes: votes },

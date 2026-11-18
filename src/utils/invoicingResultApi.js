@@ -25,7 +25,8 @@ export function normalizeInvoicingResult(data) {
     const countedCandidates = candidates
       .map((candidate) => ({ votes: toNumber(candidate?.Votes), color: partyById.get(String(candidate?.Political_party_id))?.color || '#888888' }))
       .filter((candidate) => candidate.votes !== null);
-    if (countedCandidates.length) {
+    // 全部為 0 票時維持灰色，有實際得票後才判斷領先或平手。
+    if (countedCandidates.some((candidate) => candidate.votes > 0)) {
       const highestVotes = Math.max(...countedCandidates.map((candidate) => candidate.votes));
       const leaders = countedCandidates.filter((candidate) => candidate.votes === highestVotes);
       leadingColors[normalizeCity(city.City)] = leaders.length === 1

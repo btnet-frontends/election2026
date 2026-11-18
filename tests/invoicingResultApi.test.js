@@ -7,6 +7,15 @@ const payload = (Candidate) => ({
   aInvoicingResult: [{ City: '臺北市', City_id: '63', Candidate }]
 });
 
+test('reads the explicit search visibility boolean without treating strings as true', () => {
+  for (const value of [true, false]) {
+    assert.equal(normalizeInvoicingResult({ ...payload([]), bIsShowSearchBar: value }).showSearchBar, value);
+  }
+  for (const value of [undefined, null, 'false', 'true', 0, 1]) {
+    assert.equal(normalizeInvoicingResult({ ...payload([]), bIsShowSearchBar: value }).showSearchBar, null);
+  }
+});
+
 test('maps API names, trailing-space percentage and party IDs without inferring winners', () => {
   const result = normalizeInvoicingResult(payload([
     { Name: '測試甲', Number: 1, Political_party_id: '1', Votes: '1,234', 'Percentage ': 33, Elected: 'false' },

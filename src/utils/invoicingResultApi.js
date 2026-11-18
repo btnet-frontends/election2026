@@ -61,7 +61,11 @@ export function normalizeInvoicingResult(data) {
       .sort((a, b) => (b.votes ?? -1) - (a.votes ?? -1)
         || (a.number ?? Infinity) - (b.number ?? Infinity));
   }
-  return { cities, winnerColors, leadingColors, progressByCity, updateTime: data.dDataTime || data.dBTUpdateDataTime || '' };
+  return {
+    cities, winnerColors, leadingColors, progressByCity,
+    showSearchBar: typeof data.bIsShowSearchBar === 'boolean' ? data.bIsShowSearchBar : null,
+    updateTime: data.dDataTime || data.dBTUpdateDataTime || ''
+  };
 }
 
 export async function fetchInvoicingResult(url = INVOICING_RESULT_URL, signal = AbortSignal.timeout(10000)) {

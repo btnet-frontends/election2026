@@ -18,8 +18,11 @@ export function normalizeInvoicingResult(data) {
   const cities = {};
   const winnerColors = {};
   const leadingColors = {};
+  const progressByCity = {};
   for (const city of data.aInvoicingResult) {
     if (!city?.City) continue;
+    const progress = toNumber(city.prgRate);
+    progressByCity[normalizeCity(city.City)] = progress === null ? null : Math.min(100, progress);
     // 地圖包含全部候選人，不受首頁面板顯示名單影響。
     const candidates = Array.isArray(city.Candidate) ? city.Candidate : [];
     const countedCandidates = candidates
@@ -45,6 +48,7 @@ export function normalizeInvoicingResult(data) {
         return {
           id: `${city.City_id || normalizeCity(city.City)}-${candidate.Number ?? index}`,
           name: candidate.Name,
+          number: toNumber(candidate.Number),
           party: partyName,
           partyImage: party?.image || null,
           shortName: badges[partyName] || partyName.slice(0, 1),
@@ -53,9 +57,11 @@ export function normalizeInvoicingResult(data) {
           percent: toNumber(candidate.Percentage ?? candidate['Percentage ']),
           elected: isTrue(candidate.Elected)
         };
-      });
+      })
+      .sort((a, b) => (b.votes ?? -1) - (a.votes ?? -1)
+        || (a.number ?? Infinity) - (b.number ?? Infinity));
   }
-  return { cities, winnerColors, leadingColors, updateTime: data.dDataTime || data.dBTUpdateDataTime || '' };
+  return { cities, winnerColors, leadingColors, progressByCity, updateTime: data.dDataTime || data.dBTUpdateDataTime || '' };
 }
 
 export async function fetchInvoicingResult(url = INVOICING_RESULT_URL, signal = AbortSignal.timeout(10000)) {

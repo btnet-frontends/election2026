@@ -13,7 +13,7 @@
             <span class="ticker-city">{{ entry.city }}</span>
             <img v-if="partyImageUrl(entry.partyImage)" class="party-icon" :src="partyImageUrl(entry.partyImage)" :alt="entry.party" :title="entry.party" />
             <span v-else class="party-badge" :style="{ backgroundColor: entry.color }" :aria-label="entry.party" :title="entry.party">{{ entry.shortName }}</span>
-            <span class="candidate-name">{{ entry.name }}</span>
+            <span class="candidate-name"><span v-if="entry.number != null" class="candidate-number" :aria-label="`${entry.number} 號`">{{ entry.number }}</span>{{ entry.name }}</span>
             <strong class="candidate-votes">{{ entry.votes == null ? '開票中' : `${formatVotes(entry.votes)} 票` }}</strong>
             <img v-if="entry.elected" class="elected-mark" :src="electedIcon" alt="當選" title="當選" />
           </li>
@@ -89,7 +89,20 @@ button:focus-visible, .ticker-viewport:focus-visible { outline: 3px solid #d9953
 .ticker-city { border-radius: 0.35rem; padding: 0.25rem 0.6rem; background: var(--color-coffee-50); font-weight: 700; }
 .party-icon, .party-badge { width: 1.75rem; height: 1.75rem; flex: 0 0 auto; object-fit: contain; }
 .party-badge { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff; font-size: 0.85rem; }
-.candidate-name { font-weight: 600; }
+.candidate-name { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600; }
+.candidate-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 1.5em;
+  height: 1.5em;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 0.8em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
 .candidate-votes { font-variant-numeric: tabular-nums; color: #996323; }
 .elected-mark { width: 1.9rem; height: 1.9rem; object-fit: contain; }
 .ticker-note { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; padding: 0.5rem 1rem; border-top: 1px solid var(--color-coffee-300); font-size: 0.75rem; }

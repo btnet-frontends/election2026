@@ -41,7 +41,7 @@
     <div class="kv-left-wrapper">
       <div class="kv-left">
         <img :src="kvCloud" alt="" class="kv-cloud" aria-hidden="true" />
-        <img :src="kvTitle" alt="2026 九合一大選" class="kv-title" />
+        <img :src="kvTitle" alt="2026 九合一選舉" class="kv-title" />
         <img :src="kvSubtitle1" alt="今周戰情室" class="kv-subtitle1" />
         <p class="kv-subtitle2">縣市長選舉 即時報導、參選人新聞一次看！</p>
 

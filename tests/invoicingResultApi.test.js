@@ -7,6 +7,15 @@ const payload = (Candidate) => ({
   aInvoicingResult: [{ City: '臺北市', City_id: '63', Candidate }]
 });
 
+test('reads the explicit search visibility boolean without treating strings as true', () => {
+  for (const value of [true, false]) {
+    assert.equal(normalizeInvoicingResult({ ...payload([]), bIsShowSearchBar: value }).showSearchBar, value);
+  }
+  for (const value of [undefined, null, 'false', 'true', 0, 1]) {
+    assert.equal(normalizeInvoicingResult({ ...payload([]), bIsShowSearchBar: value }).showSearchBar, null);
+  }
+});
+
 test('maps API names, trailing-space percentage and party IDs without inferring winners', () => {
   const result = normalizeInvoicingResult(payload([
     { Name: '測試甲', Number: 1, Political_party_id: '1', Votes: '1,234', 'Percentage ': 33, Elected: 'false' },
@@ -14,6 +23,8 @@ test('maps API names, trailing-space percentage and party IDs without inferring 
   ]));
   const [first, second] = result.cities['台北市'];
   assert.equal(first.votes, 1234);
+  assert.equal(first.number, 1);
+  assert.equal(second.number, 2);
   assert.equal(first.percent, 33);
   assert.equal(first.party, '中國國民黨');
   assert.equal(first.partyImage, 'party1.png');
@@ -69,6 +80,7 @@ test('missing city/candidates stay empty; missing values are not fabricated as z
   assert.equal(result.cities['嘉義市'], undefined);
   assert.equal(result.cities['台北市'].length, 1);
   assert.equal(result.cities['台北市'][0].votes, null);
+  assert.equal(result.cities['台北市'][0].number, null);
   assert.equal(result.cities['台北市'][0].percent, null);
   assert.throws(() => normalizeInvoicingResult({}), /格式/);
 });
@@ -76,6 +88,53 @@ test('missing city/candidates stay empty; missing values are not fabricated as z
 test('HTTP failures reject so the caller can retain its last successful result', async (t) => {
   t.mock.method(globalThis, 'fetch', async () => new Response('', { status: 503 }));
   await assert.rejects(fetchInvoicingResult(), /503/);
+});
+
+test('progress is tracked independently by normalized city and refreshed without fabricating missing values', () => {
+  const data = {
+    aInvoicingResult: [
+      { City: '臺北市', prgRate: 0 },
+      { City: '新北市', prgRate: 42.75 },
+      { City: '桃園市', prgRate: '100' },
+      { City: '台南市' },
+      { City: '高雄市', prgRate: -1 },
+      { City: '基隆市', prgRate: 101 }
+    ]
+  };
+  assert.deepEqual(normalizeInvoicingResult(data).progressByCity, {
+    台北市: 0, 新北市: 42.75, 桃園市: 100, 台南市: null, 高雄市: null, 基隆市: 100
+  });
+  data.aInvoicingResult[0].prgRate = 68.5;
+  assert.equal(normalizeInvoicingResult(data).progressByCity['台北市'], 68.5);
+  assert.equal(normalizeInvoicingResult({ aInvoicingResult: [{ City: '臺北市' }] }).progressByCity['台北市'], null);
+});
+
+test('candidates reorder by updated votes while retaining their IDs and candidate numbers', () => {
+  const candidates = [
+    { Name: '甲', Number: 1, Votes: 100 },
+    { Name: '乙', Number: 2, Votes: 80 },
+    { Name: '丙', Number: 3, Votes: 90 }
+  ];
+  const first = normalizeInvoicingResult(payload(candidates)).cities['台北市'];
+  const next = normalizeInvoicingResult(payload(candidates.map((candidate) => (
+    candidate.Number === 2 ? { ...candidate, Votes: 110 } : candidate
+  )))).cities['台北市'];
+  assert.deepEqual(first.map((candidate) => candidate.number), [1, 3, 2]);
+  assert.deepEqual(next.map((candidate) => candidate.number), [2, 1, 3]);
+  for (const candidate of next) {
+    assert.equal(candidate.id, first.find((previous) => previous.number === candidate.number).id);
+  }
+  assert.deepEqual(candidates.map((candidate) => candidate.Number), [1, 2, 3]);
+});
+
+test('ties use candidate number order; missing votes follow zero votes', () => {
+  const result = normalizeInvoicingResult(payload([
+    { Name: '缺資料', Number: 1, Votes: null },
+    { Name: '零票', Number: 2, Votes: 0 },
+    { Name: '同票乙', Number: 4, Votes: 100 },
+    { Name: '同票甲', Number: 3, Votes: 100 }
+  ]));
+  assert.deepEqual(result.cities['台北市'].map((candidate) => candidate.number), [3, 4, 2, 1]);
 });
 
 test('counting map uses highest votes including hidden candidates without changing elected flags', () => {
@@ -88,8 +147,21 @@ test('counting map uses highest votes including hidden candidates without changi
   assert.equal(result.cities['台北市'].length, 1);
 });
 
-test('ties retain all leading party colors, including zero and same-party ties', () => {
-  for (const votes of [0, 100]) {
+test('zero votes stay uncolored before counting, including a single candidate', () => {
+  for (const candidates of [
+    [{ Name: '甲', Political_party_id: 1, Votes: 0 }],
+    [
+      { Name: '甲', Political_party_id: 1, Votes: 0 },
+      { Name: '乙', Political_party_id: 16, Votes: '0' },
+      { Name: '丙', Political_party_id: 350, Votes: null }
+    ]
+  ]) {
+    assert.deepEqual(normalizeInvoicingResult(payload(candidates)).leadingColors, {});
+  }
+});
+
+test('positive ties retain all leading party colors, including same-party ties', () => {
+  for (const votes of [1, 100]) {
     const result = normalizeInvoicingResult(payload([
       { Name: '甲', Political_party_id: 1, Votes: votes },
       { Name: '乙', Political_party_id: 16, Votes: votes },

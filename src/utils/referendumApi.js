@@ -15,9 +15,12 @@ export function normalizeReferendum(data) {
   if (typeof data.bIsPass !== 'boolean') throw new Error('公投資料格式不正確：bIsPass');
   const totalElectors = Number.isSafeInteger(data.iGmeb) && data.iGmeb > 0 ? data.iGmeb : null;
   const percentageOfElectors = (votes) => totalElectors === null ? null : votes / totalElectors * 100;
+  const progress = typeof data.prgRate === 'number' || (typeof data.prgRate === 'string' && data.prgRate.trim() !== '')
+    ? Number(data.prgRate) : NaN;
 
   return {
-    status: data.bIsPass ? 'passed' : 'failed',
+    status: data.bIsFinalResult === true ? (data.bIsPass ? 'passed' : 'failed') : 'pending',
+    countingProgress: Number.isFinite(progress) && progress >= 0 ? Math.min(100, progress) : null,
     totalElectors,
     thresholdVotes: totalElectors === null ? null : Math.ceil(totalElectors / 4),
     results: {

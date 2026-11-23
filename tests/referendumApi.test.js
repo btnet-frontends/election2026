@@ -11,12 +11,15 @@ const payload = {
   iDisagreeTks: 5000000,
   iGmeb: 19615014,
   bIsPass: false,
+  bIsFinalResult: true,
+  prgRate: 72.35,
   sError: ''
 };
 
 test('maps documented response and uses API pass flag independently of vote rates', () => {
   assert.deepEqual(normalizeReferendum(payload), {
     status: 'failed',
+    countingProgress: 72.35,
     totalElectors: 19615014,
     thresholdVotes: 4903754,
     results: {
@@ -27,6 +30,26 @@ test('maps documented response and uses API pass flag independently of vote rate
   });
   assert.equal(normalizeReferendum({ ...payload, bIsPass: true }).status, 'passed');
   assert.equal(normalizeReferendum({ ...payload, fAgreeRate: 90 }).status, 'failed');
+});
+
+test('only announces a result when bIsFinalResult is explicitly true', () => {
+  for (const bIsFinalResult of [false, undefined, null, 'true', 1]) {
+    for (const bIsPass of [true, false]) {
+      const result = normalizeReferendum({ ...payload, bIsFinalResult, bIsPass, prgRate: 100 });
+      assert.equal(result.status, 'pending');
+      assert.equal(result.results.agree.votes, payload.iAgreeTks);
+    }
+  }
+  assert.equal(normalizeReferendum({ ...payload, bIsFinalResult: true, bIsPass: true }).status, 'passed');
+  assert.equal(normalizeReferendum({ ...payload, bIsFinalResult: true, bIsPass: false }).status, 'failed');
+});
+
+test('normalizes counting progress without treating missing data as zero', () => {
+  for (const [prgRate, expected] of [[0, 0], [100, 100], ['42.5', 42.5], [120, 100],
+    [undefined, null], [null, null], ['', null], [' ', null], ['invalid', null],
+    [-1, null], [Infinity, null], [true, null]]) {
+    assert.equal(normalizeReferendum({ ...payload, prgRate }).countingProgress, expected);
+  }
 });
 
 test('preserves zero votes and falls back to backend timestamp', () => {

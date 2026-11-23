@@ -18,11 +18,8 @@
         :key="election.year"
         class="election-result"
       >
-        <h3>{{ election.year }}</h3>
-        <div class="year-divider"></div>
-
         <p v-if="!election.candidates.length" class="counting-state" role="status">開票中</p>
-        <ul v-else class="candidate-list">
+        <TransitionGroup v-else name="candidate-rank" tag="ul" class="candidate-list">
           <li v-for="candidate in election.candidates" :key="candidate.id">
             <div class="candidate">
               <span
@@ -49,7 +46,7 @@
               >
                 {{ candidate.shortName }}
               </span>
-              <span class="candidate-name">{{ candidate.name }}</span>
+              <VoteCandidateName :name="candidate.name" :number="candidate.number" />
             </div>
 
             <div class="vote-result">
@@ -62,10 +59,29 @@
               </div>
             </div>
           </li>
-        </ul>
+        </TransitionGroup>
 
         <div v-if="electionIndex < selectedElections.length - 1" class="section-gap"></div>
       </section>
+    </div>
+
+    <div class="counting-progress">
+      <div class="progress-heading">
+        <span>開票進度</span>
+        <strong>{{ countingProgress === null ? '待更新' : `${progressFormatter.format(countingProgress)}%` }}</strong>
+      </div>
+      <div
+        class="progress-track"
+        role="progressbar"
+        :aria-label="`${selectedLocation}開票進度`"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        :aria-valuenow="countingProgress === null ? undefined : countingProgress"
+        :aria-valuetext="countingProgress === null ? '待更新' : `${progressFormatter.format(countingProgress)}%`"
+      >
+        <span class="progress-fill" :style="{ width: `${countingProgress ?? 0}%` }"></span>
+      </div>
+      <div class="progress-scale" aria-hidden="true"><span>0%</span><span>100%</span></div>
     </div>
 
     <div class="data-note">
@@ -78,6 +94,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import VoteCandidateName from './VoteCandidateName.vue';
 import { ELECTION_YEAR } from '../utils/schedule.js';
 import elected_icon from '../assets/images/elected.png?url';
 
@@ -123,6 +140,8 @@ const props = defineProps({
   refreshFailed: { type: Boolean, default: false }
 });
 const updateTime = computed(() => props.result?.updateTime || '開票中');
+const countingProgress = computed(() => props.result?.progressByCity?.[selectedLocation.value] ?? null);
+const progressFormatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 2 });
 const selectedElections = computed(() => [{
   year: ELECTION_YEAR,
   candidates: props.result?.cities[selectedLocation.value] ?? []
@@ -135,7 +154,6 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
 <style scoped>
 .vote-panel {
   --panel-brown: #917f6b;
-  --panel-accent: #996323;
   width: 100%;
   color: var(--panel-brown);
 }
@@ -204,23 +222,6 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
   padding: 1.9rem 1.75rem 2.2rem;
 }
 
-.election-result h3 {
-  color: var(--panel-accent);
-  font-size: clamp(1.35rem, 2.3vw, 1.85rem);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: 0.2em;
-  text-align: center;
-  text-indent: 0.2em;
-}
-
-.year-divider {
-  width: 100%;
-  height: 1px;
-  margin: 0.8rem 0 1.75rem;
-  background: var(--panel-brown);
-}
-
 .counting-state {
   padding: 2rem 0;
   text-align: center;
@@ -233,7 +234,18 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
   gap: 2rem;
 }
 
+.candidate-rank-move {
+  transition: transform 0.6s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .candidate-rank-move {
+    transition: none;
+  }
+}
+
 .candidate-list li {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -250,6 +262,7 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
 
 .candidate {
   min-width: 0;
+  flex: 1;
   gap: 0.9rem;
 }
 
@@ -275,12 +288,12 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
 }
 
 .candidate-name {
-  overflow: hidden;
   color: var(--panel-brown);
   font-size: clamp(0.9rem, 1.5vw, 1.2rem);
 }
 
 .vote-result {
+  flex-shrink: 0;
   justify-content: flex-end;
   gap: 1rem;
 }
@@ -308,7 +321,7 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
 
 .elected-mark {
   position: absolute;
-  left: 0.8rem;
+  left: -1rem;
   flex: 0 0 auto;
   width: 1.6rem;
   height: 1.6rem;
@@ -319,8 +332,43 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
   height: 2.4rem;
 }
 
+.counting-progress {
+  margin-top: 1.5rem;
+}
+
+.progress-heading, .progress-scale {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-heading {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.progress-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ded7ce;
+}
+
+.progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #996323;
+}
+
+.progress-scale {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+}
+
 .data-note {
-  margin-top: 3.5rem;
+  margin-top: 1.25rem;
   font-size: clamp(0.8rem, 1.35vw, 0.95rem);
   font-weight: 500;
   line-height: 1.35;
@@ -334,10 +382,6 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
     .vote-result {
         gap: 0;
     }
-
-  .election-result h3 {
-    font-size: clamp(1.2rem, 1.8vw, 1.6rem);
-  }
 
   .party-badge {
     font-size: 0.95rem;
@@ -392,6 +436,10 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
     gap: 0.55rem;
   }
 
+  .elected-mark {
+    left: 0;
+  }
+
   .party-icon,
   .party-badge {
     width: 2.15rem;
@@ -405,7 +453,7 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
   }
 
   .data-note {
-    margin-top: 2.5rem;
+    margin-top: 1.25rem;
   }
 }
 
@@ -414,8 +462,5 @@ const formatPercent = (percent) => `${Number(percent).toFixed(2)}%`;
     padding-inline: 0.75rem;
   }
 
-  .candidate-name {
-    max-width: 4rem;
-  }
 }
 </style>

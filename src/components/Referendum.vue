@@ -35,7 +35,7 @@
                 <path v-else d="M12 6v6l4 2" />
               </svg>
               <span class="status-copy">
-                <span class="status-caption">公投結果</span>
+                <span v-if="item.status !== 'pending'" class="status-caption">公投結果</span>
                 <strong class="status-label">{{ getCaseStatus(item).label }}</strong>
               </span>
             </div>
@@ -107,6 +107,25 @@
             </div>
           </div>
 
+          <div class="counting-progress">
+            <div class="progress-heading">
+              <span>開票進度</span>
+              <strong>{{ item.countingProgress == null ? '待更新' : `${progressFormatter.format(item.countingProgress)}%` }}</strong>
+            </div>
+            <div
+              class="progress-track"
+              role="progressbar"
+              :aria-label="`${item.title}開票進度`"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              :aria-valuenow="item.countingProgress ?? undefined"
+              :aria-valuetext="item.countingProgress == null ? '待更新' : `${progressFormatter.format(item.countingProgress)}%`"
+            >
+              <span class="progress-fill" :style="{ width: `${item.countingProgress ?? 0}%` }"></span>
+            </div>
+            <div class="progress-scale" aria-hidden="true"><span>0%</span><span>100%</span></div>
+          </div>
+
           <ol v-if="item.notes?.length" class="case-notes">
             <li v-for="(note, noteIndex) in item.notes" :key="note.id || noteIndex">
               <span class="note-label">{{ note.label || `註 ${noteIndex + 1}` }}</span>
@@ -138,7 +157,7 @@ const sectionTitle = computed(() => referendumConfig.sectionTitle || '公民投�
 const caseStatuses = {
   passed: { id: 'passed', label: '通過' },
   failed: { id: 'failed', label: '不通過' },
-  pending: { id: 'pending', label: '等待結果' }
+  pending: { id: 'pending', label: '開票中' }
 };
 const getCaseStatus = (item) => caseStatuses[item.status] ?? caseStatuses.pending;
 const referendumItems = computed(() => (
@@ -146,6 +165,7 @@ const referendumItems = computed(() => (
   Array.isArray(referendumConfig.items) ? referendumConfig.items.map((item, index) => ({
     ...item,
     status: index === 0 ? referendumResult.value?.status ?? 'pending' : 'pending',
+    countingProgress: index === 0 ? referendumResult.value?.countingProgress ?? null : null,
     scale: item.scale ? {
       ...item.scale,
       totalElectors: index === 0 ? referendumResult.value?.totalElectors ?? null : null,
@@ -208,6 +228,7 @@ const clampPercentage = (value) => {
   return Math.min(100, Math.max(0, percentage));
 };
 
+const progressFormatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 2 });
 const percentageFormatter = new Intl.NumberFormat('zh-TW', {
   maximumFractionDigits: 1
 });
@@ -563,6 +584,50 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
   transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.counting-progress {
+  display: grid;
+  grid-template-columns: var(--result-label-column) minmax(0, 1fr) var(--result-votes-column);
+  column-gap: var(--result-column-gap);
+  max-width: 1280px;
+  margin: 1.5rem auto 0;
+  color: var(--color-coffee-900);
+}
+
+.counting-progress > * {
+  grid-column: 2;
+}
+
+.progress-heading, .progress-scale {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-heading {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.progress-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ded7ce;
+}
+
+.progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #996323;
+}
+
+.progress-scale {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+}
+
 .case-notes {
   display: grid;
   gap: 0.35rem;
@@ -626,6 +691,14 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
     margin-top: 2.5rem;
   }
 
+  .counting-progress {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .counting-progress > * {
+    grid-column: 1;
+  }
+
   .result-scale {
     grid-template-columns: minmax(0, 1fr);
     margin-bottom: 1.25rem;
@@ -671,6 +744,7 @@ const getCaseTitleId = (item, index) => `referendum-title-${item.id || item.numb
   .result-chart { --percentage-space: 4.25rem; }
 
   .result-votes {
+    left: calc(max(var(--result-percentage), var(--percentage-space), 25%) + 0.75rem);
     font-size: 1.25rem;
   }
 

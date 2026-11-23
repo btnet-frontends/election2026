@@ -7,7 +7,7 @@
         </a>
         <div class="logo-divider"></div>
         <a :href="getLocalHref('#kv')" class="logo-link" @click="scrollToSection($event, 'kv')">
-          <img :src="electionLogo" alt="2026九合一大選" class="logo-election" />
+          <img :src="electionLogo" alt="2026九合一選舉" class="logo-election" />
         </a>
       </div>
 

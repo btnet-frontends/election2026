@@ -1,5 +1,5 @@
 // export const ELECTION_SEARCH_URL = 'http://localhost/api/Election2026_search';
-export const ELECTION_SEARCH_URL = 'https://webtest-kenny.businesstoday.com.tw/api/election2026_search';
+export const ELECTION_SEARCH_URL = 'https://www.businesstoday.com.tw/api/election2026_search';
 
 export const SEARCH_MODE = { office: 1, name: 2, party: 3 };
 

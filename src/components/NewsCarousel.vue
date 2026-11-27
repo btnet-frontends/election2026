@@ -17,7 +17,12 @@
           target="_blank"
           class="slide-media"
         >
-          <img :src="resolveImageUrl(item.image_url)" :alt="item.title" class="slide-image" />
+          <img
+            :src="resolveImageUrl(item.image_url)"
+            :alt="item.title"
+            class="slide-image"
+            :style="{ objectPosition: item.image_position, transform: item.image_scale ? `scale(${item.image_scale})` : undefined }"
+          />
           <div class="slide-overlay-color"></div>
           <div class="slide-overlay-dark"></div>
           <div class="slide-content-desktop">

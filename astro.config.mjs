@@ -11,19 +11,19 @@ export default defineConfig({
   vite: {
     server: {
       proxy: {
-        '/files/2026election/uat/': {
+        '/files/2026election/': {
           target: 'https://download.businesstoday.com.tw',
           changeOrigin: true
         },
         '/api/referendum': {
           target: 'https://download.businesstoday.com.tw',
           changeOrigin: true,
-          rewrite: () => '/files/2026election/uat/getReferendum'
+          rewrite: () => '/files/2026election/getReferendum'
         },
         '/api/invoicing-result': {
           target: 'https://download.businesstoday.com.tw',
           changeOrigin: true,
-          rewrite: (path) => path.replace('/api/invoicing-result', '/files/2026election/uat/getInvoicingResult')
+          rewrite: (path) => path.replace('/api/invoicing-result', '/files/2026election/getInvoicingResult')
         }
       }
     }

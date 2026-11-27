@@ -6,8 +6,8 @@
         {{ paused ? '繼續捲動' : '暫停捲動' }}
       </button>
     </div>
-    <div v-if="entries.length" class="ticker-viewport" tabindex="0" aria-label="各選區開票資訊，滑鼠移入或鍵盤聚焦可暫停捲動">
-      <div class="ticker-track" :class="{ paused }" :style="{ '--ticker-duration': `${Math.max(20, entries.length * 5)}s` }">
+    <div v-if="entries.length" ref="viewport" class="ticker-viewport" tabindex="0" aria-label="各選區開票資訊，滑鼠移入或鍵盤聚焦可暫停捲動">
+      <div class="ticker-track">
         <ul v-for="copy in 2" :key="copy" class="ticker-group" :aria-hidden="copy === 2 ? 'true' : undefined">
           <li v-for="entry in entries" :key="`${entry.city}-${entry.id}`" class="ticker-entry">
             <span class="ticker-city">{{ entry.city }}</span>
@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import electedIcon from '../assets/images/elected.png?url';
 
 const props = defineProps({
@@ -38,6 +38,7 @@ const props = defineProps({
   refreshFailed: { type: Boolean, default: false }
 });
 const paused = ref(false);
+const viewport = ref(null);
 const entries = computed(() => Object.entries(props.result?.cities ?? {}).flatMap(
   ([city, candidates]) => candidates.map((candidate) => ({ ...candidate, city }))
 ));
@@ -47,6 +48,57 @@ const partyImages = import.meta.glob('../assets/images/party_icon/*.png', {
 const partyImageUrl = (filename) => partyImages[`../assets/images/party_icon/${filename}`];
 const numberFormat = new Intl.NumberFormat('zh-TW');
 const formatVotes = (votes) => numberFormat.format(votes);
+
+let animationFrame;
+let stopWatching;
+let resizeObserver;
+
+onMounted(() => {
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const hoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  let groupWidth = 0;
+  let position = 0;
+  let previousTime;
+
+  // Scroll the viewport instead of transforming a potentially enormous layer.
+  // Long candidate lists can be clipped when composited by mobile Safari.
+  resizeObserver = new ResizeObserver(() => {
+    groupWidth = viewport.value?.querySelector('.ticker-group')?.getBoundingClientRect().width ?? 0;
+    position = viewport.value?.scrollLeft ?? 0;
+  });
+  stopWatching = watch(viewport, (element) => {
+    resizeObserver.disconnect();
+    groupWidth = 0;
+    position = 0;
+    if (element) {
+      resizeObserver.observe(element);
+      resizeObserver.observe(element.querySelector('.ticker-track'));
+    }
+  }, { immediate: true, flush: 'post' });
+
+  const tick = (time) => {
+    const elapsed = previousTime == null ? 0 : Math.min(time - previousTime, 100);
+    previousTime = time;
+    const element = viewport.value;
+    if (element && groupWidth && !paused.value && !reducedMotion.matches && !document.hidden
+      && !(hoverPointer.matches && element.matches(':hover'))
+      && !element.matches(':focus-visible')) {
+      const duration = Math.max(20, entries.value.length * 5) * 1000;
+      position = (position + elapsed * groupWidth / duration) % groupWidth;
+      element.scrollLeft = position;
+    } else if (element) {
+      position = element.scrollLeft;
+    }
+    animationFrame = requestAnimationFrame(tick);
+  };
+  animationFrame = requestAnimationFrame(tick);
+});
+
+onUnmounted(() => {
+  cancelAnimationFrame(animationFrame);
+  stopWatching?.();
+  resizeObserver?.disconnect();
+});
 </script>
 
 <style scoped>
@@ -82,7 +134,7 @@ button {
 }
 button:focus-visible, .ticker-viewport:focus-visible { outline: 3px solid #d99538; outline-offset: -3px; }
 .ticker-viewport { overflow: hidden; }
-.ticker-track { display: flex; width: max-content; animation: ticker-scroll var(--ticker-duration) linear infinite; }
+.ticker-track { display: flex; width: max-content; }
 .ticker-group { display: flex; flex: 0 0 auto; align-items: center; margin: 0; padding: 0; list-style: none; }
 .ticker-entry { display: flex; flex: 0 0 auto; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; white-space: nowrap; }
 .ticker-entry::after { content: ''; height: 1.5rem; width: 1px; margin-left: 0.75rem; background: var(--color-coffee-300); }
@@ -107,14 +159,11 @@ button:focus-visible, .ticker-viewport:focus-visible { outline: 3px solid #d9953
 .elected-mark { width: 1.9rem; height: 1.9rem; object-fit: contain; }
 .ticker-note { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; padding: 0.5rem 1rem; border-top: 1px solid var(--color-coffee-300); font-size: 0.75rem; }
 .ticker-empty { margin: 0; padding: 1rem; text-align: center; }
-.ticker-track.paused, .ticker-viewport:hover .ticker-track, .ticker-viewport:focus-within .ticker-track { animation-play-state: paused; }
-@keyframes ticker-scroll { to { transform: translateX(-50%); } }
 @media (max-width: 575px) {
   .ticker-entry { gap: 0.5rem; padding: 0.85rem 1rem; font-size: 0.9rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ticker-viewport { overflow-x: auto; }
-  .ticker-track { animation: none; }
   .ticker-group[aria-hidden='true'] { display: none; }
 }
 </style>
